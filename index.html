@@ -116,8 +116,8 @@
                 </button>
 
                 <div class="px-3.5 py-2 bg-slate-100/70 dark:bg-slate-700/40 rounded-xl text-xs text-slate-500 dark:text-slate-400 flex items-center justify-between">
-                    <span><i class="fa-solid fa-hard-drive mr-1"></i> บันทึกในเครื่อง</span>
-                    <span class="font-mono text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">พร้อมใช้งาน</span>
+                    <span><i class="fa-solid fa-cloud mr-1"></i> สถานะข้อมูล</span>
+                    <span class="font-mono text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">{{ syncStatus }}</span>
                 </div>
             </div>
         </aside>
@@ -989,8 +989,8 @@
          * ================================================================
          * 1) Create a Supabase project.
          * 2) Create the tables/storage using the SQL supplied below this file.
-         * 3) Put your Project URL and Publishable/Anon Key here.
-         * 4) Keep the key as the public/anon key only. NEVER use service_role.
+         * 3) Put your Project URL and Publishable key here.
+         * 4) Keep this as the Publishable key only. NEVER put a Secret key/service_role key in this file.
          *
          * If left unchanged, the app automatically works in LOCAL MODE so
          * you can test the original UI first.
@@ -1028,16 +1028,16 @@
          *   create policy if not exists task_images_insert_authenticated on storage.objects for insert to authenticated with check (bucket_id='task-images');
          * The bucket is public so getPublicUrl() works without signed URLs.
          */
-        const SUPABASE_URL = 'YOUR_SUPABASE_URL';
-        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+        const SUPABASE_URL = 'https://qmolvpwqomwizqjyzhsx.supabase.co';
+        const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_-EfFZ9Xu4w7qoTU1UDqs3A_BWXTqH1S';
         const CLOUD_ENABLED =
             SUPABASE_URL.startsWith('https://') &&
             !SUPABASE_URL.includes('YOUR_') &&
-            SUPABASE_ANON_KEY &&
-            !SUPABASE_ANON_KEY.includes('YOUR_');
+            SUPABASE_PUBLISHABLE_KEY &&
+            !SUPABASE_PUBLISHABLE_KEY.includes('YOUR_');
 
         const supabaseClient = CLOUD_ENABLED && window.supabase
-            ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+            ? window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY)
             : null;
 
         const LOCAL_KEYS = {
