@@ -85,7 +85,7 @@
                 </div>
 
                 <!-- Add Task Quick Button -->
-                <button type="button" class="btn" @click="logout" style="margin-left:8px;">ออกจากระบบ</button><button @click="openAddTaskModal()" class="w-full py-3 px-4 mb-6 bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white font-medium rounded-xl shadow-lg shadow-blue-500/25 transition flex items-center justify-center gap-2">
+                <button @click="openAddTaskModal()" class="w-full py-3 px-4 mb-6 bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white font-medium rounded-xl shadow-lg shadow-blue-500/25 transition flex items-center justify-center gap-2">
                     <i class="fa-solid fa-plus text-sm"></i>
                     <span>เพิ่มงานใหม่</span>
                 </button>
@@ -115,10 +115,19 @@
                     <span class="text-xs text-slate-400 dark:text-slate-500">{{ isDark ? 'เปิด' : 'ปิด' }}</span>
                 </button>
 
-                <div class="px-3.5 py-2 bg-slate-100/70 dark:bg-slate-700/40 rounded-xl text-xs text-slate-500 dark:text-slate-400 flex items-center justify-between">
-                    <span><i class="fa-solid fa-cloud mr-1"></i> สถานะข้อมูล</span>
-                    <span class="font-mono text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">{{ syncStatus }}</span>
-                </div><button v-if="CLOUD_ENABLED" @click="enableBrowserNotifications()" class="ml-2 text-[10px] text-blue-600 dark:text-blue-400 hover:underline">เปิดแจ้งเตือน</button>
+                <div class="px-3.5 py-2 bg-slate-100/70 dark:bg-slate-700/40 rounded-xl text-xs text-slate-500 dark:text-slate-400">
+                    <div class="flex items-center justify-between gap-2">
+                        <span><i class="fa-solid fa-cloud mr-1"></i> สถานะข้อมูล</span>
+                        <span class="font-mono text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold truncate">{{ syncStatus }}</span>
+                    </div>
+                    <div v-if="CLOUD_ENABLED && cloudUser" class="mt-1 text-[10px] text-slate-400 dark:text-slate-500 truncate" :title="cloudUser.email">{{ cloudUser.email }}</div>
+                </div>
+                <button v-if="CLOUD_ENABLED" @click="enableBrowserNotifications()" class="w-full text-left px-3.5 py-2 text-[10px] text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-xl">
+                    <i class="fa-solid fa-bell mr-1"></i> เปิดแจ้งเตือน
+                </button>
+                <button v-if="CLOUD_ENABLED && cloudUser" @click="logout()" type="button" class="w-full flex items-center gap-3 px-3.5 py-2.5 text-sm text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-xl transition">
+                    <i class="fa-solid fa-right-from-bracket w-5 text-center"></i><span>ออกจากระบบ</span>
+                </button>
             </div>
         </aside>
 
@@ -133,6 +142,9 @@
             <div class="flex items-center gap-2">
                 <button @click="openAddTaskModal()" class="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center text-xs shadow-md shadow-blue-500/20 active:scale-95 transition">
                     <i class="fa-solid fa-plus"></i>
+                </button>
+                <button v-if="CLOUD_ENABLED && cloudUser" @click="logout()" type="button" class="w-8 h-8 rounded-lg bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 flex items-center justify-center text-xs" title="ออกจากระบบ">
+                    <i class="fa-solid fa-right-from-bracket"></i>
                 </button>
                 <button @click="toggleTheme()" class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center text-xs">
                     <i :class="isDark ? 'fa-solid fa-moon text-amber-400' : 'fa-solid fa-sun text-amber-500'"></i>
@@ -1034,7 +1046,10 @@
                 <input v-model="authPassword" type="password" autocomplete="current-password" placeholder="รหัสผ่าน (อย่างน้อย 6 ตัวอักษร)" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 <button v-if="authMode==='login'" @click="requestPasswordReset()" type="button" class="mt-2 text-xs text-blue-600 dark:text-blue-400 hover:underline">ลืมรหัสผ่าน?</button>
                 <p v-if="authMessage" class="mt-3 text-xs text-rose-600 dark:text-rose-400">{{ authMessage }}</p>
-                <button @click="signInOrSignUp()" class="w-full mt-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-semibold">{{ authMode==='login' ? 'เข้าสู่ระบบและซิงก์' : 'สร้างบัญชีและซิงก์' }}</button>
+                <button @click="signInOrSignUp()" :disabled="isSyncing" class="w-full mt-4 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed text-white rounded-xl text-sm font-semibold">
+                    <i v-if="isSyncing" class="fa-solid fa-spinner fa-spin mr-1"></i>{{ isSyncing ? 'กำลังดำเนินการ…' : (authMode==='login' ? 'เข้าสู่ระบบและซิงก์' : 'สมัครสมาชิกและซิงก์') }}
+                </button>
+                <button v-if="authMode==='signup'" @click="authMode='login'; authMessage=''" type="button" class="w-full mt-2 py-2 text-xs text-slate-500 hover:text-blue-600">มีบัญชีอยู่แล้ว? เข้าสู่ระบบ</button>
                 <p class="mt-3 text-[10px] leading-relaxed text-slate-400">สมัครได้หลายอีเมล บัญชีแต่ละบัญชีจะแยกงานออกจากกัน และใช้บัญชีเดิมบนหลายอุปกรณ์ได้</p>
             </div>
         </div>
@@ -1184,6 +1199,9 @@
                 const isSyncing = ref(false);
                 let realtimeChannel = null;
                 let suppressLocalMigration = false;
+                let authGeneration = 0;
+                let authListenerAttached = false;
+                let authSyncTimer = null;
 
                 const subjects = ref(safeParse(localStorage.getItem(LOCAL_KEYS.subjects), []));
                 const tasks = ref(safeParse(localStorage.getItem(LOCAL_KEYS.tasks), []));
@@ -1571,41 +1589,131 @@
                     }
                 }
 
-                async function signInOrSignUp() {
-                    authMessage.value = '';
-                    if (!CLOUD_ENABLED || !supabaseClient) return;
-                    if (!authEmail.value || !authPassword.value) {
-                        authMessage.value = 'กรุณากรอกอีเมลและรหัสผ่าน';
-                        return;
-                    }
+                async function clearUserScopedState() {
+                    // Cloud mode must never leave the previous account's data in memory/local cache.
+                    subjects.value = [];
+                    tasks.value = [];
+                    trashTasks.value = [];
+                    selectedTask.value = null;
+                    selectedSubject.value = null;
+                    selectedSubjectTasks.value = [];
+                    showTaskModal.value = false;
+                    showCompleteModal.value = false;
+                    showSubjectModal.value = false;
+                    showSubjectTasksModal.value = false;
+                    showTaskDetailModal.value = false;
+                    showDayDrawer.value = false;
+                    pendingFileBlobs.clear();
+                    pendingCompletionFileBlobs.clear();
+                    localStorage.removeItem(LOCAL_KEYS.subjects);
+                    localStorage.removeItem(LOCAL_KEYS.tasks);
+                    localStorage.removeItem(LOCAL_KEYS.trash);
+                    localStorage.removeItem(LOCAL_KEYS.draft);
+                }
+
+                async function stopRealtime() {
+                    if (!realtimeChannel || !supabaseClient) return;
+                    const channel = realtimeChannel;
+                    realtimeChannel = null;
+                    try { await supabaseClient.removeChannel(channel); } catch (err) { console.warn('Realtime cleanup:', err); }
+                }
+
+                async function syncSignedInSession(session, generation) {
+                    if (!session?.user || generation !== authGeneration) return;
+                    cloudUser.value = session.user;
+                    showAuthModal.value = false;
+                    syncError.value = '';
                     try {
-                        const action = authMode.value === 'login'
-                            ? supabaseClient.auth.signInWithPassword({ email: authEmail.value.trim(), password: authPassword.value })
-                            : supabaseClient.auth.signUp({ email: authEmail.value.trim(), password: authPassword.value });
-                        const { data, error } = await action;
-                        if (error) throw error;
-                        if (data.session?.user) {
-                            cloudUser.value = data.session.user;
-                            showAuthModal.value = false;
-                            authPassword.value = '';
-                            await migrateLocalDataAfterLogin();
-                            await loadCloudData();
-                            await setupRealtime();
-                        } else if (authMode.value === 'signup') {
-                            authMessage.value = 'สร้างบัญชีแล้ว หากระบบเปิดการยืนยันอีเมล กรุณายืนยันอีเมลก่อน แล้วจึงเข้าสู่ระบบ';
-                        }
+                        await loadCloudData();
+                        if (generation !== authGeneration || cloudUser.value?.id !== session.user.id) return;
+                        await setupRealtime();
+                        if (generation === authGeneration) syncStatus.value = 'ซิงก์แล้ว';
                     } catch (err) {
-                        authMessage.value = err?.message || 'เข้าสู่ระบบไม่สำเร็จ';
+                        if (generation !== authGeneration) return;
+                        console.error('Post-login sync error:', err);
+                        syncError.value = err?.message || 'ซิงก์ข้อมูลหลังเข้าสู่ระบบไม่สำเร็จ';
                     }
                 }
 
-                async function signOutCloud() {
-                    if (supabaseClient) await supabaseClient.auth.signOut();
-                    cloudUser.value = null;
-                    if (realtimeChannel && supabaseClient) await supabaseClient.removeChannel(realtimeChannel);
-                    realtimeChannel = null;
-                    syncStatus.value = 'ออกจาก Cloud แล้ว';
+                async function signInOrSignUp() {
+                    authMessage.value = '';
+                    if (!CLOUD_ENABLED || !supabaseClient) { authMessage.value = 'ระบบ Cloud ยังไม่พร้อมใช้งาน'; return; }
+                    const email = authEmail.value.trim().toLowerCase();
+                    const password = authPassword.value;
+                    if (!email || !password) { authMessage.value = 'กรุณากรอกอีเมลและรหัสผ่าน'; return; }
+                    if (password.length < 6) { authMessage.value = 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร'; return; }
+                    isSyncing.value = true;
+                    const requestedMode = authMode.value;
+                    try {
+                        let result;
+                        if (requestedMode === 'login') {
+                            result = await supabaseClient.auth.signInWithPassword({ email, password });
+                        } else {
+                            result = await supabaseClient.auth.signUp({ email, password, options: { emailRedirectTo: window.location.href.split('#')[0] } });
+                        }
+                        if (result.error) throw result.error;
+
+                        if (!result.data.session?.user) {
+                            if (requestedMode === 'signup') {
+                                authMessage.value = 'สมัครสมาชิกสำเร็จแล้ว กรุณาตรวจสอบอีเมลเพื่อยืนยันบัญชี แล้วกลับมาเข้าสู่ระบบ';
+                            } else {
+                                throw new Error('เข้าสู่ระบบไม่สำเร็จ กรุณาลองใหม่');
+                            }
+                            return;
+                        }
+
+                        // Session is the source of truth. The auth listener performs the cloud load.
+                        authGeneration++;
+                        cloudUser.value = result.data.session.user;
+                        authPassword.value = '';
+                        showAuthModal.value = false;
+                        await syncSignedInSession(result.data.session, authGeneration);
+                    } catch (err) {
+                        console.error('Auth error:', err);
+                        const msg = err?.message || '';
+                        if (msg.toLowerCase().includes('invalid login credentials')) authMessage.value = 'อีเมลหรือรหัสผ่านไม่ถูกต้อง';
+                        else if (msg.toLowerCase().includes('user already registered')) authMessage.value = 'อีเมลนี้มีบัญชีอยู่แล้ว กรุณาเข้าสู่ระบบ';
+                        else if (msg.toLowerCase().includes('email not confirmed')) authMessage.value = 'กรุณายืนยันอีเมลก่อนเข้าสู่ระบบ';
+                        else authMessage.value = msg || 'ดำเนินการไม่สำเร็จ กรุณาลองใหม่';
+                    } finally {
+                        isSyncing.value = false;
+                    }
                 }
+
+                async function logout() {
+                    if (!CLOUD_ENABLED || !supabaseClient || !cloudUser.value) return;
+                    const email = cloudUser.value.email || '';
+                    if (!confirm(`ต้องการออกจากระบบบัญชี ${email} ใช่หรือไม่?`)) return;
+                    isSyncing.value = true;
+                    authGeneration++;
+                    if (authSyncTimer) { clearTimeout(authSyncTimer); authSyncTimer = null; }
+                    try {
+                        // 1) Stop realtime first so the old account cannot update the UI after logout.
+                        await stopRealtime();
+                        // 2) Tell Supabase to end the real session.
+                        const { error } = await supabaseClient.auth.signOut();
+                        if (error) throw error;
+                        // 3) Clear every user-scoped in-memory/cache value.
+                        await clearUserScopedState();
+                        // 4) Reset authentication UI.
+                        cloudUser.value = null;
+                        showAuthModal.value = true;
+                        authMode.value = 'login';
+                        authEmail.value = '';
+                        authPassword.value = '';
+                        authMessage.value = '';
+                        syncError.value = '';
+                        syncStatus.value = 'ออกจากระบบแล้ว — กรุณาเข้าสู่ระบบ';
+                    } catch (err) {
+                        console.error('Logout error:', err);
+                        authMessage.value = err?.message || 'ออกจากระบบไม่สำเร็จ กรุณาลองใหม่';
+                    } finally {
+                        isSyncing.value = false;
+                    }
+                }
+
+                // Backward-compatible name for any existing internal call; the UI uses logout().
+                async function signOutCloud() { return logout(); }
 
                 // ------------------------------------------------------------
                 // Computed data
@@ -2044,25 +2152,51 @@
 
                     try {
                         const { data } = await supabaseClient.auth.getSession();
-                        cloudUser.value = data.session?.user || null;
-                        if (!cloudUser.value) {
+                        if (data.session?.user) {
+                            authGeneration++;
+                            cloudUser.value = data.session.user;
+                            await syncSignedInSession(data.session, authGeneration);
+                        } else {
+                            cloudUser.value = null;
                             showAuthModal.value = true;
                             syncStatus.value = 'ต้องเข้าสู่ระบบเพื่อซิงก์';
-                        } else {
-                            await loadCloudData();
-                            await setupRealtime();
                         }
-                        supabaseClient.auth.onAuthStateChange(async (event, session) => {
-                            if (event === 'PASSWORD_RECOVERY') {
-                                showResetModal.value = true;
-                                resetMessage.value = '';
-                            }
-                            cloudUser.value = session?.user || null;
-                            if (cloudUser.value) {
-                                await loadCloudData();
-                                await setupRealtime();
-                            }
-                        });
+
+                        if (!authListenerAttached) {
+                            authListenerAttached = true;
+                            supabaseClient.auth.onAuthStateChange((event, session) => {
+                                if (event === 'PASSWORD_RECOVERY') {
+                                    showResetModal.value = true;
+                                    resetMessage.value = '';
+                                    return;
+                                }
+                                authGeneration++;
+                                const generation = authGeneration;
+                                if (authSyncTimer) { clearTimeout(authSyncTimer); authSyncTimer = null; }
+
+                                if (event === 'SIGNED_OUT' || !session?.user) {
+                                    cloudUser.value = null;
+                                    stopRealtime().catch(console.warn);
+                                    clearUserScopedState().catch(console.warn);
+                                    showAuthModal.value = true;
+                                    authMode.value = 'login';
+                                    authEmail.value = '';
+                                    authPassword.value = '';
+                                    authMessage.value = '';
+                                    syncError.value = '';
+                                    syncStatus.value = 'ออกจากระบบแล้ว — กรุณาเข้าสู่ระบบ';
+                                    return;
+                                }
+
+                                cloudUser.value = session.user;
+                                if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
+                                    authSyncTimer = setTimeout(() => {
+                                        authSyncTimer = null;
+                                        syncSignedInSession(session, generation).catch(err => console.error('Auth sync error:', err));
+                                    }, 0);
+                                }
+                            });
+                        }
                     } catch (err) {
                         console.error(err);
                         syncError.value = err?.message || 'เริ่มระบบ Cloud ไม่สำเร็จ';
@@ -2086,7 +2220,7 @@
                     toggleTheme, resumeDraft, discardDraft,
                     // Cloud/auth helpers are exposed for optional console/UI use.
                     CLOUD_ENABLED, syncStatus, syncError, cloudUser, showAuthModal, authMode, authEmail, authPassword,
-                    authMessage, isSyncing, signInOrSignUp, signOutCloud, requestPasswordReset, showResetModal, resetPassword, resetPasswordConfirm, resetMessage, resetSuccess, updatePasswordFromRecovery, completionAttachments, completionLink, enableBrowserNotifications
+                    authMessage, isSyncing, signInOrSignUp, logout, signOutCloud, requestPasswordReset, showResetModal, resetPassword, resetPasswordConfirm, resetMessage, resetSuccess, updatePasswordFromRecovery, completionAttachments, completionLink, enableBrowserNotifications
                 };
             }
         }).mount('#app');
