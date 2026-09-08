@@ -1054,6 +1054,22 @@
             </div>
         </div>
 
+        <!-- PASSWORD RESET SENT MODAL -->
+        <div v-if="showResetSentModal" class="fixed inset-0 z-[90] bg-slate-900/75 glass-effect flex items-center justify-center p-4">
+            <div class="w-full max-w-md bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6">
+                <div class="w-14 h-14 mx-auto rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center text-blue-600 dark:text-blue-300 text-2xl"><i class="fa-solid fa-envelope"></i></div>
+                <h3 class="text-lg font-bold text-center mt-4 dark:text-white">ส่งลิงก์กู้รหัสผ่านแล้ว</h3>
+                <p class="text-sm text-center text-slate-500 dark:text-slate-300 mt-2">ให้ทำตาม 3 ขั้นตอนนี้</p>
+                <div class="mt-5 space-y-3 text-sm dark:text-slate-200">
+                    <div class="flex gap-3"><b class="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0">1</b><span>เปิดอีเมลที่ระบบส่งไปให้</span></div>
+                    <div class="flex gap-3"><b class="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0">2</b><span>กดปุ่ม <b>Reset Password</b> ในอีเมล</span></div>
+                    <div class="flex gap-3"><b class="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0">3</b><span>ระบบจะกลับมาหน้านี้ แล้วให้ตั้งรหัสผ่านใหม่ทันที</span></div>
+                </div>
+                <p class="mt-4 text-xs text-amber-600 dark:text-amber-300 bg-amber-50 dark:bg-amber-900/20 rounded-xl p-3">ถ้าไม่พบอีเมล ให้ตรวจสอบ Spam / Junk ด้วย</p>
+                <button @click="showResetSentModal=false" class="w-full mt-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold">เข้าใจแล้ว</button>
+            </div>
+        </div>
+
         <!-- IMAGE LIGHTBOX PREVIEW MODAL -->
         <div v-if="previewImageUrl" class="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4" @click="previewImageUrl = null">
             <img :src="previewImageUrl" class="max-w-full max-h-full rounded-lg shadow-2xl" alt="รูปขยายใหญ่">
@@ -1177,6 +1193,7 @@
                 const pendingCompletionFileBlobs = new Map();
 
                 const showResetModal = ref(false);
+                const showResetSentModal = ref(false);
                 const resetPassword = ref('');
                 const resetPasswordConfirm = ref('');
                 const resetMessage = ref('');
@@ -1549,15 +1566,27 @@
 
                 async function requestPasswordReset() {
                     authMessage.value = '';
+                    if (!CLOUD_ENABLED || !supabaseClient) {
+                        authMessage.value = 'ระบบ Cloud ยังไม่พร้อมใช้งาน';
+                        return;
+                    }
                     if (!authEmail.value?.trim()) {
                         authMessage.value = 'กรุณากรอกอีเมลก่อนกดลืมรหัสผ่าน';
                         return;
                     }
+                    if (window.location.protocol === 'file:') {
+                        authMessage.value = 'การกู้รหัสผ่านต้องเปิดเว็บไซต์ผ่านลิงก์ http:// หรือ https:// ก่อน จึงจะกลับเข้าหน้านี้ได้ถูกต้อง';
+                        return;
+                    }
                     try {
-                        const redirectTo = window.location.href.split('#')[0];
-                        const { error } = await supabaseClient.auth.resetPasswordForEmail(authEmail.value.trim(), { redirectTo });
+                        const url = new URL(window.location.href);
+                        url.hash = '';
+                        url.search = '';
+                        const redirectTo = url.toString();
+                        const { error } = await supabaseClient.auth.resetPasswordForEmail(authEmail.value.trim().toLowerCase(), { redirectTo });
                         if (error) throw error;
-                        authMessage.value = 'ส่งลิงก์รีเซ็ตรหัสผ่านไปยังอีเมลแล้ว กรุณาตรวจสอบกล่องจดหมาย';
+                        showResetSentModal.value = true;
+                        authMessage.value = '';
                     } catch (err) {
                         authMessage.value = err?.message || 'ส่งลิงก์รีเซ็ตรหัสผ่านไม่สำเร็จ';
                     }
@@ -1649,7 +1678,7 @@
                         if (requestedMode === 'login') {
                             result = await supabaseClient.auth.signInWithPassword({ email, password });
                         } else {
-                            result = await supabaseClient.auth.signUp({ email, password, options: { emailRedirectTo: window.location.href.split('#')[0] } });
+                            result = await supabaseClient.auth.signUp({ email, password, options: { emailRedirectTo: window.location.protocol === 'file:' ? undefined : new URL(window.location.href).toString().split('#')[0].split('?')[0] } });
                         }
                         if (result.error) throw result.error;
 
@@ -2166,6 +2195,7 @@
                             authListenerAttached = true;
                             supabaseClient.auth.onAuthStateChange((event, session) => {
                                 if (event === 'PASSWORD_RECOVERY') {
+                                    showResetSentModal.value = false;
                                     showResetModal.value = true;
                                     resetMessage.value = '';
                                     return;
@@ -2220,7 +2250,7 @@
                     toggleTheme, resumeDraft, discardDraft,
                     // Cloud/auth helpers are exposed for optional console/UI use.
                     CLOUD_ENABLED, syncStatus, syncError, cloudUser, showAuthModal, authMode, authEmail, authPassword,
-                    authMessage, isSyncing, signInOrSignUp, logout, signOutCloud, requestPasswordReset, showResetModal, resetPassword, resetPasswordConfirm, resetMessage, resetSuccess, updatePasswordFromRecovery, completionAttachments, completionLink, enableBrowserNotifications
+                    authMessage, isSyncing, signInOrSignUp, logout, signOutCloud, requestPasswordReset, showResetSentModal, showResetModal, resetPassword, resetPasswordConfirm, resetMessage, resetSuccess, updatePasswordFromRecovery, completionAttachments, completionLink, enableBrowserNotifications
                 };
             }
         }).mount('#app');
