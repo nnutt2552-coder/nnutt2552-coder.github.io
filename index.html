@@ -1015,6 +1015,16 @@
         </div>
 
 
+        <!-- EMAIL CONFIRMED MODAL -->
+        <div v-if="showEmailConfirmedModal" class="fixed inset-0 z-[95] bg-slate-900/75 glass-effect flex items-center justify-center p-4">
+            <div class="w-full max-w-md bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6 text-center">
+                <div class="w-16 h-16 mx-auto rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 text-3xl"><i class="fa-solid fa-circle-check"></i></div>
+                <h3 class="text-lg font-bold mt-4 dark:text-white">ยืนยันอีเมลสำเร็จแล้ว</h3>
+                <p class="text-sm text-slate-500 dark:text-slate-300 mt-2">บัญชีของคุณพร้อมใช้งานแล้ว ระบบพากลับมายังเว็บไซต์เรียบร้อย</p>
+                <button @click="showEmailConfirmedModal=false; showAuthModal=false" class="w-full mt-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold">เริ่มใช้งาน</button>
+            </div>
+        </div>
+
         <!-- PASSWORD RESET MODAL -->
         <div v-if="showResetModal" class="fixed inset-0 z-[80] bg-slate-900/75 glass-effect flex items-center justify-center p-4">
             <div class="bg-white dark:bg-slate-800 rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-700">
@@ -1126,6 +1136,7 @@
          *   create policy if not exists task_images_insert_authenticated on storage.objects for insert to authenticated with check (bucket_id='task-images');
          * The bucket is public so getPublicUrl() works without signed URLs.
          */
+        const APP_URL = 'https://nnutt2552-coder.github.io/';
         const SUPABASE_URL = 'https://qmolvpwqomwizqjyzhsx.supabase.co';
         const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_-EfFZ9Xu4w7qoTU1UDqs3A_BWXTqH1S';
         const CLOUD_ENABLED =
@@ -1192,6 +1203,7 @@
                 const pendingFileBlobs = new Map();
                 const pendingCompletionFileBlobs = new Map();
 
+                const showEmailConfirmedModal = ref(false);
                 const showResetModal = ref(false);
                 const showResetSentModal = ref(false);
                 const resetPassword = ref('');
@@ -1579,10 +1591,7 @@
                         return;
                     }
                     try {
-                        const url = new URL(window.location.href);
-                        url.hash = '';
-                        url.search = '';
-                        const redirectTo = url.toString();
+                        const redirectTo = APP_URL;
                         const { error } = await supabaseClient.auth.resetPasswordForEmail(authEmail.value.trim().toLowerCase(), { redirectTo });
                         if (error) throw error;
                         showResetSentModal.value = true;
@@ -1612,7 +1621,9 @@
                             showResetModal.value = false;
                             resetPassword.value = '';
                             resetPasswordConfirm.value = '';
-                        }, 900);
+                            authMode.value = 'login';
+                            authMessage.value = 'เปลี่ยนรหัสผ่านสำเร็จแล้ว สามารถเข้าสู่ระบบด้วยรหัสผ่านใหม่ได้';
+                        }, 1000);
                     } catch (err) {
                         resetMessage.value = err?.message || 'เปลี่ยนรหัสผ่านไม่สำเร็จ';
                     }
@@ -1678,7 +1689,7 @@
                         if (requestedMode === 'login') {
                             result = await supabaseClient.auth.signInWithPassword({ email, password });
                         } else {
-                            result = await supabaseClient.auth.signUp({ email, password, options: { emailRedirectTo: window.location.protocol === 'file:' ? undefined : new URL(window.location.href).toString().split('#')[0].split('?')[0] } });
+                            result = await supabaseClient.auth.signUp({ email, password, options: { emailRedirectTo: APP_URL } });
                         }
                         if (result.error) throw result.error;
 
@@ -2166,10 +2177,29 @@
 
                 watch([subjects, tasks, trashTasks], () => { if (!CLOUD_ENABLED) localSave(); }, { deep: true });
 
+                function handleAuthRedirectUrl() {
+                    const url = new URL(window.location.href);
+                    const hash = new URLSearchParams(url.hash.replace(/^#/, ''));
+                    const type = hash.get('type');
+                    const error = hash.get('error_description') || new URLSearchParams(url.search).get('error_description');
+                    if (error) {
+                        authMessage.value = decodeURIComponent(error.replace(/\+/g, ' '));
+                        showAuthModal.value = true;
+                    }
+                    if (type === 'signup') {
+                        showEmailConfirmedModal.value = true;
+                        showAuthModal.value = false;
+                    }
+                    if (url.hash || url.search) {
+                        try { window.history.replaceState({}, document.title, APP_URL); } catch (_) {}
+                    }
+                }
+
                 onMounted(async () => {
                     const savedTheme = localStorage.getItem(LOCAL_KEYS.theme);
                     if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) { isDark.value = true; document.documentElement.classList.add('dark'); }
                     checkDraft();
+                    handleAuthRedirectUrl();
                     await autoPurgeTrash();
                     setTimeout(checkScheduledReminders, 1500);
                     setInterval(checkScheduledReminders, 30000);
@@ -2198,7 +2228,17 @@
                                     showResetSentModal.value = false;
                                     showResetModal.value = true;
                                     resetMessage.value = '';
+                                    try { window.history.replaceState({}, document.title, APP_URL); } catch (_) {}
                                     return;
+                                }
+                                if (event === 'SIGNED_IN') {
+                                    const url = new URL(window.location.href);
+                                    const hash = new URLSearchParams(url.hash.replace(/^#/, ''));
+                                    if (hash.get('type') === 'signup') {
+                                        showAuthModal.value = false;
+                                        showEmailConfirmedModal.value = true;
+                                        try { window.history.replaceState({}, document.title, APP_URL); } catch (_) {}
+                                    }
                                 }
                                 authGeneration++;
                                 const generation = authGeneration;
@@ -2250,7 +2290,7 @@
                     toggleTheme, resumeDraft, discardDraft,
                     // Cloud/auth helpers are exposed for optional console/UI use.
                     CLOUD_ENABLED, syncStatus, syncError, cloudUser, showAuthModal, authMode, authEmail, authPassword,
-                    authMessage, isSyncing, signInOrSignUp, logout, signOutCloud, requestPasswordReset, showResetSentModal, showResetModal, resetPassword, resetPasswordConfirm, resetMessage, resetSuccess, updatePasswordFromRecovery, completionAttachments, completionLink, enableBrowserNotifications
+                    authMessage, isSyncing, signInOrSignUp, logout, signOutCloud, requestPasswordReset, showEmailConfirmedModal, showResetSentModal, showResetModal, resetPassword, resetPasswordConfirm, resetMessage, resetSuccess, updatePasswordFromRecovery, completionAttachments, completionLink, enableBrowserNotifications
                 };
             }
         }).mount('#app');
