@@ -1,0 +1,2467 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#123c73">
+  <meta name="description" content="ระบบแบบทดสอบชีววิทยา ม.5 เรื่องโครงสร้างและการเจริญเติบโตของราก">
+  <title>ระบบประเมินความรู้ชีววิทยา ม.5 | โครงสร้างและการเจริญเติบโตของราก</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700&display=swap');
+
+    :root {
+      --navy: #0d2f59;
+      --blue: #175ea8;
+      --blue-light: #eaf3fd;
+      --gold: #c7972b;
+      --green: #147a55;
+      --green-light: #e9f8f1;
+      --red: #b73535;
+      --red-light: #fff0f0;
+      --orange: #a45c11;
+      --ink: #17263a;
+      --muted: #5c6878;
+      --line: #d7dfe9;
+      --paper: #ffffff;
+      --background: #f2f5f9;
+      --shadow: 0 8px 28px rgba(18, 45, 75, .09);
+      --radius: 14px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--background);
+      font-family: "Noto Sans Thai", system-ui, sans-serif;
+      line-height: 1.7;
+    }
+
+    button, input, select, textarea {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    button:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible,
+    a:focus-visible {
+      outline: 3px solid rgba(23, 94, 168, .28);
+      outline-offset: 2px;
+    }
+
+    a {
+      color: var(--blue);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .site-header {
+      color: #fff;
+      background: linear-gradient(135deg, #09284d, #175ea8);
+      border-bottom: 4px solid var(--gold);
+    }
+
+    .header-inner {
+      width: min(1200px, calc(100% - 32px));
+      min-height: 86px;
+      margin: auto;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .emblem {
+      width: 52px;
+      height: 52px;
+      flex: 0 0 52px;
+      display: grid;
+      place-items: center;
+      border: 2px solid rgba(255, 255, 255, .72);
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .11);
+      font-size: 27px;
+    }
+
+    .header-title {
+      margin: 0;
+      font-size: clamp(1.05rem, 3vw, 1.55rem);
+      line-height: 1.4;
+    }
+
+    .header-subtitle {
+      margin: 2px 0 0;
+      color: #dbeafd;
+      font-size: .9rem;
+    }
+
+    .container {
+      width: min(1200px, calc(100% - 32px));
+      margin: 28px auto 52px;
+    }
+
+    .panel {
+      overflow: hidden;
+      margin-bottom: 20px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--paper);
+      box-shadow: var(--shadow);
+    }
+
+    .panel-body {
+      padding: clamp(20px, 4vw, 34px);
+    }
+
+    .hero {
+      color: #fff;
+      background:
+        radial-gradient(circle at 85% 20%, rgba(255, 255, 255, .13), transparent 28%),
+        linear-gradient(135deg, #123c73, #0d6f75);
+    }
+
+    .hero .panel-body {
+      padding: clamp(28px, 5vw, 52px);
+    }
+
+    .hero h1 {
+      max-width: 830px;
+      margin: 0 0 12px;
+      font-size: clamp(1.75rem, 4vw, 2.8rem);
+      line-height: 1.3;
+    }
+
+    .hero p {
+      max-width: 850px;
+      margin: 0;
+      color: #e8f2ff;
+      font-size: 1.02rem;
+    }
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+      margin-top: 23px;
+    }
+
+    .badge {
+      padding: 6px 12px;
+      border: 1px solid rgba(255, 255, 255, .26);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .11);
+      font-size: .86rem;
+    }
+
+    h2, h3 {
+      line-height: 1.4;
+    }
+
+    h2 {
+      margin-top: 0;
+      color: var(--navy);
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .info-grid,
+    .result-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    .info-card,
+    .score-card {
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fbfcfe;
+    }
+
+    .info-card strong,
+    .score-card strong {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--navy);
+    }
+
+    .score-value {
+      color: var(--blue);
+      font-size: 2rem;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .notice {
+      margin: 18px 0;
+      padding: 14px 16px;
+      border-left: 4px solid var(--blue);
+      border-radius: 8px;
+      background: var(--blue-light);
+    }
+
+    .notice.warning {
+      border-color: var(--orange);
+      background: #fff7e8;
+    }
+
+    .notice.success {
+      border-color: var(--green);
+      background: var(--green-light);
+    }
+
+    .check-list {
+      padding-left: 22px;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 24px;
+    }
+
+    .btn {
+      min-height: 44px;
+      padding: 10px 19px;
+      border: 1px solid transparent;
+      border-radius: 9px;
+      font-weight: 600;
+      transition: transform .15s, box-shadow .15s, background .15s;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      color: #fff;
+      background: var(--blue);
+      box-shadow: 0 4px 13px rgba(23, 94, 168, .22);
+    }
+
+    .btn-primary:hover {
+      background: #104f90;
+    }
+
+    .btn-secondary {
+      color: var(--navy);
+      border-color: #bfcbd9;
+      background: #fff;
+    }
+
+    .btn-danger {
+      color: #fff;
+      background: var(--red);
+    }
+
+    .btn:disabled {
+      opacity: .55;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .candidate-form {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 20px;
+    }
+
+    .field label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+
+    .field input,
+    .field select,
+    .field textarea {
+      width: 100%;
+      padding: 11px 12px;
+      color: var(--ink);
+      border: 1px solid #bfc9d6;
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .field textarea {
+      min-height: 130px;
+      resize: vertical;
+    }
+
+    .exam-shell {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 280px;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .exam-main,
+    .exam-sidebar {
+      min-width: 0;
+    }
+
+    .exam-sidebar {
+      position: sticky;
+      top: 12px;
+    }
+
+    .exam-toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      margin-bottom: 14px;
+      padding: 12px 16px;
+      color: #fff;
+      background: var(--navy);
+      border-radius: 11px;
+      box-shadow: var(--shadow);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .timer {
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+
+    .timer.danger {
+      color: #ffe0e0;
+      animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+      50% { opacity: .58; }
+    }
+
+    .progress-track {
+      height: 8px;
+      overflow: hidden;
+      margin-top: 7px;
+      border-radius: 99px;
+      background: rgba(255, 255, 255, .22);
+    }
+
+    .progress-fill {
+      width: 0;
+      height: 100%;
+      background: #f2c75c;
+      transition: width .2s;
+    }
+
+    .question-card {
+      scroll-margin-top: 96px;
+      margin-bottom: 16px;
+      padding: clamp(18px, 3vw, 27px);
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: #fff;
+      box-shadow: 0 3px 14px rgba(18, 45, 75, .05);
+    }
+
+    .question-card.answered {
+      border-left: 4px solid var(--green);
+    }
+
+    .question-card.unanswered {
+      border-left: 4px solid #d4a034;
+    }
+
+    .question-number {
+      margin-bottom: 8px;
+      color: var(--blue);
+      font-size: .9rem;
+      font-weight: 700;
+      letter-spacing: .02em;
+    }
+
+    .question-stem {
+      margin-bottom: 16px;
+      font-weight: 600;
+    }
+
+    .choice {
+      position: relative;
+      display: flex;
+      align-items: flex-start;
+      gap: 11px;
+      margin: 9px 0;
+      padding: 12px 13px;
+      border: 1px solid #d3dbe5;
+      border-radius: 9px;
+      background: #fff;
+      cursor: pointer;
+      transition: border .15s, background .15s;
+    }
+
+    .choice:hover {
+      border-color: #7da9d6;
+      background: #f7fbff;
+    }
+
+    .choice:has(input:checked) {
+      border-color: var(--blue);
+      background: var(--blue-light);
+    }
+
+    .choice input {
+      margin-top: 5px;
+      accent-color: var(--blue);
+    }
+
+    .choice-letter {
+      flex: 0 0 24px;
+      color: var(--navy);
+      font-weight: 700;
+    }
+
+    .palette {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 7px;
+    }
+
+    .palette button {
+      aspect-ratio: 1;
+      padding: 0;
+      color: var(--navy);
+      border: 1px solid #c8d2df;
+      border-radius: 7px;
+      background: #fff;
+      font-weight: 600;
+    }
+
+    .palette button.done {
+      color: #fff;
+      border-color: var(--green);
+      background: var(--green);
+    }
+
+    .palette button.partial {
+      color: #fff;
+      border-color: var(--orange);
+      background: var(--orange);
+    }
+
+    .sidebar-card {
+      margin-bottom: 13px;
+      padding: 17px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+      box-shadow: var(--shadow);
+    }
+
+    .sidebar-card h3 {
+      margin: 0 0 11px;
+      color: var(--navy);
+      font-size: 1rem;
+    }
+
+    .figure {
+      overflow: auto;
+      margin: 17px 0;
+      padding: 15px;
+      text-align: center;
+      border: 1px solid #d7e0e9;
+      border-radius: 10px;
+      background: #f9fbfd;
+    }
+
+    .figure svg {
+      display: block;
+      width: min(100%, 640px);
+      height: auto;
+      margin: auto;
+    }
+
+    .figure figcaption {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: .8rem;
+      font-weight: 400;
+    }
+
+    .data-table {
+      width: 100%;
+      margin: 14px 0;
+      border-collapse: collapse;
+      font-size: .92rem;
+    }
+
+    .data-table th,
+    .data-table td {
+      padding: 9px 10px;
+      border: 1px solid #cbd5e0;
+      text-align: center;
+    }
+
+    .data-table th {
+      color: var(--navy);
+      background: #edf4fb;
+    }
+
+    .matching-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(180px, .7fr);
+      gap: 10px;
+      align-items: center;
+    }
+
+    .matching-grid select {
+      width: 100%;
+      padding: 9px;
+      border: 1px solid #bfc9d6;
+      border-radius: 7px;
+    }
+
+    .fill-grid {
+      display: grid;
+      gap: 10px;
+    }
+
+    .fill-row {
+      display: grid;
+      grid-template-columns: 34px 1fr;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .fill-row input {
+      width: 100%;
+      padding: 9px;
+      border: 1px solid #bfc9d6;
+      border-radius: 7px;
+    }
+
+    .analysis-row {
+      margin: 13px 0;
+    }
+
+    .analysis-label {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 5px;
+    }
+
+    .analysis-bar {
+      height: 11px;
+      overflow: hidden;
+      border-radius: 99px;
+      background: #e4e9ef;
+    }
+
+    .analysis-bar > div {
+      height: 100%;
+      border-radius: 99px;
+      background: linear-gradient(90deg, var(--blue), #25a27a);
+    }
+
+    .result-status {
+      display: inline-block;
+      padding: 4px 9px;
+      border-radius: 999px;
+      font-size: .8rem;
+      font-weight: 700;
+    }
+
+    .status-correct {
+      color: #07553a;
+      background: #dff5ea;
+    }
+
+    .status-wrong {
+      color: #842626;
+      background: #fde5e5;
+    }
+
+    .status-empty {
+      color: #74500e;
+      background: #fff0cd;
+    }
+
+    .answer-review {
+      margin-bottom: 14px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: #fff;
+    }
+
+    .answer-review summary {
+      padding: 15px 17px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .review-content {
+      padding: 0 17px 18px;
+    }
+
+    .explanation-choice {
+      margin: 7px 0;
+      padding: 9px 11px;
+      border-left: 3px solid #cbd4df;
+      background: #f7f9fb;
+    }
+
+    .explanation-choice.correct {
+      border-color: var(--green);
+      background: var(--green-light);
+    }
+
+    .explanation-choice.selected-wrong {
+      border-color: var(--red);
+      background: var(--red-light);
+    }
+
+    .rubric {
+      padding: 13px 16px;
+      border-radius: 8px;
+      background: #f5f8fc;
+    }
+
+    .footer {
+      padding: 28px 16px;
+      color: #dbe7f4;
+      background: #102c4c;
+      text-align: center;
+      font-size: .86rem;
+    }
+
+    .footer a {
+      color: #fff;
+    }
+
+    .toast {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      z-index: 100;
+      max-width: min(390px, calc(100% - 40px));
+      padding: 13px 17px;
+      color: #fff;
+      border-radius: 9px;
+      background: #17263a;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(12px);
+      transition: .25s;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .screen-reader {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+    }
+
+    @media (max-width: 900px) {
+      .exam-shell {
+        grid-template-columns: 1fr;
+      }
+
+      .exam-sidebar {
+        position: static;
+        order: -1;
+      }
+
+      .palette {
+        grid-template-columns: repeat(10, 1fr);
+      }
+    }
+
+    @media (max-width: 680px) {
+      .container,
+      .header-inner {
+        width: min(100% - 20px, 1200px);
+      }
+
+      .info-grid,
+      .result-grid,
+      .candidate-form {
+        grid-template-columns: 1fr;
+      }
+
+      .exam-toolbar {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .matching-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .palette {
+        grid-template-columns: repeat(5, 1fr);
+      }
+
+      .actions .btn {
+        width: 100%;
+      }
+    }
+
+    @media print {
+      .site-header,
+      .footer,
+      .actions,
+      .exam-sidebar,
+      .exam-toolbar {
+        display: none !important;
+      }
+
+      body {
+        background: #fff;
+      }
+
+      .container {
+        width: 100%;
+        margin: 0;
+      }
+
+      .panel,
+      .answer-review {
+        box-shadow: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="emblem" aria-hidden="true">🌱</div>
+      <div>
+        <h1 class="header-title">ระบบประเมินความรู้ทางชีววิทยา ระดับมัธยมศึกษาปีที่ 5</h1>
+        <p class="header-subtitle">บทที่ 9 โครงสร้างและการเจริญเติบโตของพืชดอก</p>
+      </div>
+    </div>
+  </header>
+
+  <main id="app" class="container">
+    <section id="homeScreen">
+      <article class="panel hero">
+        <div class="panel-body">
+          <h1>แบบทดสอบเรื่องโครงสร้างและการเจริญเติบโตของราก</h1>
+          <p>ระบบทบทวนและประเมินความเข้าใจตามแนวหลักสูตรชีววิทยาระดับมัธยมศึกษาตอนปลาย เน้นการวิเคราะห์ การประยุกต์ใช้ และการอธิบายด้วยเหตุผลทางชีววิทยา</p>
+          <div class="badge-row">
+            <span class="badge">ม.5</span>
+            <span class="badge">แบบทบทวน 20 ข้อ</span>
+            <span class="badge">แบบทดสอบหลัก 35 ข้อ</span>
+            <span class="badge">50 คะแนน</span>
+            <span class="badge">เวลา 30 นาที</span>
+          </div>
+        </div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-body">
+          <h2 class="section-title">ข้อมูลการประเมิน</h2>
+          <div class="info-grid">
+            <div class="info-card">
+              <strong>ขั้นที่ 1</strong>
+              แบบทบทวนความรู้เดิม เรื่องเนื้อเยื่อพืช จำนวน 20 ข้อ ไม่คิดรวมในคะแนนหลัก
+            </div>
+            <div class="info-card">
+              <strong>ขั้นที่ 2</strong>
+              ปรนัย 5 ตัวเลือก จำนวน 30 ข้อ คิดเป็น 20 คะแนน
+            </div>
+            <div class="info-card">
+              <strong>ขั้นที่ 3</strong>
+              ข้อสอบเชิงซ้อนและอัตนัย 5 ข้อ คิดเป็น 30 คะแนน
+            </div>
+          </div>
+
+          <div class="notice">
+            <strong>ระบบบันทึกอัตโนมัติ:</strong> คำตอบและเวลาคงเหลือจะถูกบันทึกไว้ในอุปกรณ์นี้ ผู้สอบสามารถกลับมาทำต่อได้ตราบใดที่ยังไม่หมดเวลาและไม่ได้ล้างข้อมูลเบราว์เซอร์
+          </div>
+
+          <form id="candidateForm" class="candidate-form">
+            <div class="field">
+              <label for="candidateName">ชื่อ–นามสกุลผู้เข้าสอบ</label>
+              <input id="candidateName" maxlength="100" autocomplete="name" required placeholder="กรอกชื่อ–นามสกุล">
+            </div>
+            <div class="field">
+              <label for="candidateRoom">ชั้น/ห้อง หรือรหัสประจำตัว</label>
+              <input id="candidateRoom" maxlength="50" required placeholder="เช่น ม.5/1 เลขที่ 12">
+            </div>
+          </form>
+
+          <h3>คำชี้แจงสำคัญ</h3>
+          <ol class="check-list">
+            <li>ผู้สอบต้องทำแบบทบทวนความรู้เดิมก่อนเริ่มแบบทดสอบหลัก</li>
+            <li>แบบทดสอบหลักมีเวลา 30 นาที ระบบจะส่งคำตอบทันทีเมื่อหมดเวลา</li>
+            <li>สามารถส่งแบบทดสอบก่อนหมดเวลาได้ แม้ตอบไม่ครบทุกข้อ</li>
+            <li>ข้อปรนัยให้เลือกคำตอบที่ถูกต้องหรือเหมาะสมที่สุดเพียงคำตอบเดียว</li>
+            <li>ข้อเลือกตอบเชิงซ้อนอาจมีข้อความถูกมากกว่าหนึ่งข้อความ โปรดอ่านคำสั่งของแต่ละข้อ</li>
+            <li>ข้อเขียนจะประเมินจากความถูกต้องของแนวคิด เหตุผล คำศัพท์ชีววิทยา และการเชื่อมโยงหลักฐาน</li>
+            <li>หลังส่งคำตอบ ระบบจะแสดงคะแนน วิเคราะห์รายหัวข้อ และเปิดเฉลยละเอียดรายข้อ</li>
+          </ol>
+
+          <div class="actions">
+            <button type="button" class="btn btn-secondary" id="resetAllBtn">ล้างข้อมูลเดิม</button>
+            <button type="button" class="btn btn-primary" id="startDiagnosticBtn">เริ่มแบบทบทวนความรู้เดิม</button>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section id="diagnosticScreen" class="hidden">
+      <div class="exam-toolbar">
+        <div>
+          <strong>แบบทบทวนความรู้เดิม: เนื้อเยื่อพืช</strong>
+          <div class="progress-track"><div id="diagnosticProgress" class="progress-fill"></div></div>
+        </div>
+        <div><span id="diagnosticCount">ตอบแล้ว 0/20</span></div>
+      </div>
+      <div class="exam-shell">
+        <div class="exam-main">
+          <div id="diagnosticQuestions"></div>
+          <div class="actions">
+            <button type="button" class="btn btn-danger" id="submitDiagnosticBtn">ส่งแบบทบทวน</button>
+          </div>
+        </div>
+        <aside class="exam-sidebar">
+          <div class="sidebar-card">
+            <h3>แผงข้อสอบ</h3>
+            <div id="diagnosticPalette" class="palette"></div>
+          </div>
+          <div class="sidebar-card">
+            <h3>สถานะ</h3>
+            <p>สีเขียวหมายถึงตอบแล้ว สีขาวหมายถึงยังไม่ได้ตอบ</p>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section id="diagnosticResultScreen" class="hidden"></section>
+
+    <section id="mainIntroScreen" class="hidden">
+      <article class="panel">
+        <div class="panel-body">
+          <h2 class="section-title">คำชี้แจงก่อนเริ่มแบบทดสอบหลัก</h2>
+          <div class="notice warning">
+            เมื่อกด “เริ่มจับเวลา” ระบบจะเริ่มนับถอยหลัง 30 นาทีทันที และไม่สามารถหยุดเวลาได้
+          </div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>ส่วน</th>
+                <th>จำนวนข้อ</th>
+                <th>คะแนน</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>ปรนัย 5 ตัวเลือก</td><td>30</td><td>20</td></tr>
+              <tr><td>อัตนัยและเชิงซ้อน</td><td>5</td><td>30</td></tr>
+              <tr><th>รวม</th><th>35</th><th>50</th></tr>
+            </tbody>
+          </table>
+          <p>ข้อปรนัยแต่ละข้อมีน้ำหนักเท่ากัน ระบบจะคำนวณคะแนนส่วนปรนัยจากจำนวนข้อที่ตอบถูกด้วยสูตร $(จำนวนข้อที่ถูก ÷ 30) × 20$</p>
+          <div class="actions">
+            <button type="button" class="btn btn-primary" id="startMainBtn">เริ่มจับเวลาและทำแบบทดสอบ</button>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section id="mainExamScreen" class="hidden">
+      <div class="exam-toolbar">
+        <div style="flex:1">
+          <strong>แบบทดสอบหลัก: โครงสร้างและการเจริญเติบโตของราก</strong>
+          <div class="progress-track"><div id="mainProgress" class="progress-fill"></div></div>
+        </div>
+        <div id="timer" class="timer" aria-live="polite">30:00</div>
+      </div>
+      <div class="exam-shell">
+        <div class="exam-main">
+          <div id="mainQuestions"></div>
+          <div class="actions">
+            <button type="button" class="btn btn-danger" id="submitMainBtn">ส่งแบบทดสอบ</button>
+          </div>
+        </div>
+        <aside class="exam-sidebar">
+          <div class="sidebar-card">
+            <h3>ความคืบหน้า</h3>
+            <p id="mainCount">ตอบแล้ว 0/35 ข้อ</p>
+          </div>
+          <div class="sidebar-card">
+            <h3>แผงข้อสอบ</h3>
+            <div id="mainPalette" class="palette"></div>
+          </div>
+          <div class="sidebar-card">
+            <h3>เวลาสอบ</h3>
+            <p>เมื่อหมดเวลา ระบบจะส่งคำตอบที่บันทึกไว้โดยอัตโนมัติ</p>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section id="mainResultScreen" class="hidden"></section>
+  </main>
+
+  <footer class="footer">
+    <p>เนื้อหาอ้างอิงแนวหลักสูตรจาก <a href="[ipst](https://proj14.ipst.ac.th/m4-6-biology/m5-bio-book3/)" target="_blank" rel="noopener">Project 14 สสวท.</a></p>
+    <p>แผนภาพเรียบเรียงใหม่โดยอาศัยหลักกายวิภาคของรากจาก <a href="[openstax](https://openstax.org/books/biology-2e/pages/30-3-roots)" target="_blank" rel="noopener">OpenStax Biology 2e</a> ซึ่งเผยแพร่ภายใต้สัญญาอนุญาต CC BY 4.0</p>
+  </footer>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    "use strict";
+
+    const APP_VERSION = "bio-root-exam-v1";
+    const STORAGE_KEY = APP_VERSION + "-state";
+
+    /*
+      การเชื่อมต่อ AI จริง:
+      กำหนด URL ของเซิร์ฟเวอร์ที่รับ POST JSON และส่งกลับข้อมูลรูปแบบ
+      { "score": 0-6, "feedback": "ข้อความสะท้อนผล" }
+
+      ห้ามใส่ API key ของผู้ให้บริการ AI ในไฟล์ HTML เพราะผู้ใช้สามารถเปิดดูได้
+      หากไม่กำหนด endpoint ระบบจะใช้เกณฑ์คำสำคัญและรูบริกภายในเครื่องแทน
+    */
+    const CONFIG = {
+      aiGradingEndpoint: "",
+      examDurationSeconds: 30 * 60
+    };
+
+    const letters = ["ก", "ข", "ค", "ง", "จ"];
+
+    const topicLabels = {
+      "เนื้อเยื่อเจริญ": "เนื้อเยื่อเจริญและการแบ่งเซลล์",
+      "เนื้อเยื่อถาวร": "เนื้อเยื่อถาวร",
+      "เนื้อเยื่อลำเลียง": "เนื้อเยื่อลำเลียง",
+      "เนื้อเยื่อผิว": "เนื้อเยื่อผิว",
+      "บริเวณปลายราก": "บริเวณการเจริญของปลายราก",
+      "โครงสร้างภายใน": "โครงสร้างภายในของราก",
+      "การลำเลียง": "การลำเลียงน้ำและแร่ธาตุ",
+      "การเจริญทุติยภูมิ": "การเจริญทุติยภูมิ",
+      "การปรับตัว": "การปรับตัวและการประยุกต์ใช้",
+      "การทดลอง": "การวิเคราะห์ข้อมูลและการทดลอง"
+    };
+
+    function q(id, stem, choices, answer, reason, notes, topic, media = "") {
+      return { id, stem, choices, answer, reason, notes, topic, media };
+    }
+
+    const diagnosticQuestions = [
+      q("R1", "ข้อใดเป็นลักษณะที่สอดคล้องกับเซลล์ของเนื้อเยื่อเจริญมากที่สุด",
+        ["เซลล์ขนาดเล็ก ผนังปฐมภูมิบาง นิวเคลียสเด่น และแบ่งเซลล์ได้ต่อเนื่อง", "เซลล์ตายเมื่อเจริญเต็มที่และมีลิกนินสะสมหนา", "เซลล์มีช่องว่างระหว่างเซลล์ขนาดใหญ่และหยุดแบ่งถาวร", "เซลล์ไม่มีนิวเคลียสและเชื่อมต่อกันเป็นท่อยาว", "เซลล์มีผนังทุติยภูมิหนาเท่ากันทุกด้าน"],
+        0,
+        "เซลล์เนื้อเยื่อเจริญยังไม่เปลี่ยนแปลงไปทำหน้าที่เฉพาะ มีไซโทพลาซึมหนาแน่น นิวเคลียสเด่น และแบ่งเซลล์ได้",
+        ["เป็นสมบัติสำคัญของเซลล์เนื้อเยื่อเจริญ", "เป็นลักษณะที่พบในสเคลอเรงคิมาหรือเซลล์ลำเลียงบางชนิด", "เป็นลักษณะของเนื้อเยื่อถาวรบางประเภท", "สอดคล้องกับสมาชิกของซีฟทิวบ์เมื่อโตเต็มที่มากกว่า", "ผนังทุติยภูมิหนาไม่ใช่ลักษณะเด่นของเนื้อเยื่อเจริญ"],
+        "เนื้อเยื่อเจริญ"),
+
+      q("R2", "การเพิ่มความยาวของรากและยอดในระยะแรกสัมพันธ์โดยตรงกับเนื้อเยื่อใด",
+        ["คอร์กแคมเบียม", "วาสคิวลาร์แคมเบียม", "เนื้อเยื่อเจริญส่วนปลาย", "สเคลอเรงคิมา", "เอนโดเดอร์มิส"],
+        2,
+        "เนื้อเยื่อเจริญส่วนปลายอยู่บริเวณปลายยอดและปลายราก ทำให้เกิดการเจริญปฐมภูมิและเพิ่มความยาว",
+        ["สร้างคอร์กในการเจริญทุติยภูมิ", "เพิ่มเส้นผ่านศูนย์กลางเป็นหลัก", "ทำให้รากและยอดยืดยาวจากการเจริญปฐมภูมิ", "เป็นเนื้อเยื่อค้ำจุน", "เป็นชั้นควบคุมการผ่านเข้าสู่สตีล"],
+        "เนื้อเยื่อเจริญ"),
+
+      q("R3", "เนื้อเยื่อเจริญด้านข้างของพืชใบเลี้ยงคู่ที่มีการเจริญทุติยภูมิประกอบด้วยข้อใด",
+        ["โพรโทเดิร์มและกราวด์เมริสเต็ม", "เนื้อเยื่อเจริญส่วนปลายและเนื้อเยื่อเจริญเหนือข้อ", "ไซเล็มและโฟลเอ็มปฐมภูมิ", "เอพิเดอร์มิสและเอนโดเดอร์มิส", "วาสคิวลาร์แคมเบียมและคอร์กแคมเบียม"],
+        4,
+        "วาสคิวลาร์แคมเบียมและคอร์กแคมเบียมเป็นเนื้อเยื่อเจริญด้านข้างที่ทำให้ส่วนของพืชหนาขึ้น",
+        ["เป็นเนื้อเยื่อเจริญปฐมภูมิ", "เกี่ยวกับการเพิ่มความยาว", "เป็นเนื้อเยื่อถาวรลำเลียง", "เป็นเนื้อเยื่อผิวและชั้นด้านในของคอร์เทกซ์", "ทั้งสองชนิดทำให้เกิดการเจริญทุติยภูมิ"],
+        "เนื้อเยื่อเจริญ"),
+
+      q("R4", "ก้านใบอ่อนสามารถโค้งงอได้โดยไม่หัก เนื้อเยื่อใดเหมาะสมต่อหน้าที่ค้ำจุนลักษณะนี้มากที่สุด",
+        ["พาเรงคิมา", "คอลเลงคิมา", "สเคลอรีด", "เวสเซล", "คอร์ก"],
+        1,
+        "คอลเลงคิมามีผนังปฐมภูมิหนาไม่สม่ำเสมอ ให้ความแข็งแรงพร้อมความยืดหยุ่นแก่อวัยวะอ่อน",
+        ["ทำหน้าที่พื้นฐานหลายอย่างแต่ไม่เด่นด้านค้ำจุนแบบยืดหยุ่น", "ค้ำจุนอวัยวะอ่อนและยังยืดหยุ่นได้", "ผนังหนาและแข็ง ไม่เหมาะกับส่วนที่กำลังยืดตัว", "ทำหน้าที่ลำเลียงน้ำเป็นหลัก", "เป็นเนื้อเยื่อป้องกันในการเจริญทุติยภูมิ"],
+        "เนื้อเยื่อถาวร"),
+
+      q("R5", "ความแข็งของเปลือกเมล็ดและกะลาบางชนิดเกิดจากเซลล์ประเภทใดเด่นที่สุด",
+        ["คอลเลงคิมา", "เซลล์คุม", "คอมพาเนียนเซลล์", "สเคลอรีด", "พาเรงคิมาสะสมอาหาร"],
+        3,
+        "สเคลอรีดเป็นเซลล์สเคลอเรงคิมาที่มีผนังทุติยภูมิหนาและมีลิกนิน จึงให้ความแข็ง",
+        ["ค้ำจุนแบบยืดหยุ่น", "ควบคุมการเปิดปิดปากใบ", "ช่วยการทำงานของซีฟทิวบ์", "ผนังหนามีลิกนิน ทำให้โครงสร้างแข็ง", "เน้นสะสมอาหารและยังมีชีวิต"],
+        "เนื้อเยื่อถาวร"),
+
+      q("R6", "พบเซลล์มีชีวิต ผนังบาง มีคลอโรพลาสต์จำนวนมากในเนื้อใบ เซลล์ดังกล่าวจัดอยู่ในเนื้อเยื่อใด",
+        ["ไฟเบอร์", "เวสเซล", "คอร์ก", "คอลเลงคิมา", "คลอเรงคิมา"],
+        4,
+        "คลอเรงคิมาคือพาเรงคิมาที่มีคลอโรพลาสต์จำนวนมากและทำหน้าที่สังเคราะห์ด้วยแสง",
+        ["เป็นเซลล์ค้ำจุนผนังหนา", "เป็นเซลล์ลำเลียงน้ำที่ตายเมื่อโตเต็มที่", "มักตายและมีซูเบอริน", "ผนังหนาไม่สม่ำเสมอและค้ำจุน", "เป็นพาเรงคิมาที่เชี่ยวชาญด้านการสังเคราะห์ด้วยแสง"],
+        "เนื้อเยื่อถาวร"),
+
+      q("R7", "เมื่อเจริญเต็มที่ เซลล์ใดมักไม่มีโพรโทพลาสต์และเชื่อมต่อเป็นท่อลำเลียงน้ำที่มีประสิทธิภาพ",
+        ["คอมพาเนียนเซลล์", "เวสเซลเมมเบอร์", "เซลล์คุม", "พาเรงคิมา", "ซีฟทิวบ์เมมเบอร์"],
+        1,
+        "เวสเซลเมมเบอร์ตายเมื่อโตเต็มที่ ปลายเซลล์มีเพอร์ฟอเรชันและเรียงต่อกันเป็นเวสเซล",
+        ["ยังมีชีวิตและช่วยซีฟทิวบ์", "ตายเมื่อโตเต็มที่และต่อกันเป็นท่อลำเลียงน้ำ", "ต้องมีชีวิตเพื่อควบคุมปากใบ", "โดยทั่วไปยังมีชีวิต", "ไม่มีนิวเคลียสแต่ยังมีโพรโทพลาสต์บางส่วน"],
+        "เนื้อเยื่อลำเลียง"),
+
+      q("R8", "เนื้อเยื่อใดทำหน้าที่ลำเลียงซูโครสจากบริเวณแหล่งผลิตไปยังบริเวณที่ใช้หรือสะสม",
+        ["โฟลเอ็ม", "ไซเล็ม", "เอพิเดอร์มิส", "คอลเลงคิมา", "คอร์ก"],
+        0,
+        "โฟลเอ็มลำเลียงสารอินทรีย์ โดยเฉพาะซูโครส จากแหล่งผลิตไปยังแหล่งใช้หรือสะสม",
+        ["ลำเลียงผลิตผลจากการสังเคราะห์ด้วยแสง", "ลำเลียงน้ำและแร่ธาตุเป็นหลัก", "ปกคลุมและป้องกัน", "ค้ำจุน", "ป้องกันส่วนที่มีการเจริญทุติยภูมิ"],
+        "เนื้อเยื่อลำเลียง"),
+
+      q("R9", "การเปลี่ยนแปลงแรงดันเต่งของเซลล์ใดควบคุมขนาดช่องเปิดปากใบโดยตรง",
+        ["เซลล์เอพิเดอร์มิสทั่วไป", "เซลล์ขนราก", "คอมพาเนียนเซลล์", "เซลล์คุม", "เซลล์คอร์ก"],
+        3,
+        "เซลล์คุมเปลี่ยนรูปร่างตามแรงดันเต่ง จึงควบคุมการเปิดและปิดของปากใบ",
+        ["ไม่ได้ควบคุมช่องเปิดโดยตรง", "เพิ่มพื้นที่ดูดน้ำและแร่ธาตุ", "ทำงานร่วมกับซีฟทิวบ์", "แรงดันเต่งของเซลล์คุมกำหนดการเปิดปิดปากใบ", "เป็นเซลล์ป้องกันที่มักตาย"],
+        "เนื้อเยื่อผิว"),
+
+      q("R10", "จากแผนภาพตัดขวางอวัยวะพืชอย่างง่าย ข้อใดจัดระบบเนื้อเยื่อ A, B และ C ได้ถูกต้อง",
+        ["A ระบบเนื้อเยื่อพื้น B ระบบเนื้อเยื่อผิว C ระบบเนื้อเยื่อลำเลียง", "A ระบบเนื้อเยื่อลำเลียง B ระบบเนื้อเยื่อพื้น C ระบบเนื้อเยื่อผิว", "A ระบบเนื้อเยื่อผิว B ระบบเนื้อเยื่อพื้น C ระบบเนื้อเยื่อลำเลียง", "A ระบบเนื้อเยื่อผิว B ระบบเนื้อเยื่อลำเลียง C ระบบเนื้อเยื่อพื้น", "A ระบบเนื้อเยื่อเจริญ B ระบบเนื้อเยื่อลำเลียง C ระบบเนื้อเยื่อผิว"],
+        2,
+        "ชั้นนอก A เป็นระบบเนื้อเยื่อผิว บริเวณส่วนใหญ่ B เป็นระบบเนื้อเยื่อพื้น และกลุ่มท่อ C เป็นระบบเนื้อเยื่อลำเลียง",
+        ["สลับตำแหน่งชั้นนอกกับบริเวณพื้น", "ระบบลำเลียงไม่ได้เป็นชั้นนอกสุด", "ตรงกับตำแหน่งของทั้งสามระบบ", "B และ C ถูกสลับกัน", "แผนภาพแสดงระบบเนื้อเยื่อถาวร ไม่ใช่การจัดเนื้อเยื่อเจริญ"],
+        "เนื้อเยื่อถาวร", "tissue"),
+
+      q("R11", "โพรแคมเบียมเปลี่ยนแปลงไปเป็นเนื้อเยื่อใดในการเจริญปฐมภูมิ",
+        ["ไซเล็มปฐมภูมิและโฟลเอ็มปฐมภูมิ", "เอพิเดอร์มิสและขนราก", "คอร์เทกซ์และพิธ", "คอร์กและเฟลโลเดิร์ม", "คอลเลงคิมาและสเคลอรีดเท่านั้น"],
+        0,
+        "โพรแคมเบียมเป็นเนื้อเยื่อเจริญปฐมภูมิที่ให้กำเนิดไซเล็มและโฟลเอ็มปฐมภูมิ",
+        ["เป็นอนุพันธ์โดยตรงของโพรแคมเบียม", "เกิดจากโพรโทเดิร์ม", "ส่วนใหญ่เกิดจากกราวด์เมริสเต็ม", "เกิดจากคอร์กแคมเบียม", "ไม่ได้เป็นอนุพันธ์ทั้งหมดและไม่ใช่คำตอบเฉพาะ"],
+        "เนื้อเยื่อเจริญ"),
+
+      q("R12", "กราวด์เมริสเต็มบริเวณรากพัฒนาไปเป็นโครงสร้างใดเป็นสำคัญ",
+        ["เอพิเดอร์มิส", "ไซเล็มและโฟลเอ็ม", "คอร์เทกซ์", "หมวกรากทั้งหมด", "คอร์ก"],
+        2,
+        "กราวด์เมริสเต็มให้กำเนิดระบบเนื้อเยื่อพื้น ซึ่งบริเวณรากคือคอร์เทกซ์เป็นส่วนสำคัญ",
+        ["เอพิเดอร์มิสเกิดจากโพรโทเดิร์ม", "เกิดจากโพรแคมเบียม", "คอร์เทกซ์เป็นระบบเนื้อเยื่อพื้น", "หมวกรากไม่ได้เกิดจากกราวด์เมริสเต็มทั้งหมด", "คอร์กเกิดจากคอร์กแคมเบียม"],
+        "เนื้อเยื่อเจริญ"),
+
+      q("R13", "เนื้อเยื่อเจริญปฐมภูมิใดให้กำเนิดเอพิเดอร์มิส",
+        ["โพรแคมเบียม", "กราวด์เมริสเต็ม", "วาสคิวลาร์แคมเบียม", "คอร์กแคมเบียม", "โพรโทเดิร์ม"],
+        4,
+        "โพรโทเดิร์มเป็นเนื้อเยื่อเจริญปฐมภูมิที่พัฒนาไปเป็นเอพิเดอร์มิส",
+        ["ให้กำเนิดเนื้อเยื่อลำเลียงปฐมภูมิ", "ให้กำเนิดเนื้อเยื่อพื้น", "สร้างไซเล็มและโฟลเอ็มทุติยภูมิ", "สร้างเพริเดิร์ม", "พัฒนาเป็นระบบเนื้อเยื่อผิวปฐมภูมิ"],
+        "เนื้อเยื่อเจริญ"),
+
+      q("R14", "เมื่อลอกเปลือกรอบลำต้นจนโฟลเอ็มขาดออก แต่ไซเล็มยังอยู่ ผลระยะแรกที่คาดได้คือข้อใด",
+        ["น้ำหยุดเข้าสู่ใบในทันที", "น้ำตาลสะสมเหนือบริเวณที่ลอกและรากได้รับอาหารลดลง", "แร่ธาตุสะสมเหนือรอยลอกเพียงอย่างเดียว", "การแบ่งเซลล์ที่ปลายยอดหยุดทันทีเสมอ", "การลำเลียงทั้งสองระบบไม่เปลี่ยนแปลง"],
+        1,
+        "การลอกเป็นวงตัดการลำเลียงทางโฟลเอ็ม ทำให้น้ำตาลสะสมเหนือรอยลอกและส่งลงรากได้น้อยลง",
+        ["ไซเล็มยังลำเลียงน้ำได้ในระยะแรก", "เป็นผลตรงจากการขาดความต่อเนื่องของโฟลเอ็ม", "แร่ธาตุเคลื่อนผ่านไซเล็มเป็นหลัก", "ยอดอาจยังใช้สารสะสมได้ จึงไม่จำเป็นต้องหยุดทันที", "โฟลเอ็มถูกตัดจึงต้องเกิดผล"],
+        "เนื้อเยื่อลำเลียง"),
+
+      q("R15", "หากต้องการเลือกเนื้อเยื่อค้ำจุนส่วนที่ยังยืดยาวอยู่ ควรเลือกเนื้อเยื่อใด",
+        ["สเคลอรีด", "ไฟเบอร์", "เวสเซล", "คอลเลงคิมา", "คอร์ก"],
+        3,
+        "คอลเลงคิมามีชีวิตและผนังปฐมภูมิยืดหยุ่น จึงค้ำจุนส่วนที่ยังเจริญได้",
+        ["แข็งและมักตายเมื่อโตเต็มที่", "ผนังทุติยภูมิหนาและยืดตัวได้น้อย", "ลำเลียงน้ำเป็นหลัก", "ค้ำจุนพร้อมยืดตัวตามอวัยวะอ่อน", "ทำหน้าที่ป้องกันและลดการสูญเสียน้ำ"],
+        "เนื้อเยื่อถาวร"),
+
+      q("R16", "เนื้อเยื่อมีเซลล์เรียงต่อกัน ผนังมีลิกนิน มีพิต และเซลล์ส่วนมากตายเมื่อโตเต็มที่ ข้อมูลนี้สนับสนุนว่าเป็นเนื้อเยื่อใดมากที่สุด",
+        ["เอพิเดอร์มิส", "โฟลเอ็ม", "คอลเลงคิมา", "พาเรงคิมา", "ไซเล็ม"],
+        4,
+        "ไซเล็มมีเทรคีดและเวสเซลเมมเบอร์ที่ผนังมีลิกนิน มีพิต และตายเมื่อโตเต็มที่",
+        ["เซลล์เอพิเดอร์มิสส่วนมากยังมีชีวิตและไม่มีลิกนินหนา", "สมาชิกซีฟทิวบ์ยังมีชีวิตและผนังไม่เป็นลิกนินแบบนี้", "ผนังปฐมภูมิหนาไม่สม่ำเสมอ", "เซลล์ผนังบางและยังมีชีวิต", "ตรงกับโครงสร้างของเซลล์ลำเลียงน้ำ"],
+        "เนื้อเยื่อลำเลียง"),
+
+      q("R17", "เหตุใดซีฟทิวบ์เมมเบอร์จึงต้องทำงานร่วมกับคอมพาเนียนเซลล์",
+        ["เพราะซีฟทิวบ์สร้างลิกนินไม่ได้", "เพราะซีฟทิวบ์ไม่มีนิวเคลียสเมื่อโตเต็มที่ จึงพึ่งการควบคุมเมแทบอลิซึมจากคอมพาเนียนเซลล์", "เพราะคอมพาเนียนเซลล์สร้างผนังทุติยภูมิให้ซีฟทิวบ์", "เพราะคอมพาเนียนเซลล์เปลี่ยนเป็นเวสเซลได้", "เพราะทั้งสองเซลล์ตายเมื่อโตเต็มที่"],
+        1,
+        "ซีฟทิวบ์เมมเบอร์ไม่มีนิวเคลียสเมื่อโตเต็มที่ จึงอาศัยคอมพาเนียนเซลล์ช่วยควบคุมกระบวนการเมแทบอลิซึม",
+        ["ไม่ใช่เหตุผลหลักของความสัมพันธ์", "อธิบายการพึ่งพากันทางสรีรวิทยาได้ตรงที่สุด", "คอมพาเนียนเซลล์ไม่ได้สร้างผนังให้ซีฟทิวบ์", "ไม่มีการเปลี่ยนเป็นเวสเซล", "คอมพาเนียนเซลล์ยังมีชีวิต"],
+        "เนื้อเยื่อลำเลียง"),
+
+      q("R18", "ข้อใดเป็นหลักฐานที่ดีที่สุดว่าเซลล์ยังอยู่ในภาวะเนื้อเยื่อเจริญ",
+        ["พบภาพไมโทซิสหลายระยะและเซลล์ยังไม่เปลี่ยนไปทำหน้าที่เฉพาะ", "พบลิกนินเต็มผนังทุติยภูมิ", "เซลล์สูญเสียนิวเคลียสทั้งหมด", "พบแวคิวโอลกลางขนาดใหญ่มากทุกเซลล์", "ไม่มีการสังเคราะห์ DNA"],
+        0,
+        "การพบเซลล์หลายระยะของไมโทซิสและยังไม่เกิดการเปลี่ยนแปลงเฉพาะเป็นหลักฐานตรงของเนื้อเยื่อเจริญ",
+        ["แสดงการแบ่งเซลล์อย่างต่อเนื่อง", "มักพบในเซลล์ที่เปลี่ยนแปลงแล้ว", "ไม่ใช่ลักษณะทั่วไปของเนื้อเยื่อเจริญ", "เซลล์เจริญมักมีแวคิวโอลเล็กหลายอัน", "เซลล์ก่อนแบ่งต้องจำลอง DNA"],
+        "เนื้อเยื่อเจริญ"),
+
+      q("R19", "เมื่อผิวลำต้นแก่แตกและต้องสร้างชั้นป้องกันใหม่ เนื้อเยื่อเจริญใดมีบทบาทสำคัญที่สุด",
+        ["เนื้อเยื่อเจริญส่วนปลาย", "โพรโทเดิร์ม", "โพรแคมเบียม", "คอร์กแคมเบียม", "กราวด์เมริสเต็ม"],
+        3,
+        "คอร์กแคมเบียมแบ่งเซลล์สร้างคอร์กออกด้านนอกและเฟลโลเดิร์มเข้าด้านใน เกิดเป็นเพริเดิร์ม",
+        ["เพิ่มความยาวของปลายอวัยวะ", "สร้างเอพิเดอร์มิสปฐมภูมิ", "สร้างระบบลำเลียงปฐมภูมิ", "สร้างเนื้อเยื่อป้องกันทดแทนเอพิเดอร์มิส", "สร้างระบบเนื้อเยื่อพื้น"],
+        "เนื้อเยื่อเจริญ"),
+
+      q("R20", "เหตุใดพืชบกหลายชนิดจึงมีปากใบที่ผิวใบด้านล่างมากกว่าด้านบน",
+        ["เพื่อรับแสงโดยตรงมากขึ้น", "เพื่อเพิ่มอุณหภูมิใบ", "เพื่อลดการสูญเสียน้ำจากลมและรังสีโดยยังแลกเปลี่ยนแก๊สได้", "เพื่อทำให้ไซเล็มอยู่ใกล้อากาศ", "เพื่อป้องกันการลำเลียงน้ำตาล"],
+        2,
+        "ผิวใบด้านล่างมักได้รับแสงและลมน้อยกว่า จึงช่วยลดการคายน้ำขณะที่ยังแลกเปลี่ยนแก๊สได้",
+        ["ปากใบไม่ได้มีหน้าที่รับแสง", "อุณหภูมิสูงขึ้นมักเพิ่มการสูญเสียน้ำ", "สอดคล้องกับการลดการคายน้ำ", "ตำแหน่งไซเล็มไม่ใช่เหตุผล", "ไม่เกี่ยวกับการลำเลียงน้ำตาลโดยตรง"],
+        "เนื้อเยื่อผิว")
+    ];
+
+    const mainQuestions = [
+      q("M1", "โครงสร้างใดห่อหุ้มเนื้อเยื่อเจริญบริเวณปลายรากและช่วยลดความเสียหายขณะรากชอนไชดิน",
+        ["หมวกราก", "เอนโดเดอร์มิส", "เพริไซเคิล", "วาสคิวลาร์แคมเบียม", "ขนราก"],
+        0,
+        "หมวกรากป้องกันเนื้อเยื่อเจริญส่วนปลายและหลั่งเมือกช่วยลดแรงเสียดทาน",
+        ["ทำหน้าที่ป้องกันปลายรากโดยตรง", "เป็นชั้นในสุดของคอร์เทกซ์", "ให้กำเนิดรากแขนง", "เกี่ยวกับการเจริญทุติยภูมิ", "เพิ่มพื้นที่ดูดน้ำแต่ไม่ได้คลุมปลายราก"],
+        "บริเวณปลายราก"),
+
+      q("M2", "หากตรวจพบเซลล์ขนาดเล็กเรียงชิด มีนิวเคลียสเด่น และพบไมโทซิสจำนวนมาก ตัวอย่างน่าจะมาจากบริเวณใดของปลายราก",
+        ["บริเวณเปลี่ยนแปลงไปทำหน้าที่เฉพาะ", "บริเวณแบ่งเซลล์", "บริเวณยืดตามยาว", "บริเวณเกิดรากแขนงที่แก่เต็มที่", "บริเวณคอร์กทุติยภูมิ"],
+        1,
+        "บริเวณแบ่งเซลล์มีเนื้อเยื่อเจริญส่วนปลาย จึงพบเซลล์ขนาดเล็กและภาพไมโทซิสมาก",
+        ["เซลล์เริ่มมีหน้าที่เฉพาะและแบ่งน้อยลง", "ตรงกับลักษณะของเนื้อเยื่อเจริญ", "การเพิ่มขนาดเด่นกว่าการแบ่ง", "รากแขนงเกิดจากเพริไซเคิล ไม่ใช่คำบรรยายนี้", "พบในรากที่เกิดการเจริญทุติยภูมิ"],
+        "บริเวณปลายราก"),
+
+      q("M3", "กระบวนการใดมีส่วนโดยตรงมากที่สุดต่อการเพิ่มความยาวของรากภายหลังเซลล์ผ่านบริเวณแบ่งเซลล์",
+        ["การสะสมซูเบอรินในผนัง", "การเกิดไซเล็มทุติยภูมิ", "การขยายตัวตามยาวของเซลล์จากการรับน้ำเข้าสู่แวคิวโอล", "การสลายหมวกราก", "การสร้างรากแขนงจากเพริไซเคิล"],
+        2,
+        "เซลล์ในบริเวณยืดตามยาวรับน้ำและมีแวคิวโอลขยาย ทำให้เซลล์และรากยาวขึ้น",
+        ["เกี่ยวกับการควบคุมการผ่านน้ำ", "เพิ่มเส้นผ่านศูนย์กลาง", "เป็นกลไกหลักของเขตยืดตามยาว", "ไม่ใช่เหตุหลักที่ทำให้รากยาว", "เพิ่มจำนวนแขนงแต่ไม่ใช่การยืดของปลายราก"],
+        "บริเวณปลายราก"),
+
+      q("M4", "ขนรากพบมากในบริเวณใดและมีประโยชน์สำคัญอย่างไร",
+        ["บริเวณแบ่งเซลล์ ช่วยสร้างเซลล์ใหม่", "บริเวณยืดตามยาว ช่วยดันดิน", "หมวกราก ช่วยรับรู้แรงโน้มถ่วง", "บริเวณเปลี่ยนแปลงไปทำหน้าที่เฉพาะ ช่วยเพิ่มพื้นที่ผิวในการดูดน้ำและแร่ธาตุ", "บริเวณวาสคิวลาร์แคมเบียม ช่วยสร้างโฟลเอ็ม"],
+        3,
+        "ขนรากเป็นส่วนยื่นของเซลล์เอพิเดอร์มิสที่พัฒนาแล้วในเขตเปลี่ยนแปลงไปทำหน้าที่เฉพาะ",
+        ["ขนรากไม่เกิดในเขตแบ่งเซลล์", "เขตยืดยังไม่พบขนรากสมบูรณ์จำนวนมาก", "หมวกรากไม่มีขนราก", "ถูกทั้งตำแหน่งและหน้าที่", "ขนรากไม่ได้เกิดจากวาสคิวลาร์แคมเบียม"],
+        "บริเวณปลายราก"),
+
+      q("M5", "ส่วนยื่นที่เรียกว่าขนรากเกิดจากเซลล์ชนิดใด",
+        ["เซลล์เพริไซเคิล", "เซลล์เอนโดเดอร์มิส", "เซลล์คอร์เทกซ์ชั้นใน", "เซลล์โฟลเอ็ม", "เซลล์เอพิเดอร์มิสของราก"],
+        4,
+        "ขนรากเป็นส่วนยื่นของเซลล์เอพิเดอร์มิสหรือไรโซเดอร์มิสเพียงเซลล์เดียว",
+        ["เพริไซเคิลให้กำเนิดรากแขนง", "เอนโดเดอร์มิสมีแถบแคสพาเรียน", "คอร์เทกซ์ช่วยลำเลียงระยะสั้นและสะสมอาหาร", "โฟลเอ็มลำเลียงสารอินทรีย์", "เป็นแหล่งกำเนิดขนรากโดยตรง"],
+        "โครงสร้างภายใน"),
+
+      q("M6", "ชั้นเซลล์ใดเป็นขอบเขตด้านในสุดของคอร์เทกซ์และล้อมรอบสตีล",
+        ["เพริไซเคิล", "เอนโดเดอร์มิส", "เอพิเดอร์มิส", "พิธ", "วาสคิวลาร์แคมเบียม"],
+        1,
+        "เอนโดเดอร์มิสเป็นชั้นในสุดของคอร์เทกซ์และอยู่รอบสตีล",
+        ["อยู่ด้านในเอนโดเดอร์มิสและเป็นส่วนของสตีล", "เป็นขอบเขตด้านในของคอร์เทกซ์", "เป็นชั้นนอกสุดของรากอ่อน", "อยู่กลางรากบางชนิด", "เกิดเด่นเมื่อมีการเจริญทุติยภูมิ"],
+        "โครงสร้างภายใน"),
+
+      q("M7", "สารซูเบอรินในแถบแคสพาเรียนมีผลโดยตรงอย่างไร",
+        ["เพิ่มอัตราการแบ่งเซลล์ของเพริไซเคิล", "ทำให้ไซเล็มลำเลียงน้ำตาล", "ทำให้ขนรากยืดยาว", "ขัดขวางการเคลื่อนที่ตามผนังเซลล์และบังคับให้สารผ่านเยื่อหุ้มเซลล์เอนโดเดอร์มิส", "สร้างช่องอากาศในคอร์เทกซ์"],
+        3,
+        "แถบแคสพาเรียนปิดกั้นเส้นทางอโพพลาสต์ ทำให้น้ำและไอออนต้องผ่านเยื่อหุ้มเซลล์ก่อนเข้าสู่สตีล",
+        ["ไม่ควบคุมไมโทซิสของเพริไซเคิลโดยตรง", "ไซเล็มยังลำเลียงน้ำและแร่ธาตุ", "ไม่ใช่ตัวกระตุ้นการยืดขนราก", "อธิบายบทบาทด้านการคัดเลือกสารได้ถูกต้อง", "ช่องอากาศเกิดจากการจัดเนื้อเยื่อแบบแอเรงคิมา"],
+        "การลำเลียง"),
+
+      q("M8", "รากแขนงของพืชมีดอกส่วนใหญ่เกิดจากเนื้อเยื่อใด",
+        ["เพริไซเคิล", "เอพิเดอร์มิส", "เอนโดเดอร์มิส", "คอร์เทกซ์ชั้นนอก", "หมวกราก"],
+        0,
+        "เพริไซเคิลยังแบ่งเซลล์ได้และเป็นแหล่งกำเนิดรากแขนงจากภายในราก",
+        ["เป็นแหล่งกำเนิดรากแขนง", "สร้างขนรากแต่ไม่สร้างรากแขนง", "ควบคุมการผ่านเข้าสู่สตีล", "รากแขนงเพียงชอนไชผ่านคอร์เทกซ์", "ป้องกันปลายราก"],
+        "โครงสร้างภายใน"),
+
+      q("M9", "จากแผนภาพรากตัดขวางของพืชใบเลี้ยงคู่ ข้อใดระบุ P และ Q ได้ถูกต้อง",
+        ["P โฟลเอ็ม และ Q คอร์เทกซ์", "P พิธ และ Q เอนโดเดอร์มิส", "P เพริไซเคิล และ Q ไซเล็ม", "P เอนโดเดอร์มิส และ Q ขนราก", "P ไซเล็ม และ Q โฟลเอ็ม"],
+        4,
+        "รากพืชใบเลี้ยงคู่มีไซเล็มรูปดาวอยู่กลางราก ส่วนโฟลเอ็มอยู่ระหว่างแขนของไซเล็ม",
+        ["P กลางรูปดาวไม่ใช่โฟลเอ็ม", "รากใบเลี้ยงคู่ทั่วไปไม่มีพิธขนาดใหญ่กลางรูป", "เพริไซเคิลเป็นวงรอบมัดลำเลียง", "ทั้งสองตำแหน่งไม่ตรงภาพ", "ตรงกับการจัดเรียงมัดลำเลียงของรากใบเลี้ยงคู่"],
+        "โครงสร้างภายใน", "rootCross"),
+
+      q("M10", "ลักษณะใดพบได้เด่นในรากพืชใบเลี้ยงเดี่ยวเมื่อเทียบกับรากพืชใบเลี้ยงคู่ทั่วไป",
+        ["ไซเล็มเป็นรูปดาวและไม่มีพิธ", "มีมัดท่อลำเลียงกระจายในคอร์เทกซ์", "มีพิธกลางรากขนาดค่อนข้างใหญ่ และไซเล็มหลายกลุ่มเรียงเป็นวง", "ไม่มีเอนโดเดอร์มิส", "รากแขนงเกิดจากเอพิเดอร์มิส"],
+        2,
+        "รากพืชใบเลี้ยงเดี่ยวมักมีพิธกลางขนาดใหญ่ และไซเล็มกับโฟลเอ็มหลายกลุ่มเรียงสลับเป็นวง",
+        ["เด่นในรากใบเลี้ยงคู่", "ลักษณะมัดกระจายใช้บรรยายลำต้นใบเลี้ยงเดี่ยวมากกว่า", "เป็นลักษณะเปรียบเทียบสำคัญ", "รากใบเลี้ยงเดี่ยวมีเอนโดเดอร์มิส", "รากแขนงยังเกิดจากเพริไซเคิล"],
+        "โครงสร้างภายใน"),
+
+      q("M11", "นักเรียนทำเครื่องหมายหมึกสองจุดบนรากอ่อน จุดหนึ่งอยู่เขตแบ่งเซลล์และอีกจุดอยู่เหนือเขตยืดตามยาว หลังผ่านไปสองวัน ระยะห่างระหว่างเครื่องหมายเพิ่มขึ้นมากที่สุดในช่วงใด",
+        ["บริเวณหมวกรากเพียงอย่างเดียว", "บริเวณที่เกิดขนรากแล้วเท่านั้น", "บริเวณยืดตามยาว เพราะเซลล์เพิ่มขนาดในแนวแกนราก", "บริเวณเพริไซเคิล เพราะเกิดรากแขนง", "เพิ่มเท่ากันทุกบริเวณ"],
+        2,
+        "การเพิ่มระยะห่างของเครื่องหมายเกิดเด่นในเขตที่เซลล์ยืดตามยาว ไม่ได้เกิดเท่ากันตลอดราก",
+        ["หมวกรากหลุดลอกและป้องกัน ไม่ใช่เขตยืดหลัก", "เขตขนรากเปลี่ยนแปลงหน้าที่แล้ว", "สอดคล้องกับกลไกการเพิ่มความยาว", "การเกิดรากแขนงไม่ทำให้แกนช่วงนั้นยาวมากที่สุด", "อัตราการเจริญแตกต่างกันตามเขต"],
+        "บริเวณปลายราก"),
+
+      q("M12", "ใส่สีย้อมที่เคลื่อนผ่านช่องว่างผนังเซลล์ลงในสารละลายรอบราก ต่อมาพบว่าสีย้อมหยุดสะสมก่อนเข้าสู่สตีลมากที่สุดที่ตำแหน่งใด",
+        ["ขนราก", "คอร์เทกซ์ชั้นกลาง", "เพริไซเคิล", "ไซเล็ม", "แถบแคสพาเรียนของเอนโดเดอร์มิส"],
+        4,
+        "สารที่เดินทางตามอโพพลาสต์จะถูกแถบแคสพาเรียนขวางก่อนเข้าสู่สตีล",
+        ["เป็นจุดเริ่มรับสารแต่ไม่ใช่สิ่งกีดขวางหลัก", "ผนังคอร์เทกซ์ยังเชื่อมต่อเป็นอโพพลาสต์", "อยู่หลังเอนโดเดอร์มิส", "อยู่ภายในสตีลแล้ว", "ซูเบอรินทำให้ทางผนังไม่ต่อเนื่อง"],
+        "การลำเลียง"),
+
+      q("M13", "ข้อใดอธิบายเส้นทางซิมพลาสต์จากขนรากเข้าสู่คอร์เทกซ์ได้ถูกต้อง",
+        ["น้ำเคลื่อนเฉพาะในช่องว่างระหว่างเซลล์", "น้ำเข้าสู่ไซโทพลาซึมและเคลื่อนระหว่างเซลล์ผ่านพลาสโมเดสมาตา", "น้ำไหลผ่านลูเมนของไซเล็มตั้งแต่เอพิเดอร์มิส", "น้ำต้องผ่านผนังที่มีซูเบอรินทุกเซลล์", "น้ำเคลื่อนผ่านโฟลเอ็มเข้าสู่เอนโดเดอร์มิส"],
+        1,
+        "ซิมพลาสต์คือไซโทพลาซึมที่เชื่อมต่อกันด้วยพลาสโมเดสมาตา",
+        ["เป็นเส้นทางอโพพลาสต์", "เป็นนิยามและกลไกของซิมพลาสต์", "ไซเล็มเริ่มภายในสตีล", "ซูเบอรินไม่ได้อยู่ทุกเซลล์คอร์เทกซ์", "โฟลเอ็มไม่ใช่เส้นทางรับน้ำเข้าสู่ราก"],
+        "การลำเลียง"),
+
+      q("M14", "รากพืชถูกแช่ในสารยับยั้งการหายใจระดับเซลล์ การดูดไอออนแร่ธาตุบางชนิดลดลงอย่างรวดเร็ว แต่การเคลื่อนที่ของน้ำบางส่วนยังเกิดได้ ข้อสรุปใดเหมาะสมที่สุด",
+        ["การลำเลียงไอออนบางชนิดต้องใช้พลังงาน แต่การเคลื่อนของน้ำอาจเกิดตามศักย์น้ำ", "ทั้งน้ำและไอออนต้องใช้ ATP โดยตรงทุกขั้นตอน", "น้ำเข้าสู่รากด้วยการลำเลียงแบบใช้พลังงานเท่านั้น", "ไอออนทุกชนิดเข้าสู่รากด้วยการแพร่แบบธรรมดา", "การหายใจเกิดเฉพาะในขนราก"],
+        0,
+        "การลำเลียงไอออนทวนความเข้มข้นอาศัยพลังงาน ส่วนการเคลื่อนน้ำสัมพันธ์กับความต่างศักย์น้ำ",
+        ["อธิบายผลของสารยับยั้งได้ครบที่สุด", "น้ำไม่ต้องใช้ ATP โดยตรงทุกขั้น", "ออสโมซิสเป็นกระบวนการแบบไม่ใช้พลังงานโดยตรง", "ไอออนหลายชนิดต้องอาศัยโปรตีนและพลังงาน", "เซลล์มีชีวิตหลายบริเวณของรากหายใจได้"],
+        "การลำเลียง"),
+
+      q("M15", "หากปลายรากถูกตัดเฉพาะหมวกรากออก แต่เนื้อเยื่อเจริญยังไม่เสียหาย ผลใดมีแนวโน้มเกิดขึ้นก่อน",
+        ["ขนรากทั้งหมดหายไปทันที", "รากไม่สามารถสร้างไซเล็มได้อีก", "โฟลเอ็มเปลี่ยนเป็นไซเล็ม", "ปลายรากไวต่อการเสียดสีมากขึ้นและการตอบสนองต่อแรงโน้มถ่วงอาจผิดปกติ", "รากเกิดการเจริญทุติยภูมิทันที"],
+        3,
+        "หมวกรากทั้งป้องกันปลายรากและมีบทบาทรับรู้แรงโน้มถ่วงผ่านสแตโทลิท",
+        ["ขนรากอยู่เหนือปลายราก", "เนื้อเยื่อเจริญยังสร้างอนุพันธ์ได้", "เนื้อเยื่อลำเลียงไม่เปลี่ยนชนิดเช่นนี้", "เป็นผลตรงจากการสูญเสียหมวกราก", "การตัดหมวกรากไม่กระตุ้นแคมเบียมทันที"],
+        "บริเวณปลายราก"),
+
+      q("M16", "จากแผนภาพตามยาวของปลายราก หากเรียงบริเวณจากปลายสุดขึ้นไปทางโคนราก ลำดับใดถูกต้อง",
+        ["A → B → C → D", "C → D → B → A", "D → B → C → A", "B → C → D → A", "D → C → B → A"],
+        4,
+        "จากปลายสุดคือหมวกราก D ถัดขึ้นไปเป็นเขตแบ่งเซลล์ C เขตยืดตามยาว B และเขตเปลี่ยนแปลงไปทำหน้าที่เฉพาะ A",
+        ["เป็นลำดับย้อนจากโคนลงปลาย", "สลับตำแหน่งหมวกรากกับเขตแบ่ง", "เขตยืดกับเขตแบ่งสลับกัน", "ไม่ได้เริ่มจากปลายสุด", "ลำดับตรงกับกายวิภาคตามยาวของราก"],
+        "บริเวณปลายราก", "rootZones"),
+
+      q("M17", "การที่รากแขนงเกิดจากเพริไซเคิลแทนที่จะเกิดจากเอพิเดอร์มิสมีความสำคัญอย่างไร",
+        ["ทำให้รากแขนงเชื่อมต่อกับระบบลำเลียงของรากเดิมได้โดยตรงและชอนไชออกสู่ภายนอก", "ทำให้รากแขนงไม่มีเนื้อเยื่อลำเลียง", "ป้องกันไม่ให้รากแขนงตอบสนองต่อแรงโน้มถ่วง", "ทำให้รากแขนงเกิดได้เฉพาะบริเวณหมวกราก", "ทำให้รากแขนงเป็นเพียงขนรากหลายเซลล์"],
+        0,
+        "การเกิดจากชั้นในช่วยให้ระบบลำเลียงของรากแขนงต่อเนื่องกับสตีลของรากเดิม",
+        ["เชื่อมโยงตำแหน่งกำเนิดกับหน้าที่ลำเลียงได้ถูกต้อง", "รากแขนงมีระบบลำเลียง", "รากแขนงยังตอบสนองต่อสิ่งเร้า", "เกิดในบริเวณที่เพริไซเคิลยังแบ่งได้ ไม่ใช่หมวกราก", "รากแขนงเป็นอวัยวะหลายเนื้อเยื่อ"],
+        "โครงสร้างภายใน"),
+
+      q("M18", "ในการเจริญทุติยภูมิของรากพืชใบเลี้ยงคู่ วาสคิวลาร์แคมเบียมสร้างเนื้อเยื่อใดและในทิศทางใด",
+        ["สร้างโฟลเอ็มทุติยภูมิเข้าด้านในอย่างเดียว", "สร้างคอร์กออกด้านนอกและคอร์เทกซ์เข้าด้านใน", "สร้างเอพิเดอร์มิสทั้งสองด้าน", "สร้างไซเล็มทุติยภูมิเข้าด้านในและโฟลเอ็มทุติยภูมิออกด้านนอก", "สร้างเพริไซเคิลออกด้านนอก"],
+        3,
+        "วาสคิวลาร์แคมเบียมแบ่งสร้างไซเล็มทุติยภูมิด้านในและโฟลเอ็มทุติยภูมิด้านนอก",
+        ["ทิศทางของโฟลเอ็มไม่ถูกต้องและไม่ครบ", "เป็นบทบาทของคอร์กแคมเบียมบางส่วน", "เอพิเดอร์มิสไม่ใช่อนุพันธ์ของวาสคิวลาร์แคมเบียม", "ถูกทั้งชนิดเนื้อเยื่อและทิศทาง", "เพริไซเคิลไม่ใช่ผลิตผลหลักของแคมเบียม"],
+        "การเจริญทุติยภูมิ"),
+
+      q("M19", "เมื่อรากมีเส้นผ่านศูนย์กลางเพิ่มขึ้น เอพิเดอร์มิสและคอร์เทกซ์เดิมอาจแตกออก เนื้อเยื่อใดเข้ามาทำหน้าที่ป้องกันแทน",
+        ["ไซเล็มปฐมภูมิ", "โฟลเอ็มปฐมภูมิ", "เพริเดิร์มที่เกิดจากคอร์กแคมเบียม", "พิธ", "หมวกราก"],
+        2,
+        "คอร์กแคมเบียมสร้างเพริเดิร์มขึ้นทดแทนเนื้อเยื่อผิวเดิมระหว่างการเจริญทุติยภูมิ",
+        ["ทำหน้าที่ลำเลียงน้ำ", "ทำหน้าที่ลำเลียงสารอินทรีย์", "เป็นระบบป้องกันทุติยภูมิ", "เป็นเนื้อเยื่อพื้นกลางอวัยวะบางชนิด", "ป้องกันเฉพาะปลายราก"],
+        "การเจริญทุติยภูมิ"),
+
+      q("M20", "หากวาสคิวลาร์แคมเบียมของรากหยุดแบ่งเซลล์ แต่เนื้อเยื่ออื่นยังมีชีวิต ผลใดตรงที่สุด",
+        ["การสร้างขนรากทั้งหมดหยุดทันที", "การเพิ่มเส้นผ่านศูนย์กลางจากไซเล็มและโฟลเอ็มทุติยภูมิลดลงอย่างมาก", "การแบ่งเซลล์ที่ปลายรากเพิ่มขึ้นเสมอ", "แถบแคสพาเรียนหายไปทันที", "รากแขนงไม่สามารถเกิดจากเพริไซเคิลได้"],
+        1,
+        "วาสคิวลาร์แคมเบียมเป็นแหล่งสร้างเนื้อเยื่อลำเลียงทุติยภูมิ จึงมีผลต่อความหนาของรากโดยตรง",
+        ["ขนรากเกิดจากเอพิเดอร์มิส", "เป็นผลโดยตรงจากการหยุดทำงานของแคมเบียม", "ไม่มีเหตุให้การแบ่งที่ปลายเพิ่มเสมอ", "เอนโดเดอร์มิสไม่ได้หายทันที", "เพริไซเคิลอาจยังให้กำเนิดรากแขนง"],
+        "การเจริญทุติยภูมิ"),
+
+      q("M21", "พืชสองต้นมีมวลรวมใกล้เคียงกัน ต้น X อยู่ในเขตแห้งแล้งและมีอัตราส่วนมวลรากต่อยอดสูงกว่าต้น Y ข้อใดเป็นการตีความที่เหมาะสมที่สุด",
+        ["ต้น X ต้องมีอัตราสังเคราะห์ด้วยแสงสูงกว่าทุกกรณี", "ต้น X ไม่สามารถสร้างรากแขนง", "ต้น Y ต้องมีไซเล็มมากกว่าเสมอ", "ต้น X ลงทุนสร้างระบบรากมากขึ้นเพื่อสำรวจดินและเพิ่มโอกาสได้รับน้ำ", "อัตราส่วนดังกล่าวไม่เกี่ยวกับสิ่งแวดล้อม"],
+        3,
+        "ในภาวะขาดน้ำ พืชอาจจัดสรรชีวมวลสู่รากมากขึ้นเพื่อเพิ่มการเข้าถึงน้ำ แต่ยังต้องพิจารณาปัจจัยอื่นร่วมด้วย",
+        ["ไม่สามารถสรุปอัตราสังเคราะห์ด้วยแสงจากข้อมูลนี้", "อัตราส่วนสูงอาจเกิดจากรากแขนงมากขึ้น", "ไม่มีข้อมูลปริมาณไซเล็ม", "เป็นคำอธิบายเชิงปรับตัวที่สอดคล้องกับข้อมูล", "สิ่งแวดล้อมมีผลต่อการจัดสรรทรัพยากร"],
+        "การปรับตัว"),
+
+      q("M22", "รากหายใจของพืชในดินชุ่มน้ำมีประโยชน์สำคัญที่สุดอย่างไร",
+        ["สะสมแป้งแทนลำต้น", "เพิ่มการยึดเกาะแบบรากค้ำจุนเท่านั้น", "ช่วยแลกเปลี่ยนแก๊สและนำออกซิเจนเข้าสู่เนื้อเยื่อรากที่อยู่ในดินขาดอากาศ", "ดูดซูโครสจากบรรยากาศ", "สร้างไซเล็มโดยไม่ต้องใช้แคมเบียม"],
+        2,
+        "รากหายใจยื่นพ้นน้ำหรือดิน มีช่องเปิดและช่องอากาศช่วยนำออกซิเจนสู่รากใต้ดิน",
+        ["รากสะสมอาหารเป็นการดัดแปลงอีกประเภท", "หน้าที่เด่นคือการแลกเปลี่ยนแก๊ส", "ตรงกับปัญหาดินขาดออกซิเจน", "พืชไม่ได้ดูดซูโครสจากอากาศ", "ไม่เกี่ยวกับการยกเลิกบทบาทแคมเบียม"],
+        "การปรับตัว"),
+
+      q("M23", "มันเทศมีรากบางส่วนพองสะสมคาร์โบไฮเดรต ข้อใดอธิบายได้เหมาะสมที่สุด",
+        ["เป็นลำต้นใต้ดินเพราะมีข้อและปล้องชัดเจน", "เป็นขนรากที่ขยายขนาดหลายพันเท่า", "เป็นหมวกรากที่สะสมแป้ง", "เป็นรากหายใจที่ไม่มีหน้าที่สะสม", "เป็นรากสะสมอาหารซึ่งเนื้อเยื่อพื้นและเนื้อเยื่อลำเลียงบางส่วนเพิ่มปริมาตร"],
+        4,
+        "มันเทศเป็นรากสะสมอาหาร ไม่ใช่ลำต้นใต้ดินแบบหัวมันฝรั่ง",
+        ["มันเทศไม่มีข้อปล้องและตาแบบลำต้น", "ขนรากเป็นส่วนของเซลล์เดียวและมีอายุสั้น", "หมวกรากอยู่เฉพาะปลาย", "หน้าที่เด่นไม่ใช่การหายใจ", "อธิบายชนิดอวัยวะและหน้าที่ได้ถูกต้อง"],
+        "การปรับตัว"),
+
+      q("M24", "ปลูกพืชในสารละลายธาตุอาหารที่มีออกซิเจนต่ำ พบว่ารากเปลี่ยนเป็นสีน้ำตาลและดูดแร่ธาตุลดลง การจัดการใดแก้สาเหตุโดยตรงที่สุด",
+        ["เพิ่มความเข้มข้นของปุ๋ยเป็นสองเท่าทันที", "เติมอากาศในสารละลายและควบคุมไม่ให้รากขาดออกซิเจน", "ตัดขนรากออกทั้งหมด", "ปิดภาชนะให้สนิทกว่าเดิม", "เพิ่มเกลือเพื่อให้น้ำเข้าสู่ราก"],
+        1,
+        "เซลล์รากต้องใช้ออกซิเจนในการหายใจเพื่อสร้าง ATP สำหรับการลำเลียงไอออน การเติมอากาศแก้ปัจจัยต้นเหตุ",
+        ["อาจเพิ่มความเค็มและทำให้ปัญหารุนแรงขึ้น", "แก้ภาวะขาดออกซิเจนโดยตรง", "ลดพื้นที่ดูดสาร", "ยิ่งลดการแลกเปลี่ยนแก๊ส", "เกลือสูงลดศักย์น้ำของสารละลาย"],
+        "การปรับตัว"),
+
+      q("M25", "ให้ฟอสเฟตติดตามรังสีแก่รากเพียงด้านหนึ่ง ต่อมาพบรังสีในไซเล็มเหนือบริเวณนั้นและในใบ ข้อสรุปใดได้รับการสนับสนุนโดยตรงที่สุด",
+        ["ฟอสเฟตเข้าสู่รากและเคลื่อนเข้าสู่ระบบไซเล็มก่อนลำเลียงขึ้นส่วนเหนือดิน", "ฟอสเฟตถูกสร้างขึ้นใหม่ในใบ", "ฟอสเฟตเคลื่อนขึ้นทางโฟลเอ็มเท่านั้น", "ขนรากเปลี่ยนเป็นเวสเซล", "การเข้าสู่รากไม่เกี่ยวกับเยื่อหุ้มเซลล์"],
+        0,
+        "ตำแหน่งสารติดตามในไซเล็มและใบสนับสนุนการรับที่รากแล้วลำเลียงขึ้นผ่านไซเล็ม",
+        ["เป็นข้อสรุปที่ตรงกับหลักฐาน", "สารติดตามมาจากสารละลาย ไม่ได้สร้างในใบ", "ตรวจพบในไซเล็มจึงขัดกับข้อความนี้", "ขนรากไม่เปลี่ยนชนิดเป็นเวสเซล", "ข้อมูลยังไม่สนับสนุนการปฏิเสธบทบาทเยื่อหุ้ม"],
+        "การทดลอง"),
+
+      q("M26", `วัดความยาวเฉลี่ยของเซลล์ตามแนวแกนรากได้ดังตาราง
+        <table class="data-table">
+          <tr><th>ตำแหน่งจากปลายราก</th><th>ความยาวเซลล์เฉลี่ย</th><th>จำนวนเซลล์ที่กำลังไมโทซิสต่อ 100 เซลล์</th></tr>
+          <tr><td>0.5 mm</td><td>12 µm</td><td>18</td></tr>
+          <tr><td>2.0 mm</td><td>15 µm</td><td>24</td></tr>
+          <tr><td>5.0 mm</td><td>82 µm</td><td>3</td></tr>
+          <tr><td>12.0 mm</td><td>95 µm</td><td>0</td></tr>
+        </table>
+        ข้อสรุปใดสอดคล้องกับข้อมูลมากที่สุด`,
+        ["ช่วงประมาณ 2–5 mm เป็นช่วงเปลี่ยนจากการแบ่งเซลล์เด่นไปสู่การยืดตัวเด่น", "บริเวณ 12 mm เป็นเนื้อเยื่อเจริญที่แบ่งเร็วที่สุด", "เซลล์ที่ 0.5 mm ยืดยาวกว่าที่ 5 mm", "ไมโทซิสและการยืดเซลล์สูงสุด ณ ตำแหน่งเดียวกันเสมอ", "ข้อมูลพิสูจน์ว่าไม่มีการเปลี่ยนแปลงไปทำหน้าที่เฉพาะ"],
+        0,
+        "ที่ 2 mm ยังพบไมโทซิสสูง แต่ที่ 5 mm เซลล์ยาวขึ้นมากและไมโทซิสลดลง จึงเป็นช่วงเปลี่ยนกิจกรรมเด่น",
+        ["ใช้ข้อมูลทั้งขนาดเซลล์และไมโทซิสร่วมกัน", "ที่ 12 mm ไม่พบไมโทซิส", "ค่าความยาวตรงข้ามกับข้อความ", "ข้อมูลแสดงว่าจุดสูงสุดต่างตำแหน่ง", "ข้อมูลไม่ได้พิสูจน์การไม่มี differentiation"],
+        "การทดลอง"),
+
+      q("M27", "ต้นไม้ถูกตัดโฟลเอ็มรอบลำต้นเป็นวง หลังหลายสัปดาห์รากฝอยลดลงและการเจริญทุติยภูมิของรากช้าลง กลไกใดเชื่อมโยงเหตุการณ์ได้สมเหตุสมผลที่สุด",
+        ["ไซเล็มไม่สามารถนำน้ำขึ้นใบตั้งแต่วินาทีแรก", "เอนโดเดอร์มิสเปลี่ยนเป็นหมวกราก", "คอร์เทกซ์สร้างออกซิเจนไม่ได้จึงหยุดทำงานทันที", "รากได้รับน้ำตาลจากใบน้อยลง ทำให้มีสารตั้งต้นและพลังงานสำหรับการแบ่งเซลล์ลดลง", "แถบแคสพาเรียนละลายเพราะไม่มีโฟลเอ็ม"],
+        4,
+        "การตัดโฟลเอ็มขัดขวางการส่งซูโครสลงราก จึงกระทบการหายใจ การสร้างเนื้อเยื่อ และกิจกรรมของแคมเบียมในระยะต่อมา",
+        ["ไซเล็มยังคงอยู่ในระยะแรก", "เนื้อเยื่อไม่เปลี่ยนหน้าที่เช่นนี้", "รากใช้สารอินทรีย์จากใบและหายใจ ไม่ได้สังเคราะห์แสงเป็นหลัก", "เป็นกลไกที่ควรเกิดแต่ถูกจัดไว้ตัวเลือก ง ไม่ใช่คำตอบตามตำแหน่งนี้", "แถบแคสพาเรียนไม่ได้ละลายเพราะเหตุนี้"],
+        "การเจริญทุติยภูมิ"),
+
+      q("M28", `พิจารณาข้อมูลรากสองตัวอย่าง
+        <table class="data-table">
+          <tr><th>ลักษณะ</th><th>ตัวอย่าง A</th><th>ตัวอย่าง B</th></tr>
+          <tr><td>ไซเล็มปฐมภูมิ</td><td>เป็นแขน 4 แฉกกลางราก</td><td>หลายกลุ่มเรียงเป็นวง</td></tr>
+          <tr><td>พิธ</td><td>เล็กมากหรือไม่เด่น</td><td>ขนาดใหญ่</td></tr>
+          <tr><td>การเจริญทุติยภูมิ</td><td>พบได้ชัดเมื่อรากแก่</td><td>โดยทั่วไปไม่เด่น</td></tr>
+        </table>
+        ข้อใดระบุชนิดและเหตุผลได้ถูกต้อง`,
+        ["A และ B เป็นรากใบเลี้ยงเดี่ยวทั้งคู่", "A เป็นรากใบเลี้ยงเดี่ยว เพราะไม่มีพิธ", "A เป็นรากใบเลี้ยงคู่ และ B เป็นรากใบเลี้ยงเดี่ยว โดยพิจารณาการจัดไซเล็มและขนาดพิธร่วมกัน", "B เป็นรากใบเลี้ยงคู่ เพราะมีไซเล็มหลายกลุ่ม", "จำแนกไม่ได้แม้มีข้อมูลทั้งหมด"],
+        2,
+        "ไซเล็มรูปดาวและพิธไม่เด่นสอดคล้องกับรากใบเลี้ยงคู่ ส่วนไซเล็มหลายกลุ่มรอบพิธใหญ่สอดคล้องกับรากใบเลี้ยงเดี่ยว",
+        ["ลักษณะ A ไม่ตรงใบเลี้ยงเดี่ยว", "ไซเล็มรูปดาวและพิธไม่เด่นบ่งชี้ใบเลี้ยงคู่", "ใช้หลักฐานหลายลักษณะและสรุปถูกต้อง", "พิธใหญ่และไซเล็มหลายกลุ่มบ่งชี้ใบเลี้ยงเดี่ยว", "ข้อมูลเพียงพอสำหรับจำแนกตามแบบทั่วไป"],
+        "โครงสร้างภายใน"),
+
+      q("M29", "ทดลองให้สารยับยั้งการสร้างไมโครทูบูลเฉพาะบริเวณ 1 mm เหนือหมวกราก อีกชุดให้สารเดียวกันที่บริเวณขนราก คาดว่าชุดใดกระทบการเพิ่มจำนวนเซลล์และความยาวรากมากกว่า",
+        ["ชุดบริเวณขนราก เพราะขนรากแบ่งเซลล์เร็วที่สุด", "ชุดใกล้หมวกราก เพราะรบกวนไมโทซิสในบริเวณแบ่งเซลล์และลดจำนวนเซลล์ที่จะเข้าสู่เขตยืด", "ทั้งสองชุดไม่มีผลเพราะไมโครทูบูลไม่เกี่ยวกับไมโทซิส", "ชุดขนรากเท่านั้น เพราะเป็นแหล่งกำเนิดเพริไซเคิล", "ผลต้องเท่ากันเสมอโดยไม่ขึ้นกับตำแหน่ง"],
+        1,
+        "ไมโครทูบูลจำเป็นต่อสปินเดิลในการแบ่งนิวเคลียส การรบกวนเขตแบ่งเซลล์จึงลดเซลล์ใหม่และส่งผลต่อความยาวในเวลาต่อมา",
+        ["เขตขนรากมีเซลล์เปลี่ยนแปลงแล้ว", "เชื่อมโยงตำแหน่ง สปินเดิล และผลต่อการเจริญได้ครบ", "ไมโครทูบูลเป็นส่วนสำคัญของสปินเดิล", "เพริไซเคิลอยู่ในสตีล ไม่ได้เกิดจากขนราก", "ตำแหน่งเนื้อเยื่อทำให้ผลต่างกัน"],
+        "การทดลอง"),
+
+      q("M30", `ปลูกต้นกล้าชนิดเดียวกันในดิน 3 แบบเป็นเวลา 10 วัน
+        <table class="data-table">
+          <tr><th>ชุด</th><th>ความพรุนของดิน</th><th>ออกซิเจนในช่องดิน</th><th>ความยาวรากรวม</th><th>จำนวนรากแขนง</th></tr>
+          <tr><td>A</td><td>สูง</td><td>สูง</td><td>42 cm</td><td>31</td></tr>
+          <tr><td>B</td><td>ต่ำ</td><td>ต่ำ</td><td>14 cm</td><td>9</td></tr>
+          <tr><td>C</td><td>ต่ำ</td><td>สูงจากการเติมอากาศ</td><td>23 cm</td><td>17</td></tr>
+        </table>
+        ข้อใดวิเคราะห์ได้รัดกุมที่สุด`,
+        ["ออกซิเจนเป็นปัจจัยเดียวที่กำหนดความยาวราก", "ความพรุนไม่มีผลเพราะ C ยังเจริญได้", "ข้อมูลพิสูจน์ว่ารากไม่ต้องหายใจในดินพรุน", "ทั้งออกซิเจนและความต้านทานเชิงกายภาพของดินน่าจะมีผล เพราะ C ดีขึ้นจาก B แต่ยังต่ำกว่า A", "ควรเพิ่มปุ๋ยให้ B แล้วสรุปทันทีโดยไม่ต้องมีชุดควบคุม"],
+        3,
+        "การเปรียบเทียบ B กับ C แสดงผลของออกซิเจนภายใต้ความพรุนต่ำ ส่วน C ยังต่ำกว่า A จึงชี้ว่าความพรุนหรือความต้านทานทางกายภาพอาจมีผลร่วม",
+        ["C ยังต่ำกว่า A จึงสรุปว่าออกซิเจนเป็นปัจจัยเดียวไม่ได้", "ความพรุนยังอาจอธิบายความแตกต่าง A กับ C", "ข้อมูลไม่ได้สนับสนุนข้อความนี้", "วิเคราะห์ตัวแปรร่วมโดยไม่กล่าวเกินหลักฐาน", "การเพิ่มปุ๋ยทำให้เกิดตัวแปรแทรกซ้อน"],
+        "การทดลอง")
+    ];
+
+    const subjectiveQuestions = [
+      {
+        id: "S1",
+        type: "matching",
+        title: "จับคู่เนื้อเยื่อเจริญปฐมภูมิกับโครงสร้างหรือเนื้อเยื่อที่เกิดขึ้น",
+        instruction: "เลือกคำตอบที่สัมพันธ์กันมากที่สุด แต่ละรายการ 1 คะแนน รวม 6 คะแนน",
+        items: [
+          ["1. โพรโทเดิร์ม", "epidermis"],
+          ["2. กราวด์เมริสเต็ม", "cortex"],
+          ["3. โพรแคมเบียม", "primaryVascular"],
+          ["4. เพริไซเคิล", "lateralRoot"],
+          ["5. วาสคิวลาร์แคมเบียม", "secondaryVascular"],
+          ["6. คอร์กแคมเบียม", "periderm"]
+        ],
+        options: [
+          ["", "— เลือกคำตอบ —"],
+          ["epidermis", "เอพิเดอร์มิสและขนราก"],
+          ["cortex", "คอร์เทกซ์"],
+          ["primaryVascular", "ไซเล็มและโฟลเอ็มปฐมภูมิ"],
+          ["lateralRoot", "รากแขนง"],
+          ["secondaryVascular", "ไซเล็มและโฟลเอ็มทุติยภูมิ"],
+          ["periderm", "เพริเดิร์ม"]
+        ],
+        explanation: "การจับคู่ต้องอาศัยความเข้าใจทั้งเนื้อเยื่อเจริญปฐมภูมิ เนื้อเยื่อเจริญด้านข้าง และความสามารถในการแบ่งของเพริไซเคิล",
+        topic: "โครงสร้างภายใน"
+      },
+      {
+        id: "S2",
+        type: "multi",
+        title: "เลือกตอบเชิงซ้อน",
+        instruction: "พิจารณาแต่ละข้อความแล้วเลือกเฉพาะข้อความที่ถูกต้อง ข้อละ 1 คะแนน รวม 6 คะแนน",
+        statements: [
+          ["A", "ขนรากเป็นส่วนยื่นของเซลล์เอพิเดอร์มิสและช่วยเพิ่มพื้นที่ผิว", true],
+          ["B", "แถบแคสพาเรียนทำให้สารทุกชนิดผ่านเข้าสู่สตีลได้โดยไม่ถูกคัดเลือก", false],
+          ["C", "รากแขนงเกิดจากเพริไซเคิลและมีระบบลำเลียงต่อเนื่องกับรากเดิม", true],
+          ["D", "บริเวณยืดตามยาวเป็นบริเวณที่มีอัตราไมโทซิสสูงที่สุดเสมอ", false],
+          ["E", "รากใบเลี้ยงเดี่ยวโดยทั่วไปมีพิธกลางเด่นกว่ารากใบเลี้ยงคู่", true],
+          ["F", "วาสคิวลาร์แคมเบียมสร้างไซเล็มทุติยภูมิออกด้านนอกและโฟลเอ็มทุติยภูมิเข้าด้านใน", false]
+        ],
+        explanation: "A, C และ E ถูกต้อง ส่วน B ขัดกับหน้าที่คัดเลือกสารของเอนโดเดอร์มิส D สับสนระหว่างเขตแบ่งกับเขตยืด และ F สลับทิศทางการสร้างเนื้อเยื่อ",
+        topic: "โครงสร้างภายใน"
+      },
+      {
+        id: "S3",
+        type: "fill",
+        title: "เติมคำในเส้นทางการลำเลียงและการเกิดรากแขนง",
+        instruction: "เติมคำศัพท์ที่เหมาะสมลงในช่องว่าง ช่องละ 1 คะแนน รวม 6 คะแนน",
+        prompts: [
+          ["น้ำเข้าสู่รากผ่านส่วนยื่นของเอพิเดอร์มิสที่เรียกว่า", ["ขนราก", "root hair"]],
+          ["เส้นทางผ่านผนังและช่องว่างระหว่างเซลล์เรียกว่า", ["อโพพลาสต์", "apoplast", "apoplastic"]],
+          ["เส้นทางผ่านไซโทพลาซึมที่เชื่อมด้วยพลาสโมเดสมาตาเรียกว่า", ["ซิมพลาสต์", "symplast", "symplastic"]],
+          ["ชั้นในสุดของคอร์เทกซ์เรียกว่า", ["เอนโดเดอร์มิส", "endodermis"]],
+          ["ชั้นที่เป็นต้นกำเนิดของรากแขนงเรียกว่า", ["เพริไซเคิล", "pericycle"]],
+          ["เนื้อเยื่อลำเลียงน้ำและแร่ธาตุขึ้นสู่ส่วนเหนือดินคือ", ["ไซเล็ม", "xylem"]]
+        ],
+        explanation: "ลำดับแนวคิดสำคัญคือ ขนราก → อโพพลาสต์หรือซิมพลาสต์ → เอนโดเดอร์มิส → สตีลและไซเล็ม ส่วนรากแขนงเกิดจากเพริไซเคิล",
+        topic: "การลำเลียง"
+      },
+      {
+        id: "S4",
+        type: "essay",
+        title: "อธิบายบทบาทของแถบแคสพาเรียน",
+        instruction: "อธิบายว่าเหตุใดแถบแคสพาเรียนจึงช่วยให้รากควบคุมชนิดและปริมาณของไอออนที่เข้าสู่ไซเล็ม พร้อมเชื่อมโยงเส้นทางอโพพลาสต์ เยื่อหุ้มเซลล์ และการป้องกันการไหลย้อน รวม 6 คะแนน",
+        placeholder: "เขียนคำอธิบายโดยใช้เหตุผลทางชีววิทยา...",
+        rubric: [
+          ["กล่าวถึงแถบแคสพาเรียนหรือซูเบอริน", ["แถบแคสพาเรียน", "casparian", "ซูเบอริน", "suberin"]],
+          ["อธิบายการปิดกั้นเส้นทางอโพพลาสต์", ["อโพพลาสต์", "apoplast", "ผนังเซลล์"]],
+          ["อธิบายว่าสารต้องผ่านเยื่อหุ้มเซลล์", ["เยื่อหุ้ม", "plasma membrane", "เมมเบรน"]],
+          ["กล่าวถึงการคัดเลือกไอออนหรือโปรตีนลำเลียง", ["คัดเลือก", "เลือกผ่าน", "โปรตีนลำเลียง", "transport protein", "channel", "carrier"]],
+          ["เชื่อมโยงกับการเข้าสู่สตีลหรือไซเล็ม", ["สตีล", "stele", "ไซเล็ม", "xylem"]],
+          ["อธิบายการลดการรั่วหรือไหลย้อนกลับ", ["ไหลย้อน", "รั่ว", "ย้อนกลับ", "backflow", "leak"]]
+        ],
+        model: "แถบแคสพาเรียนเป็นแถบซูเบอรินที่ผนังของเอนโดเดอร์มิส ทำให้เส้นทางอโพพลาสต์ไม่ต่อเนื่อง น้ำและไอออนจึงต้องผ่านเยื่อหุ้มเซลล์เข้าสู่ซิมพลาสต์ โปรตีนลำเลียงบนเยื่อหุ้มช่วยคัดเลือกไอออนก่อนเข้าสู่สตีลและไซเล็ม อีกทั้งแถบดังกล่าวช่วยลดการรั่วหรือการไหลย้อนของสารจากสตีลกลับสู่คอร์เทกซ์",
+        topic: "การลำเลียง"
+      },
+      {
+        id: "S5",
+        type: "essay",
+        title: "วิเคราะห์ข้อมูลการเจริญของราก",
+        instruction: `พิจารณาตารางแล้วอธิบายผลของออกซิเจนต่ำและสารละลายเกลือสูงต่อราก พร้อมเสนอแนวทางออกแบบการทดลองเพื่อแยกผลของตัวแปร รวม 6 คะแนน
+          <table class="data-table">
+            <tr><th>ชุดทดลอง</th><th>การเพิ่มความยาวราก</th><th>ความหนาแน่นขนรากเทียบชุดควบคุม</th></tr>
+            <tr><td>ควบคุม</td><td>24 mm</td><td>100%</td></tr>
+            <tr><td>ออกซิเจนต่ำ</td><td>8 mm</td><td>72%</td></tr>
+            <tr><td>เกลือสูง</td><td>6 mm</td><td>135%</td></tr>
+          </table>`,
+        placeholder: "วิเคราะห์ข้อมูล กลไก และแนวทางทดลองเพิ่มเติม...",
+        rubric: [
+          ["ระบุว่าทั้งออกซิเจนต่ำและเกลือสูงลดการยืดราก", ["ลด", "น้อยลง", "ชะลอ", "ยับยั้ง"]],
+          ["เชื่อมออกซิเจนต่ำกับการหายใจหรือ ATP", ["หายใจ", "respiration", "ATP", "พลังงาน"]],
+          ["เชื่อมเกลือสูงกับศักย์น้ำหรือความเครียดออสโมซิส", ["ศักย์น้ำ", "water potential", "ออสโมซิส", "osmotic", "น้ำเข้าสู่"]],
+          ["ใช้ข้อมูลขนราก 72% และ 135% หรือเปรียบเทียบอย่างถูกต้อง", ["72", "135", "ขนรากลด", "ขนรากเพิ่ม"]],
+          ["เสนอชุดควบคุมและควบคุมตัวแปรอื่น", ["ชุดควบคุม", "ควบคุมตัวแปร", "ชนิดเดียวกัน", "อุณหภูมิ", "แสง"]],
+          ["กล่าวถึงการทำซ้ำหรือการเปลี่ยนระดับตัวแปรอย่างเป็นระบบ", ["ทำซ้ำ", "replicate", "หลายระดับ", "ความเข้มข้น", "สถิติ"]]
+        ],
+        model: "ทั้งออกซิเจนต่ำและเกลือสูงทำให้รากยืดน้อยกว่าชุดควบคุม ออกซิเจนต่ำลดการหายใจระดับเซลล์และการสร้าง ATP จึงกระทบการลำเลียงไอออนและการเจริญ ส่วนเกลือสูงทำให้ศักย์น้ำภายนอกลดลง น้ำเข้าสู่เซลล์ยากและเกิดความเครียดออสโมซิส ชุดเกลือมีความหนาแน่นขนรากเพิ่มเป็น 135% ซึ่งอาจเป็นการตอบสนองชดเชย ขณะที่ชุดออกซิเจนต่ำลดเหลือ 72% ควรทดลองหลายระดับของออกซิเจนและความเค็ม แยกตัวแปรทีละปัจจัย มีชุดควบคุม ทำซ้ำ และควบคุมแสง อุณหภูมิ อายุ และพันธุ์พืช",
+        topic: "การทดลอง"
+      }
+    ];
+
+    let state = {
+      candidate: { name: "", room: "" },
+      diagnosticAnswers: {},
+      diagnosticSubmitted: false,
+      mainAnswers: {},
+      subjectiveAnswers: {},
+      mainStarted: false,
+      mainSubmitted: false,
+      endTime: null,
+      result: null
+    };
+
+    let timerInterval = null;
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function loadState() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      try {
+        const saved = JSON.parse(raw);
+        state = { ...state, ...saved };
+      } catch (error) {
+        console.warn("ไม่สามารถอ่านข้อมูลเดิมได้", error);
+      }
+    }
+
+    function showScreen(id) {
+      document.querySelectorAll("main > section").forEach(section => section.classList.add("hidden"));
+      document.getElementById(id).classList.remove("hidden");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.classList.add("show");
+      clearTimeout(showToast.timeout);
+      showToast.timeout = setTimeout(() => toast.classList.remove("show"), 2600);
+    }
+
+    function renderMedia(type) {
+      if (type === "rootZones") {
+        return `
+          <figure class="figure">
+            <svg viewBox="0 0 660 390" role="img" aria-label="แผนภาพตามยาวของปลายราก กำกับบริเวณ A ถึง D">
+              <defs>
+                <linearGradient id="rootFill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#eef6d8"/>
+                  <stop offset="1" stop-color="#d5a978"/>
+                </linearGradient>
+              </defs>
+              <rect width="660" height="390" fill="#f8fbfd"/>
+              <path d="M270 20 C260 80 255 135 260 210 C262 290 282 345 330 372 C378 345 398 290 400 210 C405 135 400 80 390 20 Z"
+                    fill="url(#rootFill)" stroke="#765333" stroke-width="3"/>
+              <line x1="263" y1="105" x2="397" y2="105" stroke="#496c35" stroke-width="2" stroke-dasharray="7"/>
+              <line x1="260" y1="205" x2="400" y2="205" stroke="#496c35" stroke-width="2" stroke-dasharray="7"/>
+              <line x1="274" y1="285" x2="386" y2="285" stroke="#496c35" stroke-width="2" stroke-dasharray="7"/>
+              <g stroke="#759b57" stroke-width="2">
+                <line x1="272" y1="60" x2="205" y2="38"/>
+                <line x1="270" y1="72" x2="195" y2="70"/>
+                <line x1="272" y1="84" x2="202" y2="104"/>
+                <line x1="390" y1="60" x2="455" y2="38"/>
+                <line x1="390" y1="74" x2="462" y2="74"/>
+                <line x1="390" y1="88" x2="452" y2="111"/>
+              </g>
+              <g fill="#173f70" font-size="25" font-weight="700">
+                <text x="430" y="70">A</text>
+                <text x="430" y="160">B</text>
+                <text x="430" y="250">C</text>
+                <text x="430" y="335">D</text>
+              </g>
+              <g stroke="#173f70" stroke-width="2">
+                <line x1="405" y1="62" x2="425" y2="62"/>
+                <line x1="405" y1="152" x2="425" y2="152"/>
+                <line x1="398" y1="242" x2="425" y2="242"/>
+                <line x1="380" y1="327" x2="425" y2="327"/>
+              </g>
+              <text x="20" y="375" fill="#657285" font-size="16">ปลายรากอยู่ด้านล่างของภาพ</text>
+            </svg>
+            <figcaption>แผนภาพเรียบเรียงใหม่จากหลักกายวิภาคของรากใน OpenStax Biology 2e</figcaption>
+          </figure>`;
+      }
+
+      if (type === "rootCross") {
+        return `
+          <figure class="figure">
+            <svg viewBox="0 0 620 430" role="img" aria-label="แผนภาพตัดขวางรากพืชใบเลี้ยงคู่">
+              <rect width="620" height="430" fill="#f8fbfd"/>
+              <circle cx="300" cy="210" r="180" fill="#f2ddbc" stroke="#77593a" stroke-width="3"/>
+              <circle cx="300" cy="210" r="112" fill="#f7f2cb" stroke="#368063" stroke-width="8"/>
+              <circle cx="300" cy="210" r="92" fill="#fffaf0" stroke="#6d995f" stroke-width="3"/>
+              <path d="M300 95 L326 175 L405 150 L345 210 L405 270 L326 245 L300 325 L274 245 L195 270 L255 210 L195 150 L274 175 Z"
+                    fill="#d84b4b" stroke="#9b2929" stroke-width="3"/>
+              <g fill="#3977b7" stroke="#1f548a" stroke-width="2">
+                <ellipse cx="300" cy="145" rx="18" ry="28"/>
+                <ellipse cx="365" cy="210" rx="28" ry="18"/>
+                <ellipse cx="300" cy="275" rx="18" ry="28"/>
+                <ellipse cx="235" cy="210" rx="28" ry="18"/>
+              </g>
+              <line x1="300" y1="210" x2="480" y2="100" stroke="#17263a" stroke-width="2"/>
+              <text x="490" y="98" font-size="25" font-weight="700" fill="#17263a">P</text>
+              <line x1="360" y1="210" x2="490" y2="210" stroke="#17263a" stroke-width="2"/>
+              <text x="500" y="217" font-size="25" font-weight="700" fill="#17263a">Q</text>
+              <text x="29" y="406" fill="#657285" font-size="16">สีใช้เพื่อแยกส่วนของแผนภาพ ไม่ใช่สีจริงของเนื้อเยื่อ</text>
+            </svg>
+            <figcaption>แผนภาพเรียบเรียงใหม่จากโครงสร้างรากตัดขวางใน OpenStax Biology 2e</figcaption>
+          </figure>`;
+      }
+
+      if (type === "tissue") {
+        return `
+          <figure class="figure">
+            <svg viewBox="0 0 620 330" role="img" aria-label="แผนภาพแสดงระบบเนื้อเยื่อพืช">
+              <rect width="620" height="330" fill="#f8fbfd"/>
+              <ellipse cx="310" cy="165" rx="230" ry="125" fill="#e1b987" stroke="#183e69" stroke-width="8"/>
+              <ellipse cx="310" cy="165" rx="205" ry="101" fill="#e8efc5"/>
+              <g fill="#d65a53" stroke="#9f302b" stroke-width="2">
+                <ellipse cx="230" cy="130" rx="28" ry="40"/>
+                <ellipse cx="310" cy="200" rx="28" ry="40"/>
+                <ellipse cx="390" cy="130" rx="28" ry="40"/>
+              </g>
+              <text x="55" y="48" font-size="24" font-weight="700" fill="#173f70">A</text>
+              <line x1="78" y1="50" x2="112" y2="73" stroke="#173f70" stroke-width="2"/>
+              <text x="125" y="170" font-size="24" font-weight="700" fill="#173f70">B</text>
+              <line x1="150" y1="165" x2="200" y2="155" stroke="#173f70" stroke-width="2"/>
+              <text x="460" y="210" font-size="24" font-weight="700" fill="#173f70">C</text>
+              <line x1="455" y1="200" x2="410" y2="160" stroke="#173f70" stroke-width="2"/>
+            </svg>
+            <figcaption>แผนภาพเชิงแนวคิดของระบบเนื้อเยื่อผิว เนื้อเยื่อพื้น และเนื้อเยื่อลำเลียง</figcaption>
+          </figure>`;
+      }
+
+      return "";
+    }
+
+    function renderMCQ(question, prefix, index) {
+      const saved = prefix === "diagnostic"
+        ? state.diagnosticAnswers[question.id]
+        : state.mainAnswers[question.id];
+
+      const choices = question.choices.map((choice, choiceIndex) => `
+        <label class="choice">
+          <input type="radio"
+                 name="${prefix}-${question.id}"
+                 value="${choiceIndex}"
+                 ${Number(saved) === choiceIndex ? "checked" : ""}>
+          <span class="choice-letter">${letters[choiceIndex]}.</span>
+          <span>${choice}</span>
+        </label>
+      `).join("");
+
+      return `
+        <article class="question-card ${saved !== undefined ? "answered" : ""}"
+                 id="${prefix}-card-${index + 1}">
+          <div class="question-number">ข้อ ${index + 1}</div>
+          <div class="question-stem">${question.stem}</div>
+          ${renderMedia(question.media)}
+          <div>${choices}</div>
+        </article>`;
+    }
+
+    function renderDiagnostic() {
+      const container = document.getElementById("diagnosticQuestions");
+      container.innerHTML = diagnosticQuestions.map((item, index) =>
+        renderMCQ(item, "diagnostic", index)
+      ).join("");
+
+      container.querySelectorAll("input[type=radio]").forEach(input => {
+        input.addEventListener("change", event => {
+          const id = event.target.name.replace("diagnostic-", "");
+          state.diagnosticAnswers[id] = Number(event.target.value);
+          saveState();
+          updateDiagnosticProgress();
+        });
+      });
+
+      renderPalette("diagnostic");
+      updateDiagnosticProgress();
+    }
+
+    function renderPalette(prefix) {
+      const questions = prefix === "diagnostic"
+        ? diagnosticQuestions
+        : [...mainQuestions, ...subjectiveQuestions];
+
+      const palette = document.getElementById(prefix + "Palette");
+      palette.innerHTML = questions.map((item, index) =>
+        `<button type="button" data-index="${index}" aria-label="ไปข้อ ${index + 1}">${index + 1}</button>`
+      ).join("");
+
+      palette.querySelectorAll("button").forEach(button => {
+        button.addEventListener("click", () => {
+          const index = Number(button.dataset.index);
+          document.getElementById(`${prefix}-card-${index + 1}`)
+            ?.scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+      });
+    }
+
+    function updateDiagnosticProgress() {
+      const answered = diagnosticQuestions.filter(item =>
+        state.diagnosticAnswers[item.id] !== undefined
+      ).length;
+
+      document.getElementById("diagnosticCount").textContent = `ตอบแล้ว ${answered}/20`;
+      document.getElementById("diagnosticProgress").style.width = `${answered / 20 * 100}%`;
+
+      document.querySelectorAll("#diagnosticPalette button").forEach((button, index) => {
+        const done = state.diagnosticAnswers[diagnosticQuestions[index].id] !== undefined;
+        button.classList.toggle("done", done);
+        document.getElementById(`diagnostic-card-${index + 1}`)?.classList.toggle("answered", done);
+      });
+    }
+
+    function calculateMCQ(questions, answers) {
+      let correct = 0;
+      const byTopic = {};
+
+      questions.forEach(item => {
+        const isCorrect = Number(answers[item.id]) === item.answer;
+        if (isCorrect) correct++;
+        if (!byTopic[item.topic]) byTopic[item.topic] = { correct: 0, total: 0 };
+        byTopic[item.topic].total++;
+        if (isCorrect) byTopic[item.topic].correct++;
+      });
+
+      return { correct, total: questions.length, byTopic };
+    }
+
+    function getLevel(percent) {
+      if (percent >= 80) return "ดีมาก";
+      if (percent >= 65) return "ดี";
+      if (percent >= 50) return "พอใช้";
+      return "ควรทบทวนเพิ่มเติม";
+    }
+
+    function submitDiagnostic() {
+      const answered = Object.keys(state.diagnosticAnswers).length;
+      if (answered < diagnosticQuestions.length) {
+        const proceed = confirm(`ยังไม่ได้ตอบ ${diagnosticQuestions.length - answered} ข้อ ต้องการส่งแบบทบทวนหรือไม่`);
+        if (!proceed) return;
+      }
+
+      state.diagnosticSubmitted = true;
+      saveState();
+      showDiagnosticResult();
+    }
+
+    function showDiagnosticResult() {
+      const result = calculateMCQ(diagnosticQuestions, state.diagnosticAnswers);
+      const percent = result.correct / result.total * 100;
+      const topicHTML = renderTopicAnalysis(result.byTopic);
+      const weak = Object.entries(result.byTopic)
+        .sort((a, b) => a[1].correct / a[1].total - b[1].correct / b[1].total)[0];
+
+      const screen = document.getElementById("diagnosticResultScreen");
+      screen.innerHTML = `
+        <article class="panel">
+          <div class="panel-body">
+            <h2 class="section-title">ผลการทบทวนความรู้เดิม</h2>
+            <div class="result-grid">
+              <div class="score-card">
+                <strong>คะแนน</strong>
+                <div class="score-value">${result.correct}/${result.total}</div>
+              </div>
+              <div class="score-card">
+                <strong>คิดเป็นร้อยละ</strong>
+                <div class="score-value">${percent.toFixed(0)}%</div>
+              </div>
+              <div class="score-card">
+                <strong>ระดับความพร้อม</strong>
+                <div class="score-value" style="font-size:1.35rem">${getLevel(percent)}</div>
+              </div>
+            </div>
+            <h3>วิเคราะห์รายหัวข้อ</h3>
+            ${topicHTML}
+            <div class="notice">
+              <strong>ข้อเสนอแนะ:</strong>
+              ${weak ? `หัวข้อที่ควรทบทวนก่อนสอบหลักคือ “${topicLabels[weak[0]] || weak[0]}” โดยเฉพาะความสัมพันธ์ระหว่างโครงสร้างของเซลล์กับหน้าที่ของเนื้อเยื่อ` : "โปรดทบทวนเนื้อเยื่อพืชก่อนเริ่มแบบทดสอบหลัก"}
+            </div>
+            <div class="actions">
+              <button type="button" class="btn btn-secondary" id="viewDiagnosticAnswers">ดูเฉลยแบบทบทวน</button>
+              <button type="button" class="btn btn-primary" id="continueMainIntro">ไปยังแบบทดสอบหลัก</button>
+            </div>
+          </div>
+        </article>
+        <div id="diagnosticReview" class="hidden">
+          ${renderAnswerReviews(diagnosticQuestions, state.diagnosticAnswers)}
+        </div>`;
+
+      document.getElementById("viewDiagnosticAnswers").onclick = () => {
+        document.getElementById("diagnosticReview").classList.toggle("hidden");
+      };
+
+      document.getElementById("continueMainIntro").onclick = () => showScreen("mainIntroScreen");
+      showScreen("diagnosticResultScreen");
+    }
+
+    function renderTopicAnalysis(byTopic) {
+      return Object.entries(byTopic).map(([topic, score]) => {
+        const percent = score.total ? score.correct / score.total * 100 : 0;
+        return `
+          <div class="analysis-row">
+            <div class="analysis-label">
+              <span>${topicLabels[topic] || topic}</span>
+              <strong>${score.correct}/${score.total} (${percent.toFixed(0)}%)</strong>
+            </div>
+            <div class="analysis-bar"><div style="width:${percent}%"></div></div>
+          </div>`;
+      }).join("");
+    }
+
+    function renderSubjective(item, index) {
+      const cardNumber = mainQuestions.length + index + 1;
+      const saved = state.subjectiveAnswers[item.id];
+
+      let content = "";
+
+      if (item.type === "matching") {
+        content = `
+          <div class="matching-grid">
+            ${item.items.map(([label], itemIndex) => `
+              <label for="${item.id}-${itemIndex}">${label}</label>
+              <select id="${item.id}-${itemIndex}" data-subjective="${item.id}" data-index="${itemIndex}">
+                ${item.options.map(([value, text]) =>
+                  `<option value="${value}" ${saved?.[itemIndex] === value ? "selected" : ""}>${text}</option>`
+                ).join("")}
+              </select>
+            `).join("")}
+          </div>`;
+      }
+
+      if (item.type === "multi") {
+        content = item.statements.map(([code, text]) => `
+          <label class="choice">
+            <input type="checkbox"
+                   data-subjective="${item.id}"
+                   value="${code}"
+                   ${saved?.includes(code) ? "checked" : ""}>
+            <span class="choice-letter">${code}</span>
+            <span>${text}</span>
+          </label>
+        `).join("");
+      }
+
+      if (item.type === "fill") {
+        content = `
+          <div class="fill-grid">
+            ${item.prompts.map(([prompt], itemIndex) => `
+              <label class="fill-row">
+                <span>${itemIndex + 1}.</span>
+                <span>
+                  ${prompt}
+                  <input type="text"
+                         data-subjective="${item.id}"
+                         data-index="${itemIndex}"
+                         value="${escapeAttribute(saved?.[itemIndex] || "")}"
+                         autocomplete="off">
+                </span>
+              </label>
+            `).join("")}
+          </div>`;
+      }
+
+      if (item.type === "essay") {
+        content = `
+          <div class="field">
+            <textarea data-subjective="${item.id}"
+                      placeholder="${item.placeholder}"
+                      maxlength="3000">${escapeHTML(saved || "")}</textarea>
+            <small>ระบบบันทึกคำตอบอัตโนมัติ ความยาวไม่เกิน 3,000 ตัวอักษร</small>
+          </div>`;
+      }
+
+      return `
+        <article class="question-card ${isSubjectiveAnswered(item) ? "answered" : ""}"
+                 id="main-card-${cardNumber}">
+          <div class="question-number">ส่วนอัตนัย ข้อ ${index + 1} — 6 คะแนน</div>
+          <h3>${item.title}</h3>
+          <div class="question-stem">${item.instruction}</div>
+          ${content}
+        </article>`;
+    }
+
+    function escapeHTML(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;");
+    }
+
+    function escapeAttribute(value) {
+      return escapeHTML(value).replaceAll('"', "&quot;");
+    }
+
+    function renderMainExam() {
+      const container = document.getElementById("mainQuestions");
+
+      container.innerHTML = `
+        <div class="notice">
+          <strong>ส่วนที่ 1 ปรนัย 5 ตัวเลือก:</strong> จำนวน 30 ข้อ รวม 20 คะแนน
+        </div>
+        ${mainQuestions.map((item, index) => renderMCQ(item, "main", index)).join("")}
+        <div class="notice">
+          <strong>ส่วนที่ 2 อัตนัยและเลือกตอบเชิงซ้อน:</strong> จำนวน 5 ข้อ ข้อละ 6 คะแนน รวม 30 คะแนน
+        </div>
+        ${subjectiveQuestions.map((item, index) => renderSubjective(item, index)).join("")}
+      `;
+
+      container.querySelectorAll('input[type="radio"]').forEach(input => {
+        input.addEventListener("change", event => {
+          const id = event.target.name.replace("main-", "");
+          state.mainAnswers[id] = Number(event.target.value);
+          saveState();
+          updateMainProgress();
+        });
+      });
+
+      container.querySelectorAll("[data-subjective]").forEach(element => {
+        const eventName = element.tagName === "TEXTAREA" || element.type === "text"
+          ? "input"
+          : "change";
+
+        element.addEventListener(eventName, () => {
+          storeSubjectiveValue(element);
+          saveState();
+          updateMainProgress();
+        });
+      });
+
+      renderPalette("main");
+      updateMainProgress();
+    }
+
+    function storeSubjectiveValue(element) {
+      const id = element.dataset.subjective;
+      const item = subjectiveQuestions.find(q => q.id === id);
+
+      if (item.type === "matching" || item.type === "fill") {
+        if (!Array.isArray(state.subjectiveAnswers[id])) {
+          state.subjectiveAnswers[id] = [];
+        }
+        state.subjectiveAnswers[id][Number(element.dataset.index)] = element.value.trim();
+      }
+
+      if (item.type === "multi") {
+        state.subjectiveAnswers[id] = [...document.querySelectorAll(`[data-subjective="${id}"]:checked`)]
+          .map(input => input.value);
+      }
+
+      if (item.type === "essay") {
+        state.subjectiveAnswers[id] = element.value;
+      }
+    }
+
+    function isSubjectiveAnswered(item) {
+      const answer = state.subjectiveAnswers[item.id];
+      if (item.type === "essay") return typeof answer === "string" && answer.trim().length > 0;
+      if (!Array.isArray(answer)) return false;
+      if (item.type === "multi") return answer.length > 0;
+      return answer.some(value => value && value.trim());
+    }
+
+    function updateMainProgress() {
+      const objectiveAnswered = mainQuestions.filter(item =>
+        state.mainAnswers[item.id] !== undefined
+      ).length;
+
+      const subjectiveAnswered = subjectiveQuestions.filter(isSubjectiveAnswered).length;
+      const totalAnswered = objectiveAnswered + subjectiveAnswered;
+      const total = mainQuestions.length + subjectiveQuestions.length;
+
+      document.getElementById("mainCount").textContent = `ตอบแล้ว ${totalAnswered}/${total} ข้อ`;
+      document.getElementById("mainProgress").style.width = `${totalAnswered / total * 100}%`;
+
+      document.querySelectorAll("#mainPalette button").forEach((button, index) => {
+        let done = false;
+        let partial = false;
+
+        if (index < mainQuestions.length) {
+          done = state.mainAnswers[mainQuestions[index].id] !== undefined;
+        } else {
+          const item = subjectiveQuestions[index - mainQuestions.length];
+          done = isSubjectiveAnswered(item);
+          partial = done && (
+            (item.type === "matching" || item.type === "fill") &&
+            (state.subjectiveAnswers[item.id]?.filter(Boolean).length < item.items?.length ||
+             state.subjectiveAnswers[item.id]?.filter(Boolean).length < item.prompts?.length)
+          );
+        }
+
+        button.classList.toggle("done", done && !partial);
+        button.classList.toggle("partial", partial);
+        document.getElementById(`main-card-${index + 1}`)?.classList.toggle("answered", done);
+      });
+    }
+
+    function startMainExam() {
+      if (!state.mainStarted) {
+        state.mainStarted = true;
+        state.endTime = Date.now() + CONFIG.examDurationSeconds * 1000;
+        saveState();
+      }
+
+      renderMainExam();
+      startTimer();
+      showScreen("mainExamScreen");
+    }
+
+    function startTimer() {
+      clearInterval(timerInterval);
+
+      const update = () => {
+        if (!state.endTime) return;
+        const remaining = Math.max(0, Math.ceil((state.endTime - Date.now()) / 1000));
+        const minutes = Math.floor(remaining / 60);
+        const seconds = remaining % 60;
+        const timer = document.getElementById("timer");
+
+        timer.textContent = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+        timer.classList.toggle("danger", remaining <= 300);
+
+        if (remaining <= 0) {
+          clearInterval(timerInterval);
+          showToast("หมดเวลา ระบบกำลังส่งคำตอบอัตโนมัติ");
+          submitMain(true);
+        }
+      };
+
+      update();
+      timerInterval = setInterval(update, 1000);
+    }
+
+    function normalizeText(value) {
+      return String(value || "")
+        .toLowerCase()
+        .replace(/\s+/g, "")
+        .replace(/[.,;:!?()[\]{}"'“”‘’\-–—]/g, "");
+    }
+
+    function includesAny(answer, keywords) {
+      const normalized = normalizeText(answer);
+      return keywords.some(keyword => normalized.includes(normalizeText(keyword)));
+    }
+
+    function gradeMatching(item, answer = []) {
+      let score = 0;
+      item.items.forEach(([, correct], index) => {
+        if (answer[index] === correct) score++;
+      });
+      return {
+        score,
+        feedback: `จับคู่ถูกต้อง ${score} จาก ${item.items.length} รายการ`
+      };
+    }
+
+    function gradeMulti(item, answer = []) {
+      let score = 0;
+      const selected = new Set(answer);
+
+      item.statements.forEach(([code, , correct]) => {
+        const response = selected.has(code);
+        if (response === correct) score++;
+      });
+
+      return {
+        score,
+        feedback: `พิจารณาสถานะถูก–ผิดได้ถูกต้อง ${score} จาก ${item.statements.length} ข้อความ`
+      };
+    }
+
+    function gradeFill(item, answer = []) {
+      let score = 0;
+      const details = [];
+
+      item.prompts.forEach(([prompt, accepted], index) => {
+        const user = normalizeText(answer[index] || "");
+        const correct = accepted.some(value => user === normalizeText(value));
+        if (correct) score++;
+        else details.push(`ช่อง ${index + 1}`);
+      });
+
+      return {
+        score,
+        feedback: details.length
+          ? `ควรตรวจสอบคำศัพท์ใน ${details.join(", ")}`
+          : "ใช้คำศัพท์ชีววิทยาได้ถูกต้องครบทุกช่อง"
+      };
+    }
+
+    function gradeEssayLocal(item, answer = "") {
+      let score = 0;
+      const met = [];
+      const missing = [];
+
+      item.rubric.forEach(([criterion, keywords]) => {
+        if (includesAny(answer, keywords)) {
+          score++;
+          met.push(criterion);
+        } else {
+          missing.push(criterion);
+        }
+      });
+
+      let feedback = `ครอบคลุมเกณฑ์ ${score} จาก 6 ประเด็น`;
+      if (missing.length) feedback += ` ประเด็นที่ควรเพิ่ม: ${missing.join("; ")}`;
+      return { score, feedback, met, missing, method: "rubric" };
+    }
+
+    async function gradeEssay(item, answer) {
+      if (!CONFIG.aiGradingEndpoint) {
+        return gradeEssayLocal(item, answer);
+      }
+
+      try {
+        const response = await fetch(CONFIG.aiGradingEndpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            question: item.title,
+            instruction: item.instruction,
+            answer,
+            rubric: item.rubric,
+            maximumScore: 6
+          })
+        });
+
+        if (!response.ok) throw new Error("AI endpoint error");
+        const data = await response.json();
+
+        return {
+          score: Math.max(0, Math.min(6, Number(data.score) || 0)),
+          feedback: data.feedback || "ประเมินคำตอบเรียบร้อย",
+          method: "ai"
+        };
+      } catch (error) {
+        console.warn("ใช้ระบบรูบริกสำรอง", error);
+        return gradeEssayLocal(item, answer);
+      }
+    }
+
+    async function gradeSubjective() {
+      const results = {};
+
+      for (const item of subjectiveQuestions) {
+        const answer = state.subjectiveAnswers[item.id];
+
+        if (item.type === "matching") results[item.id] = gradeMatching(item, answer);
+        if (item.type === "multi") results[item.id] = gradeMulti(item, answer);
+        if (item.type === "fill") results[item.id] = gradeFill(item, answer);
+        if (item.type === "essay") results[item.id] = await gradeEssay(item, answer || "");
+      }
+
+      return results;
+    }
+
+    async function submitMain(autoSubmit = false) {
+      if (state.mainSubmitted) {
+        showMainResult();
+        return;
+      }
+
+      if (!autoSubmit) {
+        const objectiveMissing = mainQuestions.filter(item =>
+          state.mainAnswers[item.id] === undefined
+        ).length;
+        const subjectiveMissing = subjectiveQuestions.filter(item =>
+          !isSubjectiveAnswered(item)
+        ).length;
+
+        const message = objectiveMissing + subjectiveMissing > 0
+          ? `ยังมีปรนัยที่ไม่ได้ตอบ ${objectiveMissing} ข้อ และอัตนัยที่ยังไม่ตอบหรือไม่ครบ ${subjectiveMissing} ข้อ ต้องการส่งหรือไม่`
+          : "ยืนยันการส่งแบบทดสอบหรือไม่ หลังส่งแล้วจะไม่สามารถแก้ไขคำตอบได้";
+
+        if (!confirm(message)) return;
+      }
+
+      document.getElementById("submitMainBtn").disabled = true;
+      document.getElementById("submitMainBtn").textContent = "กำลังตรวจคำตอบ...";
+
+      clearInterval(timerInterval);
+
+      const objective = calculateMCQ(mainQuestions, state.mainAnswers);
+      const subjectiveResults = await gradeSubjective();
+      const objectiveScore = objective.correct / mainQuestions.length * 20;
+      const subjectiveScore = Object.values(subjectiveResults)
+        .reduce((sum, item) => sum + item.score, 0);
+
+      state.mainSubmitted = true;
+      state.result = {
+        objective,
+        objectiveScore,
+        subjectiveResults,
+        subjectiveScore,
+        totalScore: objectiveScore + subjectiveScore,
+        autoSubmit,
+        submittedAt: new Date().toISOString()
+      };
+
+      saveState();
+      showMainResult();
+    }
+
+    function mergeTopicResults(objectiveByTopic, subjectiveResults) {
+      const merged = JSON.parse(JSON.stringify(objectiveByTopic));
+
+      subjectiveQuestions.forEach(item => {
+        if (!merged[item.topic]) merged[item.topic] = { correct: 0, total: 0 };
+        merged[item.topic].correct += subjectiveResults[item.id]?.score || 0;
+        merged[item.topic].total += 6;
+      });
+
+      return merged;
+    }
+
+    function showMainResult() {
+      if (!state.result) return;
+
+      clearInterval(timerInterval);
+
+      const result = state.result;
+      const totalPercent = result.totalScore / 50 * 100;
+      const mergedTopics = mergeTopicResults(result.objective.byTopic, result.subjectiveResults);
+      const sortedTopics = Object.entries(mergedTopics)
+        .map(([topic, score]) => ({
+          topic,
+          ...score,
+          percent: score.total ? score.correct / score.total * 100 : 0
+        }))
+        .sort((a, b) => b.percent - a.percent);
+
+      const strengths = sortedTopics.filter(item => item.percent >= 70);
+      const weaknesses = sortedTopics.filter(item => item.percent < 60);
+
+      const screen = document.getElementById("mainResultScreen");
+      screen.innerHTML = `
+        <article class="panel">
+          <div class="panel-body">
+            <h2 class="section-title">รายงานผลการประเมิน</h2>
+            <p><strong>ผู้เข้าสอบ:</strong> ${escapeHTML(state.candidate.name)} — ${escapeHTML(state.candidate.room)}</p>
+            ${result.autoSubmit ? `<div class="notice warning">ระบบส่งคำตอบอัตโนมัติเนื่องจากหมดเวลาสอบ</div>` : ""}
+            <div class="result-grid">
+              <div class="score-card">
+                <strong>ปรนัย</strong>
+                <div class="score-value">${result.objectiveScore.toFixed(2)}/20</div>
+                <small>ตอบถูก ${result.objective.correct}/30 ข้อ</small>
+              </div>
+              <div class="score-card">
+                <strong>อัตนัยและเชิงซ้อน</strong>
+                <div class="score-value">${result.subjectiveScore.toFixed(0)}/30</div>
+              </div>
+              <div class="score-card">
+                <strong>คะแนนรวม</strong>
+                <div class="score-value">${result.totalScore.toFixed(2)}/50</div>
+                <small>${getLevel(totalPercent)}</small>
+              </div>
+            </div>
+
+            <h3>วิเคราะห์ความสามารถรายด้าน</h3>
+            ${renderTopicAnalysis(mergedTopics)}
+
+            <div class="info-grid">
+              <div class="info-card">
+                <strong>จุดแข็ง</strong>
+                ${strengths.length
+                  ? strengths.map(item => topicLabels[item.topic] || item.topic).join(", ")
+                  : "ยังไม่มีหัวข้อที่ผ่านเกณฑ์จุดแข็งอย่างชัดเจน"}
+              </div>
+              <div class="info-card">
+                <strong>เรื่องที่ควรปรับปรุง</strong>
+                ${weaknesses.length
+                  ? weaknesses.map(item => topicLabels[item.topic] || item.topic).join(", ")
+                  : "ผลการประเมินไม่พบหัวข้อที่ต่ำกว่าเกณฑ์ 60%"}
+              </div>
+              <div class="info-card">
+                <strong>แนวทางทบทวน</strong>
+                ทบทวนความสัมพันธ์ระหว่างตำแหน่ง โครงสร้าง และหน้าที่ แล้วฝึกอธิบายผลการทดลองโดยอ้างหลักฐานจากข้อมูล
+              </div>
+            </div>
+
+            <div class="actions">
+              <button type="button" class="btn btn-secondary" onclick="window.print()">พิมพ์รายงานผล</button>
+              <button type="button" class="btn btn-primary" id="toggleDetailedAnswers">ดูเฉลยและคำอธิบายละเอียด</button>
+            </div>
+          </div>
+        </article>
+
+        <div id="detailedAnswers" class="hidden">
+          <article class="panel">
+            <div class="panel-body">
+              <h2>เฉลยย่อส่วนปรนัย</h2>
+              ${renderShortAnswerTable()}
+            </div>
+          </article>
+          <article class="panel">
+            <div class="panel-body">
+              <h2>เฉลยละเอียดส่วนปรนัย</h2>
+              ${renderAnswerReviews(mainQuestions, state.mainAnswers)}
+            </div>
+          </article>
+          <article class="panel">
+            <div class="panel-body">
+              <h2>เฉลยและเกณฑ์ส่วนอัตนัย</h2>
+              ${renderSubjectiveReviews(result.subjectiveResults)}
+            </div>
+          </article>
+        </div>`;
+
+      document.getElementById("toggleDetailedAnswers").onclick = event => {
+        const details = document.getElementById("detailedAnswers");
+        details.classList.toggle("hidden");
+        event.target.textContent = details.classList.contains("hidden")
+          ? "ดูเฉลยและคำอธิบายละเอียด"
+          : "ซ่อนเฉลยละเอียด";
+      };
+
+      showScreen("mainResultScreen");
+    }
+
+    function renderShortAnswerTable() {
+      const rows = [];
+      for (let i = 0; i < mainQuestions.length; i += 5) {
+        const cells = mainQuestions.slice(i, i + 5).map((item, offset) => {
+          const number = i + offset + 1;
+          const selected = state.mainAnswers[item.id];
+          const status = selected === undefined
+            ? "ไม่ตอบ"
+            : Number(selected) === item.answer ? "ถูก" : "ผิด";
+
+          return `<td><strong>${number}) ${letters[item.answer]}</strong><br><small>${status}</small></td>`;
+        });
+        rows.push(`<tr>${cells.join("")}</tr>`);
+      }
+
+      return `<table class="data-table"><tbody>${rows.join("")}</tbody></table>`;
+    }
+
+    function renderAnswerReviews(questions, answers) {
+      return questions.map((item, index) => {
+        const selected = answers[item.id];
+        const correct = Number(selected) === item.answer;
+        const status = selected === undefined
+          ? `<span class="result-status status-empty">ไม่ได้ตอบ</span>`
+          : correct
+            ? `<span class="result-status status-correct">ตอบถูก</span>`
+            : `<span class="result-status status-wrong">ตอบผิด</span>`;
+
+        const choices = item.choices.map((choice, choiceIndex) => {
+          const classes = [
+            "explanation-choice",
+            choiceIndex === item.answer ? "correct" : "",
+            Number(selected) === choiceIndex && choiceIndex !== item.answer ? "selected-wrong" : ""
+          ].join(" ");
+
+          return `
+            <div class="${classes}">
+              <strong>${letters[choiceIndex]}. ${choice}</strong><br>
+              ${choiceIndex === item.answer ? "ถูก — " : "ไม่ถูก — "}${item.notes[choiceIndex]}
+              ${Number(selected) === choiceIndex ? " <strong>(คำตอบของผู้สอบ)</strong>" : ""}
+            </div>`;
+        }).join("");
+
+        return `
+          <details class="answer-review">
+            <summary>ข้อ ${index + 1} ${status} — เฉลย ${letters[item.answer]}</summary>
+            <div class="review-content">
+              <p><strong>โจทย์:</strong> ${item.stem}</p>
+              ${item.media ? renderMedia(item.media) : ""}
+              <p><strong>หลักการ:</strong> ${item.reason}</p>
+              ${choices}
+            </div>
+          </details>`;
+      }).join("");
+    }
+
+    function renderSubjectiveReviews(results) {
+      return subjectiveQuestions.map((item, index) => {
+        const result = results[item.id];
+        const answer = state.subjectiveAnswers[item.id];
+
+        let answerHTML = "";
+
+        if (item.type === "matching") {
+          answerHTML = `
+            <table class="data-table">
+              <tr><th>รายการ</th><th>คำตอบของผู้สอบ</th><th>คำตอบที่ถูก</th></tr>
+              ${item.items.map(([label, correct], itemIndex) => {
+                const optionText = value => item.options.find(option => option[0] === value)?.[1] || "ไม่ได้ตอบ";
+                return `<tr>
+                  <td>${label}</td>
+                  <td>${optionText(answer?.[itemIndex])}</td>
+                  <td>${optionText(correct)}</td>
+                </tr>`;
+              }).join("")}
+            </table>`;
+        }
+
+        if (item.type === "multi") {
+          answerHTML = `
+            <table class="data-table">
+              <tr><th>ข้อความ</th><th>คำตอบของผู้สอบ</th><th>เฉลย</th></tr>
+              ${item.statements.map(([code, text, correct]) => `
+                <tr>
+                  <td style="text-align:left">${code}. ${text}</td>
+                  <td>${answer?.includes(code) ? "เลือก" : "ไม่เลือก"}</td>
+                  <td>${correct ? "ควรเลือก" : "ไม่ควรเลือก"}</td>
+                </tr>`).join("")}
+            </table>`;
+        }
+
+        if (item.type === "fill") {
+          answerHTML = `
+            <table class="data-table">
+              <tr><th>ช่อง</th><th>คำตอบของผู้สอบ</th><th>ตัวอย่างคำตอบ</th></tr>
+              ${item.prompts.map(([prompt, accepted], itemIndex) => `
+                <tr>
+                  <td style="text-align:left">${prompt}</td>
+                  <td>${escapeHTML(answer?.[itemIndex] || "ไม่ได้ตอบ")}</td>
+                  <td>${accepted[0]}</td>
+                </tr>`).join("")}
+            </table>`;
+        }
+
+        if (item.type === "essay") {
+          answerHTML = `
+            <p><strong>คำตอบของผู้สอบ:</strong></p>
+            <div class="rubric">${escapeHTML(answer || "ไม่ได้ตอบ").replaceAll("\n", "<br>")}</div>
+            <p><strong>แนวคำตอบ:</strong> ${item.model}</p>
+            <p><strong>เกณฑ์ให้คะแนน:</strong></p>
+            <ol>${item.rubric.map(([criterion]) => `<li>${criterion} — 1 คะแนน</li>`).join("")}</ol>`;
+        }
+
+        return `
+          <details class="answer-review">
+            <summary>อัตนัยข้อ ${index + 1} — ${result.score}/6 คะแนน</summary>
+            <div class="review-content">
+              <h3>${item.title}</h3>
+              ${answerHTML}
+              <div class="notice">
+                <strong>ผลประเมิน:</strong> ${result.feedback}
+              </div>
+              <p><strong>คำอธิบาย:</strong> ${item.explanation || "พิจารณาตามเกณฑ์และแนวคำตอบที่กำหนด"}</p>
+            </div>
+          </details>`;
+      }).join("");
+    }
+
+    document.getElementById("startDiagnosticBtn").addEventListener("click", () => {
+      const name = document.getElementById("candidateName").value.trim();
+      const room = document.getElementById("candidateRoom").value.trim();
+
+      if (!name || !room) {
+        showToast("กรุณากรอกชื่อ–นามสกุลและชั้น/รหัสประจำตัว");
+        document.getElementById(!name ? "candidateName" : "candidateRoom").focus();
+        return;
+      }
+
+      state.candidate = { name, room };
+      saveState();
+      renderDiagnostic();
+      showScreen("diagnosticScreen");
+    });
+
+    document.getElementById("submitDiagnosticBtn").addEventListener("click", submitDiagnostic);
+    document.getElementById("startMainBtn").addEventListener("click", startMainExam);
+    document.getElementById("submitMainBtn").addEventListener("click", () => submitMain(false));
+
+    document.getElementById("resetAllBtn").addEventListener("click", () => {
+      if (!confirm("ต้องการล้างคำตอบ คะแนน และเวลาสอบที่บันทึกไว้ทั้งหมดหรือไม่")) return;
+      localStorage.removeItem(STORAGE_KEY);
+      location.reload();
+    });
+
+    window.addEventListener("beforeunload", () => {
+      if (state.mainStarted && !state.mainSubmitted) saveState();
+    });
+
+    function initialize() {
+      loadState();
+
+      document.getElementById("candidateName").value = state.candidate.name || "";
+      document.getElementById("candidateRoom").value = state.candidate.room || "";
+
+      if (state.mainSubmitted && state.result) {
+        showMainResult();
+        return;
+      }
+
+      if (state.mainStarted && !state.mainSubmitted) {
+        if (state.endTime && Date.now() >= state.endTime) {
+          renderMainExam();
+          submitMain(true);
+        } else {
+          renderMainExam();
+          startTimer();
+          showScreen("mainExamScreen");
+        }
+        return;
+      }
+
+      if (state.diagnosticSubmitted) {
+        showDiagnosticResult();
+      }
+    }
+
+    initialize();
+  </script>
+</body>
+</html>
