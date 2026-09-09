@@ -1030,7 +1030,7 @@
             <div class="bg-white dark:bg-slate-800 rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-700">
                 <div class="w-11 h-11 rounded-xl bg-amber-100 dark:bg-amber-900/30 text-amber-600 flex items-center justify-center mb-3"><i class="fa-solid fa-key"></i></div>
                 <h3 class="font-bold text-slate-900 dark:text-white">ตั้งรหัสผ่านใหม่</h3>
-                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">ลิงก์นี้เปิดจากอีเมลกู้คืนรหัสผ่าน</p>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">คุณเปิดลิงก์กู้คืนรหัสผ่านสำเร็จแล้ว กรุณาตั้งรหัสผ่านใหม่ด้านล่าง</p>
                 <input v-model="resetPassword" type="password" autocomplete="new-password" placeholder="รหัสผ่านใหม่ (อย่างน้อย 6 ตัวอักษร)" class="w-full mt-4 px-3.5 py-2.5 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm dark:text-white">
                 <input v-model="resetPasswordConfirm" type="password" autocomplete="new-password" placeholder="ยืนยันรหัสผ่านใหม่" class="w-full mt-2.5 px-3.5 py-2.5 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm dark:text-white">
                 <p v-if="resetMessage" class="mt-3 text-xs" :class="resetSuccess ? 'text-emerald-600' : 'text-rose-600'">{{ resetMessage }}</p>
@@ -1061,24 +1061,6 @@
                 </button>
                 <button v-if="authMode==='signup'" @click="authMode='login'; authMessage=''" type="button" class="w-full mt-2 py-2 text-xs text-slate-500 hover:text-blue-600">มีบัญชีอยู่แล้ว? เข้าสู่ระบบ</button>
                 <p class="mt-3 text-[10px] leading-relaxed text-slate-400">สมัครได้หลายอีเมล บัญชีแต่ละบัญชีจะแยกงานออกจากกัน และใช้บัญชีเดิมบนหลายอุปกรณ์ได้</p>
-            </div>
-        </div>
-
-        <!-- PASSWORD RESET OTP MODAL -->
-        <div v-if="showResetOtpModal" class="fixed inset-0 z-[90] bg-slate-900/75 glass-effect flex items-center justify-center p-4">
-            <div class="w-full max-w-md bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6">
-                <div class="w-14 h-14 mx-auto rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center text-blue-600 dark:text-blue-300 text-2xl"><i class="fa-solid fa-shield-halved"></i></div>
-                <h3 class="text-lg font-bold text-center mt-4 dark:text-white">ยืนยันการกู้รหัสผ่าน</h3>
-                <p class="text-sm text-center text-slate-500 dark:text-slate-300 mt-2">ส่งรหัสยืนยันไปที่</p>
-                <p class="text-sm text-center font-semibold text-blue-600 dark:text-blue-300 mt-1 break-all">{{ resetOtpEmail }}</p>
-                <input v-model="resetOtpCode" inputmode="numeric" maxlength="8" autocomplete="one-time-code" placeholder="กรอกรหัสยืนยันจากอีเมล" class="w-full mt-5 px-3.5 py-3 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-center text-lg tracking-[0.35em] font-bold dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                <p class="mt-3 text-xs text-center text-amber-600 dark:text-amber-300">รหัสนี้ใช้ได้ภายใน 10 นาที กรุณานำรหัสจากอีเมลมากรอก</p>
-                <p v-if="authMessage" class="mt-3 text-xs text-center text-rose-600 dark:text-rose-400">{{ authMessage }}</p>
-                <button @click="verifyResetOtp()" :disabled="isSyncing" class="w-full mt-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-semibold">
-                    <i v-if="isSyncing" class="fa-solid fa-spinner fa-spin mr-1"></i>{{ isSyncing ? 'กำลังตรวจสอบ…' : 'ยืนยันรหัส' }}
-                </button>
-                <button @click="showResetOtpModal=false; resetOtpCode=''; authMessage=''" type="button" class="w-full mt-2 py-2 text-xs text-slate-500 hover:text-blue-600">ยกเลิก</button>
-                <p class="mt-3 text-[10px] leading-relaxed text-slate-400 text-center">หากไม่พบอีเมล ให้ตรวจสอบ Spam / Junk และอย่ากรอกรหัสที่ได้รับจากบุคคลอื่น</p>
             </div>
         </div>
 
@@ -1207,11 +1189,7 @@
 
                 const showEmailConfirmedModal = ref(false);
                 const showResetModal = ref(false);
-                const showResetSentModal = ref(false);
-                const showResetOtpModal = ref(false);
-                const resetOtpCode = ref('');
                 const resetOtpEmail = ref('');
-                const resetOtpExpiresAt = ref(0);
                 const resetPassword = ref('');
                 const resetPasswordConfirm = ref('');
                 const resetMessage = ref('');
@@ -1584,7 +1562,6 @@
 
                 async function requestPasswordReset() {
                     authMessage.value = '';
-                    resetOtpCode.value = '';
                     if (!CLOUD_ENABLED || !supabaseClient) {
                         authMessage.value = 'ระบบ Cloud ยังไม่พร้อมใช้งาน';
                         return;
@@ -1596,93 +1573,19 @@
                     }
                     try {
                         isSyncing.value = true;
-                        const { error } = await supabaseClient.auth.signInWithOtp({
-                            email,
-                            options: { shouldCreateUser: false }
+                        const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+                            redirectTo: APP_URL
                         });
                         if (error) throw error;
                         resetOtpEmail.value = email;
-                        resetOtpExpiresAt.value = Date.now() + (10 * 60 * 1000);
-                        showResetOtpModal.value = true;
-                        authMessage.value = '';
+                        authMessage.value = 'ส่งลิงก์รีเซ็ตรหัสผ่านไปยังอีเมลแล้ว กรุณาเปิดลิงก์จากอีเมล';
                     } catch (err) {
-                        console.error('Password reset OTP error:', err);
+                        console.error('Password reset error:', err);
                         const msg = err?.message || '';
-                        if (msg.toLowerCase().includes('rate limit')) authMessage.value = 'ส่งรหัสบ่อยเกินไป กรุณารอสักครู่แล้วลองใหม่';
-                        else if (msg.toLowerCase().includes('not found') || msg.toLowerCase().includes('signups not allowed')) authMessage.value = 'ไม่พบบัญชีนี้ กรุณาตรวจสอบอีเมล';
-                        else authMessage.value = msg || 'ส่งรหัสยืนยันไม่สำเร็จ กรุณาลองใหม่';
+                        if (msg.toLowerCase().includes('rate limit')) authMessage.value = 'ส่งอีเมลบ่อยเกินไป กรุณารอสักครู่แล้วลองใหม่';
+                        else authMessage.value = msg || 'ส่งลิงก์รีเซ็ตรหัสผ่านไม่สำเร็จ กรุณาลองใหม่';
                     } finally {
                         isSyncing.value = false;
-                    }
-                }
-
-                async function verifyResetOtp() {
-                    authMessage.value = '';
-                    const email = resetOtpEmail.value.trim().toLowerCase();
-                    const token = resetOtpCode.value.trim();
-                    if (!email || !token) {
-                        authMessage.value = 'กรุณากรอกรหัสยืนยันจากอีเมล';
-                        return;
-                    }
-                    if (resetOtpExpiresAt.value && Date.now() > resetOtpExpiresAt.value) {
-                        authMessage.value = 'รหัสหมดอายุแล้ว กรุณากดลืมรหัสผ่านใหม่เพื่อขอรหัสใหม่';
-                        return;
-                    }
-                    try {
-                        isSyncing.value = true;
-                        const { data, error } = await supabaseClient.auth.verifyOtp({ email, token, type: 'email' });
-                        if (error) throw error;
-                        if (!data?.session?.user) throw new Error('ยืนยันรหัสไม่สำเร็จ กรุณาขอรหัสใหม่');
-                        authGeneration++;
-                        cloudUser.value = data.session.user;
-                        showResetOtpModal.value = false;
-                        resetOtpCode.value = '';
-                        showResetModal.value = true;
-                        resetMessage.value = '';
-                        resetSuccess.value = false;
-                        authMessage.value = '';
-                        await syncSignedInSession(data.session, authGeneration);
-                    } catch (err) {
-                        console.error('Password reset OTP verify error:', err);
-                        const msg = err?.message || '';
-                        if (msg.toLowerCase().includes('expired') || msg.toLowerCase().includes('invalid')) authMessage.value = 'รหัสไม่ถูกต้องหรือหมดอายุ กรุณาตรวจสอบรหัสแล้วลองใหม่';
-                        else authMessage.value = msg || 'ยืนยันรหัสไม่สำเร็จ กรุณาลองใหม่';
-                    } finally {
-                        isSyncing.value = false;
-                    }
-                }
-
-                async function updatePasswordFromRecovery() {
-                    resetMessage.value = '';
-                    resetSuccess.value = false;
-                    if (!resetPassword.value || resetPassword.value.length < 6) {
-                        resetMessage.value = 'รหัสผ่านใหม่ต้องมีอย่างน้อย 6 ตัวอักษร';
-                        return;
-                    }
-                    if (resetPassword.value !== resetPasswordConfirm.value) {
-                        resetMessage.value = 'รหัสผ่านทั้งสองช่องไม่ตรงกัน';
-                        return;
-                    }
-                    try {
-                        const { error } = await supabaseClient.auth.updateUser({ password: resetPassword.value });
-                        if (error) throw error;
-                        resetSuccess.value = true;
-                        resetMessage.value = 'เปลี่ยนรหัสผ่านสำเร็จแล้ว';
-                        setTimeout(async () => {
-                            showResetModal.value = false;
-                            resetPassword.value = '';
-                            resetPasswordConfirm.value = '';
-                            try { await supabaseClient.auth.signOut(); } catch (_) {}
-                            await clearUserScopedState();
-                            cloudUser.value = null;
-                            authMode.value = 'login';
-                            authEmail.value = resetOtpEmail.value || '';
-                            authPassword.value = '';
-                            authMessage.value = 'เปลี่ยนรหัสผ่านสำเร็จแล้ว กรุณาเข้าสู่ระบบด้วยรหัสผ่านใหม่';
-                            showAuthModal.value = true;
-                        }, 900);
-                    } catch (err) {
-                        resetMessage.value = err?.message || 'เปลี่ยนรหัสผ่านไม่สำเร็จ';
                     }
                 }
 
@@ -2256,7 +2159,6 @@
                     const savedTheme = localStorage.getItem(LOCAL_KEYS.theme);
                     if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) { isDark.value = true; document.documentElement.classList.add('dark'); }
                     checkDraft();
-                    handleAuthRedirectUrl();
                     await autoPurgeTrash();
                     setTimeout(checkScheduledReminders, 1500);
                     setInterval(checkScheduledReminders, 30000);
@@ -2282,9 +2184,14 @@
                             authListenerAttached = true;
                             supabaseClient.auth.onAuthStateChange((event, session) => {
                                 if (event === 'PASSWORD_RECOVERY') {
-                                    // Legacy recovery-link compatibility. The normal flow now uses email OTP.
+                                    // Supabase has verified the recovery link and created a temporary session.
+                                    // Keep that session active so updateUser({ password }) can set the new password.
+                                    showAuthModal.value = false;
                                     showResetModal.value = true;
+                                    resetPassword.value = '';
+                                    resetPasswordConfirm.value = '';
                                     resetMessage.value = '';
+                                    resetSuccess.value = false;
                                     try { window.history.replaceState({}, document.title, APP_URL); } catch (_) {}
                                     return;
                                 }
@@ -2324,6 +2231,17 @@
                                 }
                             });
                         }
+
+                        // Handle recovery links that arrive before/without the auth event callback.
+                        const recoveryUrl = new URL(window.location.href);
+                        const recoveryHash = new URLSearchParams(recoveryUrl.hash.replace(/^#/, ''));
+                        if (recoveryHash.get('type') === 'recovery' && data.session?.user) {
+                            showAuthModal.value = false;
+                            showResetModal.value = true;
+                            resetMessage.value = '';
+                            resetSuccess.value = false;
+                            try { window.history.replaceState({}, document.title, APP_URL); } catch (_) {}
+                        }
                     } catch (err) {
                         console.error(err);
                         syncError.value = err?.message || 'เริ่มระบบ Cloud ไม่สำเร็จ';
@@ -2347,7 +2265,7 @@
                     toggleTheme, resumeDraft, discardDraft,
                     // Cloud/auth helpers are exposed for optional console/UI use.
                     CLOUD_ENABLED, syncStatus, syncError, cloudUser, showAuthModal, authMode, authEmail, authPassword,
-                    authMessage, isSyncing, signInOrSignUp, logout, signOutCloud, requestPasswordReset, verifyResetOtp, showEmailConfirmedModal, showResetOtpModal, showResetModal, resetOtpCode, resetOtpEmail, resetPassword, resetPasswordConfirm, resetMessage, resetSuccess, updatePasswordFromRecovery, completionAttachments, completionLink, enableBrowserNotifications
+                    authMessage, isSyncing, signInOrSignUp, logout, signOutCloud, requestPasswordReset, showEmailConfirmedModal, showResetModal, resetOtpEmail, resetPassword, resetPasswordConfirm, resetMessage, resetSuccess, updatePasswordFromRecovery, completionAttachments, completionLink, enableBrowserNotifications
                 };
             }
         }).mount('#app');
