@@ -1,1 +1,546 @@
 
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#17345c">
+<title>งานคงค้าง | Study Task Manager</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --navy:#17345c;--blue:#3468c8;--bg:#f4f6fa;--white:#fff;
+  --ink:#1b2b43;--muted:#718096;--line:#e2e8f0;
+  --red:#d63d4d;--orange:#e88b35;--yellow:#e5c33e;
+  --green:#46945e;--radius:15px
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+font-family:-apple-system,BlinkMacSystemFont,"Noto Sans Thai",Tahoma,sans-serif;
+font-size:15px;line-height:1.6}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{
+ outline:3px solid #9ab9ff;outline-offset:2px}
+header{background:var(--navy);color:white;padding:18px max(18px,calc((100% - 1150px)/2))}
+.brand{font-size:24px;font-weight:800;letter-spacing:.2px}
+.subtitle{font-size:12px;color:#d1dced}
+main{max-width:1150px;margin:auto;padding:18px 16px 100px}
+.toolbar{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:16px}
+.toolbar input{flex:1;min-width:180px}
+input,textarea,select{width:100%;padding:11px 12px;border:1px solid #d7deea;
+border-radius:10px;background:white;color:var(--ink)}
+textarea{min-height:100px;resize:vertical}
+.btn{border:1px solid var(--line);background:white;color:var(--ink);
+border-radius:10px;padding:9px 13px;font-weight:650}
+.primary{background:var(--blue);border-color:var(--blue);color:white}
+.danger{color:var(--red);background:#fff1f2}
+.tabs{display:flex;gap:7px;overflow-x:auto;padding:4px 0 14px}
+.tab{white-space:nowrap;border:1px solid var(--line);background:white;
+border-radius:10px;padding:10px 13px;color:#506078}
+.tab.active{background:var(--navy);border-color:var(--navy);color:white}
+h1{font-size:25px;margin:5px 0}
+h2{font-size:19px;margin:0 0 12px}
+.muted{color:var(--muted);font-size:13px}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:12px 0 20px}
+.stat,.panel,.task,.course,.day,.authbox{background:white;border:1px solid var(--line);
+border-radius:var(--radius);padding:15px}
+.stat strong{font-size:25px;display:block}
+.list{display:grid;gap:10px}
+.task{display:grid;grid-template-columns:5px minmax(0,1fr);gap:13px}
+.stripe{border-radius:9px;background:#dbe2ed}
+.task h3{font-size:16px;margin:0 0 4px;overflow-wrap:anywhere}
+.task p{margin:4px 0;overflow-wrap:anywhere}
+.task-buttons{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+.pill{display:inline-block;padding:3px 8px;border-radius:7px;background:#edf2f8;
+font-size:12px;margin:2px 4px 2px 0}
+.red{background:#fff0f1;color:#bf283a}
+.orange{background:#fff1e3;color:#b96719}
+.yellow{background:#fff9d9;color:#886d00}
+.green{background:#eaf7ed;color:#2f7544}
+.white{background:#f2f4f7;color:#536174}
+.panel{margin:12px 0}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.field{display:grid;gap:5px;margin-bottom:12px}
+label{font-weight:650;font-size:13px}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.calendar{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.day{padding:6px 2px;text-align:center;min-height:65px;border-radius:8px}
+.day button{border:0;background:transparent;color:inherit;width:100%;padding:0}
+.dots{display:flex;justify-content:center;gap:3px;flex-wrap:wrap;margin-top:5px}
+.dot{width:7px;height:7px;border-radius:50%;display:inline-block}
+.overlay{position:fixed;inset:0;background:#101c30a6;z-index:10;
+display:none;align-items:flex-start;justify-content:center;overflow:auto;padding:18px}
+.modal{background:white;width:min(650px,100%);border-radius:17px;padding:20px;margin:auto}
+.modalhead{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:16px}
+.filelink{display:block;margin:5px 0;overflow-wrap:anywhere}
+footer{position:fixed;bottom:0;left:0;right:0;background:white;
+border-top:1px solid var(--line);display:flex;justify-content:space-around;
+padding:8px 3px max(8px,env(safe-area-inset-bottom));z-index:5}
+footer button{border:0;background:transparent;color:#617087;font-size:11px;
+padding:5px;min-width:0}
+footer button span{display:block;font-size:20px}
+footer button.active{color:var(--blue);font-weight:800}
+#notice{position:fixed;top:12px;left:50%;transform:translateX(-50%);
+z-index:30;background:#17345c;color:white;padding:10px 16px;border-radius:10px;
+display:none;max-width:90%;box-shadow:0 5px 20px #0002}
+.hidden{display:none!important}
+@media(min-width:750px){
+ footer{position:static;max-width:1150px;margin:auto;border:0;background:transparent;
+ justify-content:flex-start;gap:8px;padding:0 16px 10px}
+ footer button{background:white;border:1px solid var(--line);border-radius:10px;padding:9px 14px}
+ footer button span{display:inline;margin-right:5px}
+}
+@media(max-width:500px){
+ main{padding:14px 11px 95px}.stats{gap:7px}.stat{padding:10px}
+ .stat strong{font-size:21px}.grid{grid-template-columns:1fr}
+ .task{padding:12px;gap:9px}.brand{font-size:22px}
+ .overlay{padding:8px}.modal{padding:15px}
+}
+</style>
+</head>
+<body>
+<header>
+ <div class="brand">▣ งานคงค้าง</div>
+ <div class="subtitle">STUDY TASK MANAGER · ระบบจัดการงานเรียน</div>
+</header>
+
+<main>
+ <div id="auth" class="authbox">
+  <h2>บัญชีผู้ใช้</h2>
+  <p class="muted">เข้าสู่ระบบหรือสมัครสมาชิกเพื่อซิงก์ข้อมูลผ่านคลาวด์</p>
+  <div class="field"><label for="email">อีเมล</label>
+   <input id="email" type="email" autocomplete="email" placeholder="you@example.com"></div>
+  <div class="field"><label for="password">รหัสผ่าน</label>
+   <input id="password" type="password" autocomplete="current-password"
+   placeholder="อย่างน้อย 8 ตัวอักษร"></div>
+  <div class="actions">
+   <button class="btn primary" onclick="signIn()">เข้าสู่ระบบ</button>
+   <button class="btn" onclick="signUp()">สมัครสมาชิก</button>
+   <button class="btn" onclick="useLocal()">ทดลองแบบไม่เข้าสู่ระบบ</button>
+  </div>
+  <p class="muted">การทดลองแบบไม่เข้าสู่ระบบจะเก็บข้อมูลไว้ในเบราว์เซอร์นี้เท่านั้น</p>
+ </div>
+
+ <div id="workspace" class="hidden">
+  <div class="toolbar">
+   <input id="search" placeholder="⌕ ค้นหางาน วิชา ครู หรือรายละเอียด..." oninput="render()">
+   <button class="btn" onclick="openCourse()">＋ รายวิชา</button>
+   <button class="btn primary" onclick="openTask()">＋ เพิ่มงาน</button>
+  </div>
+  <div class="stats">
+   <div class="stat"><span class="muted">งานที่ยังไม่เสร็จ</span><strong id="statOpen">0</strong></div>
+   <div class="stat"><span class="muted">งานเสร็จแล้ว</span><strong id="statDone">0</strong></div>
+   <div class="stat"><span class="muted">เลยกำหนดส่ง</span><strong id="statLate">0</strong></div>
+  </div>
+  <div id="pageTitle"><h1>ยังไม่เสร็จ</h1><p class="muted">ติดตามงานและวันกำหนดส่งของคุณ</p></div>
+  <div id="content"></div>
+  <section class="panel">
+   <div class="actions" style="justify-content:space-between;align-items:center">
+    <span id="userInfo" class="muted">โหมดทดลองในเครื่อง</span>
+    <button class="btn" onclick="signOut()">ออกจากระบบ</button>
+   </div>
+  </section>
+ </div>
+</main>
+
+<footer id="nav" class="hidden">
+ <button data-page="open" onclick="go('open')"><span>☷</span>ยังไม่เสร็จ</button>
+ <button data-page="done" onclick="go('done')"><span>✓</span>เสร็จแล้ว</button>
+ <button data-page="courses" onclick="go('courses')"><span>▤</span>รายวิชา</button>
+ <button data-page="calendar" onclick="go('calendar')"><span>▦</span>ปฏิทิน</button>
+ <button data-page="trash" onclick="go('trash')"><span>♲</span>ถังขยะ</button>
+</footer>
+
+<div id="overlay" class="overlay" onclick="if(event.target===this)closeModal()">
+ <div class="modal" id="modal"></div>
+</div>
+<div id="notice" role="status"></div>
+
+<script>
+"use strict";
+
+/* ตั้งค่าหลังสร้าง Supabase project:
+   ใส่ Project URL และ publishable/anon key ในสองบรรทัดด้านล่าง
+   ห้ามใส่ service_role key ในเว็บไซต์ */
+const SUPABASE_URL = "";
+const SUPABASE_ANON_KEY = "";
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g,c=>({
+ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+}[c]));
+const today = () => {
+ const d=new Date();
+ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+};
+const uid = () => crypto.randomUUID();
+let sb=null,user=null,mode="none",page="open",tasks=[],courses=[],month=new Date();
+let channel=null,editId=null,selectedFiles=[],completionFiles=[];
+let localKey="ngankhongkhang.v1";
+let noticeTimer;
+
+function toast(message){
+ $("notice").textContent=message;$("notice").style.display="block";
+ clearTimeout(noticeTimer);noticeTimer=setTimeout(()=>$("notice").style.display="none",3200);
+}
+function loadLocal(){
+ try{
+  const v=JSON.parse(localStorage.getItem(localKey)||"{}");
+  tasks=Array.isArray(v.tasks)?v.tasks:[];
+  courses=Array.isArray(v.courses)?v.courses:[];
+ }catch{tasks=[];courses=[]}
+}
+function saveLocal(){
+ try{localStorage.setItem(localKey,JSON.stringify({tasks,courses}));}
+ catch{toast("พื้นที่เก็บข้อมูลเต็ม กรุณาส่งออกข้อมูลหรือแนบไฟล์ขนาดเล็กลง")}
+}
+function enterWorkspace(){
+ $("auth").classList.add("hidden");$("workspace").classList.remove("hidden");
+ $("nav").classList.remove("hidden");$("userInfo").textContent=
+ mode==="cloud"?"บัญชี: "+(user?.email||"เข้าสู่ระบบแล้ว"):"โหมดทดลองในเครื่อง";
+ render();
+}
+function useLocal(){
+ mode="local";user=null;loadLocal();enterWorkspace();
+ toast("กำลังใช้ข้อมูลในอุปกรณ์นี้เท่านั้น");
+}
+async function signUp(){
+ if(!sb){toast("ยังไม่ได้ตั้งค่า Supabase กรุณาตั้งค่าตามคู่มือก่อน");return}
+ const email=$("email").value.trim(),password=$("password").value;
+ if(!email||password.length<8){toast("กรอกอีเมลและรหัสผ่านอย่างน้อย 8 ตัวอักษร");return}
+ const {data,error}=await sb.auth.signUp({email,password});
+ if(error){toast(error.message);return}
+ if(data.session){user=data.user;mode="cloud";await loadCloud();enterWorkspace();}
+ else toast("สมัครแล้ว กรุณาตรวจอีเมลเพื่อยืนยันบัญชี ก่อนเข้าสู่ระบบ");
+}
+async function signIn(){
+ if(!sb){toast("ยังไม่ได้ตั้งค่า Supabase กรุณาตั้งค่าตามคู่มือก่อน");return}
+ const email=$("email").value.trim(),password=$("password").value;
+ const {data,error}=await sb.auth.signInWithPassword({email,password});
+ if(error){toast(error.message);return}
+ user=data.user;mode="cloud";await loadCloud();enterWorkspace();subscribeRealtime();
+}
+async function signOut(){
+ if(mode==="cloud"&&sb)await sb.auth.signOut();
+ if(channel){await sb.removeChannel(channel);channel=null}
+ mode="none";user=null;tasks=[];courses=[];
+ $("workspace").classList.add("hidden");$("nav").classList.add("hidden");
+ $("auth").classList.remove("hidden");toast("ออกจากระบบแล้ว");
+}
+async function loadCloud(){
+ const [tr,cr]=await Promise.all([
+  sb.from("tasks").select("id,data").order("updated_at",{ascending:false}),
+  sb.from("courses").select("id,data").order("updated_at",{ascending:false})
+ ]);
+ if(tr.error||cr.error){toast("อ่านข้อมูลไม่ได้: "+(tr.error||cr.error).message);return}
+ tasks=(tr.data||[]).map(x=>({...x.data,id:x.id}));
+ courses=(cr.data||[]).map(x=>({...x.data,id:x.id}));
+ render();
+}
+function subscribeRealtime(){
+ if(!sb||!user)return;
+ if(channel)sb.removeChannel(channel);
+ channel=sb.channel("tasks-"+user.id)
+ .on("postgres_changes",{event:"*",schema:"public",table:"tasks",filter:"user_id=eq."+user.id},loadCloud)
+ .on("postgres_changes",{event:"*",schema:"public",table:"courses",filter:"user_id=eq."+user.id},loadCloud)
+ .subscribe();
+}
+async function putRow(table,item){
+ if(mode!=="cloud"){saveLocal();return true}
+ const payload={id:item.id,user_id:user.id,data:item,updated_at:new Date().toISOString()};
+ const {error}=await sb.from(table).upsert(payload);
+ if(error){toast("บันทึกไม่สำเร็จ: "+error.message);return false}
+ return true;
+}
+async function removeRow(table,id){
+ if(mode!=="cloud"){saveLocal();return true}
+ const {error}=await sb.from(table).delete().eq("id",id);
+ if(error){toast("ลบไม่สำเร็จ: "+error.message);return false}
+ return true;
+}
+function priority(t){
+ if(!t.dueDate)return {name:"ไม่ระบุวันส่ง",cls:"white",days:null};
+ const days=Math.round((new Date(t.dueDate+"T00:00:00")-new Date(today()+"T00:00:00"))/86400000);
+ if(days<0)return {name:"เลยกำหนด "+Math.abs(days)+" วัน",cls:"red",days};
+ if(days<=7)return {name:days===0?"ครบกำหนดวันนี้":"เหลือ "+days+" วัน",cls:"red",days};
+ if(days<=14)return {name:"เหลือ "+days+" วัน",cls:"orange",days};
+ if(days<=21)return {name:"เหลือ "+days+" วัน",cls:"yellow",days};
+ if(days<=30)return {name:"เหลือ "+days+" วัน",cls:"green",days};
+ return {name:"เหลือ "+days+" วัน",cls:"white",days};
+}
+function courseFor(name){return courses.find(c=>c.name===name)}
+function matches(t,q){
+ if(!q)return true;
+ return [t.title,t.subject,t.teacher,t.details,t.link].join(" ").toLowerCase().includes(q.toLowerCase());
+}
+function sortTasks(a,b){
+ const pa=priority(a),pb=priority(b);
+ if(pa.days===null)return pb.days===null?0:1;
+ if(pb.days===null)return -1;
+ return pa.days-pb.days;
+}
+function go(p){page=p;render()}
+function render(){
+ if(mode==="none")return;
+ $("statOpen").textContent=tasks.filter(t=>!t.completedAt&&!t.trashedAt&&!t.draft).length;
+ $("statDone").textContent=tasks.filter(t=>t.completedAt&&!t.trashedAt).length;
+ $("statLate").textContent=tasks.filter(t=>!t.completedAt&&!t.trashedAt&&!t.draft&&priority(t).days<0).length;
+ document.querySelectorAll("[data-page]").forEach(b=>b.classList.toggle("active",b.dataset.page===page));
+ const q=$("search").value.trim();
+ const titles={open:"ยังไม่เสร็จ",done:"เสร็จแล้ว",courses:"รายวิชา",calendar:"ปฏิทิน",trash:"ถังขยะ"};
+ $("pageTitle").innerHTML="<h1>"+titles[page]+"</h1><p class='muted'>"+({
+ open:"เรียงตามวันกำหนดส่งและความเร่งด่วน",
+ done:"ประวัติงานที่ทำเสร็จแล้ว",
+ courses:"แยกงานตามรายวิชา",
+ calendar:"เลือกวันเพื่อดูงานที่มีกำหนดส่ง",
+ trash:"รายการที่ย้ายไปถังขยะ"
+ }[page])+"</p>";
+ if(page==="open")renderTaskList(tasks.filter(t=>!t.completedAt&&!t.trashedAt&&matches(t,q)).sort(sortTasks));
+ if(page==="done")renderTaskList(tasks.filter(t=>t.completedAt&&!t.trashedAt&&matches(t,q)).sort((a,b)=>(b.completedAt||"").localeCompare(a.completedAt||"")));
+ if(page==="trash")renderTaskList(tasks.filter(t=>t.trashedAt&&matches(t,q)));
+ if(page==="courses")renderCourses(q);
+ if(page==="calendar")renderCalendar();
+}
+function renderTaskList(items){
+ if(!items.length){$("content").innerHTML="<div class='panel'><p>ไม่พบรายการงาน</p><p class='muted'>ลองเพิ่มงานใหม่หรือเปลี่ยนคำค้นหา</p></div>";return}
+ $("content").innerHTML="<div class='list'>"+items.map(t=>{
+  const p=priority(t),c=courseFor(t.subject);
+  return `<article class="task">
+   <div class="stripe ${p.cls}"></div><div>
+    <div><span class="pill">${esc(t.subject||"ไม่ระบุวิชา")}</span>
+    ${t.draft?'<span class="pill">ฉบับร่าง</span>':""}
+    ${t.completedAt?'<span class="pill green">เสร็จแล้ว</span>':""}</div>
+    <h3>${esc(t.title||"งานไม่มีชื่อ")}</h3>
+    <p>${esc(t.details||"ไม่มีรายละเอียด")}</p>
+    <p class="muted">♙ ${esc(t.teacher||c?.teacher||"ไม่ระบุผู้สอน")}
+    · ▦ ${esc(t.dueDate||"ไม่ระบุวันส่ง")}</p>
+    <span class="pill ${p.cls}">${esc(p.name)}</span>
+    <div class="task-buttons">
+     <button class="btn" onclick="details('${t.id}')">รายละเอียด</button>
+     ${!t.completedAt&&!t.trashedAt?`<button class="btn primary" onclick="completeTask('${t.id}')">✓ ทำเสร็จแล้ว</button>`:""}
+     ${t.completedAt?`<button class="btn" onclick="undoComplete('${t.id}')">ทำเครื่องหมายว่ายังไม่เสร็จ</button>`:""}
+     ${!t.trashedAt?`<button class="btn" onclick="openTask('${t.id}')">แก้ไข</button><button class="btn danger" onclick="trashTask('${t.id}')">ย้ายถังขยะ</button>`:
+     `<button class="btn" onclick="restoreTask('${t.id}')">กู้คืน</button><button class="btn danger" onclick="deleteTask('${t.id}')">ลบถาวร</button>`}
+    </div>
+   </div></article>`;
+ }).join("")+"</div>";
+}
+function renderCourses(q){
+ const names=[...new Set([...courses.map(c=>c.name),...tasks.map(t=>t.subject).filter(Boolean)])]
+ .filter(n=>n.toLowerCase().includes(q.toLowerCase()));
+ $("content").innerHTML=`<div class="actions" style="margin-bottom:12px">
+ <button class="btn primary" onclick="openCourse()">＋ เพิ่มรายวิชา</button></div>
+ <div class="list">${names.map(n=>{
+  const c=courseFor(n)||{name:n,teacher:"",color:"#3468c8"};
+  const ts=tasks.filter(t=>t.subject===n&&!t.trashedAt&&matches(t,q));
+  return `<section class="course"><h2><span class="dot" style="background:${esc(c.color)}"></span> ${esc(n)}</h2>
+  <p class="muted">ครูผู้สอน: ${esc(c.teacher||"ไม่ระบุ")} · งานทั้งหมด ${ts.length} รายการ</p>
+  <div class="actions"><button class="btn" onclick="showSubject('${encodeURIComponent(n)}')">ดูงานในวิชานี้</button>
+  <button class="btn" onclick="openCourse('${c.id||""}')">จัดการวิชา</button>
+  <button class="btn primary" onclick="openTask(null,'${esc(n)}')">＋ เพิ่มงาน</button></div></section>`;
+ }).join("")||"<p>ยังไม่มีรายวิชา</p>"}</div>`;
+}
+function showSubject(encoded){
+ const n=decodeURIComponent(encoded);
+ page="subject";$("pageTitle").innerHTML="<h1>"+esc(n)+"</h1>";
+ const ts=tasks.filter(t=>t.subject===n&&!t.trashedAt);
+ $("content").innerHTML="<h2>ยังไม่เสร็จ</h2>";
+ renderSubjectContent(ts);
+}
+function renderSubjectContent(ts){
+ $("content").innerHTML=`<h2>ยังไม่เสร็จ</h2><div class="list">${ts.filter(t=>!t.completedAt).map(t=>simpleTask(t)).join("")||"<p>ไม่มีงานค้าง</p>"}</div>
+ <h2 style="margin-top:20px">เสร็จแล้ว</h2><div class="list">${ts.filter(t=>t.completedAt).map(t=>simpleTask(t)).join("")||"<p>ยังไม่มีงานที่เสร็จแล้ว</p>"}</div>`;
+}
+function simpleTask(t){return `<section class="task"><div class="stripe ${priority(t).cls}"></div><div><h3>${esc(t.title)}</h3><p>${esc(t.dueDate||"ไม่ระบุวันส่ง")}</p><button class="btn" onclick="details('${t.id}')">รายละเอียด</button></div></section>`}
+function renderCalendar(){
+ const y=month.getFullYear(),m=month.getMonth(),first=new Date(y,m,1).getDay(),count=new Date(y,m+1,0).getDate();
+ const names=["อา","จ","อ","พ","พฤ","ศ","ส"];
+ let html=`<section class="panel"><div class="actions" style="justify-content:space-between;align-items:center">
+ <button class="btn" onclick="changeMonth(-1)">‹ เดือนก่อน</button><h2>${month.toLocaleDateString("th-TH",{month:"long",year:"numeric"})}</h2>
+ <button class="btn" onclick="changeMonth(1)">เดือนถัดไป ›</button></div>
+ <div class="calendar">${names.map(n=>`<div class="muted" style="text-align:center">${n}</div>`).join("")}`;
+ for(let i=0;i<first;i++)html+="<div></div>";
+ for(let d=1;d<=count;d++){
+  const date=`${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+  const ts=tasks.filter(t=>t.dueDate===date&&!t.trashedAt);
+  const dots=[...new Set(ts.map(t=>priority(t).cls))];
+  html+=`<div class="day"><button onclick="showDate('${date}')">${d}</button><div class="dots">${dots.map(c=>`<span class="dot ${c}" style="background:${({red:"#d63d4d",orange:"#e88b35",yellow:"#e5c33e",green:"#46945e",white:"#d8dee8"})[c]}"></span>`).join("")}</div>
+  ${ts.length?`<button class="muted" onclick="showDate('${date}')">${ts.length} งาน</button>`:""}</div>`;
+ }
+ $("content").innerHTML=html+"</div></section><div id='dateTasks'></div>";
+}
+function changeMonth(n){month=new Date(month.getFullYear(),month.getMonth()+n,1);renderCalendar()}
+function showDate(date){
+ const ts=tasks.filter(t=>t.dueDate===date&&!t.trashedAt);
+ const box=$("dateTasks");if(!box)return;
+ box.innerHTML=`<section class="panel"><h2>งานกำหนดส่งวันที่ ${esc(date)}</h2><div class="list">${ts.map(t=>simpleTask(t)).join("")||"<p>ไม่มีงานกำหนดส่งวันนี้</p>"}</div></section>`;
+}
+function openModal(html){
+ $("modal").innerHTML=html;$("overlay").style.display="flex";
+}
+function closeModal(){$("overlay").style.display="none";editId=null;selectedFiles=[];completionFiles=[]}
+function openTask(id=null,preset=""){
+ editId=id;const t=tasks.find(x=>x.id===id)||{};
+ selectedFiles=(t.attachments||[]).map(x=>({...x}));
+ openModal(`<div class="modalhead"><h2>${id?"แก้ไขงาน":"เพิ่มงานใหม่"}</h2><button class="btn" onclick="closeModal()">ปิด</button></div>
+ <form id="taskForm"><div class="grid">
+ <div class="field"><label>รายวิชา *</label><input name="subject" required maxlength="100" value="${esc(t.subject||preset)}" list="courseList" placeholder="เช่น เคมี"><datalist id="courseList">${courses.map(c=>`<option>${esc(c.name)}</option>`).join("")}</datalist></div>
+ <div class="field"><label>ครูผู้สอน</label><input name="teacher" maxlength="100" value="${esc(t.teacher||courseFor(preset)?.teacher||"")}" placeholder="ชื่อครู"></div></div>
+ <div class="field"><label>ชื่องาน *</label><input name="title" required maxlength="180" value="${esc(t.title||"")}" placeholder="เช่น ใบงานบทที่ 1"></div>
+ <div class="field"><label>รายละเอียด</label><textarea name="details" maxlength="10000" placeholder="ข้อกำหนดและรายละเอียดงาน">${esc(t.details||"")}</textarea></div>
+ <div class="grid"><div class="field"><label>วันกำหนดส่ง</label><input type="date" name="dueDate" value="${esc(t.dueDate||"")}"></div>
+ <div class="field"><label>ลิงก์ที่เกี่ยวข้อง</label><input type="url" name="link" value="${esc(t.link||"")}" placeholder="https://..."></div></div>
+ <div class="field"><label>แนบไฟล์</label><input id="files" type="file" multiple accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.mp3,.wav,.m4a,.txt">
+ <span class="muted">แนะนำไฟล์ไม่เกิน 10 MB ต่อไฟล์</span><div id="fileNames"></div></div>
+ <div class="field"><label><input style="width:auto" type="checkbox" name="draft" ${t.draft?"checked":""}> บันทึกเป็นฉบับร่าง</label></div>
+ <div class="actions"><button class="btn primary" type="submit">บันทึกงาน</button><button class="btn" type="button" onclick="closeModal()">ยกเลิก</button></div>
+ </form>`);
+ $("files").onchange=e=>{
+  const files=[...e.target.files];
+  if(files.some(f=>f.size>10*1024*1024)){toast("ไฟล์ต้องมีขนาดไม่เกิน 10 MB");e.target.value="";return}
+  selectedFiles=files.map(f=>({file:f,name:f.name,type:f.type,size:f.size}));
+  $("fileNames").textContent=selectedFiles.map(f=>f.name).join(", ");
+ };
+ $("taskForm").onsubmit=async e=>{
+  e.preventDefault();const f=new FormData(e.target);
+  const t={...tasks.find(x=>x.id===id),id:id||uid(),subject:f.get("subject").trim(),
+   teacher:f.get("teacher").trim(),title:f.get("title").trim(),details:f.get("details").trim(),
+   dueDate:f.get("dueDate"),link:f.get("link").trim(),draft:f.has("draft"),
+   attachments:(tasks.find(x=>x.id===id)?.attachments||[]),
+   createdAt:t.createdAt||new Date().toISOString(),updatedAt:new Date().toISOString(),
+   completedAt:t.completedAt||null,trashedAt:t.trashedAt||null};
+  if(!t.subject||!t.title){toast("กรอกวิชาและชื่องาน");return}
+  try{
+   if(selectedFiles.some(a=>a.file)){
+    const uploaded=await uploadFiles(t.id,selectedFiles.filter(a=>a.file));
+    t.attachments=[...t.attachments,...uploaded];
+   }
+  }catch(err){toast("อัปโหลดไฟล์ไม่สำเร็จ: "+err.message);return}
+  const ok=await putRow("tasks",t);if(!ok)return;
+  const i=tasks.findIndex(x=>x.id===t.id);if(i<0)tasks.push(t);else tasks[i]=t;
+  if(mode!=="cloud")saveLocal();closeModal();render();toast("บันทึกงานแล้ว");
+ };
+}
+async function uploadFiles(taskId,files){
+ const out=[];
+ for(const f of files){
+  if(mode!=="cloud"){
+   const dataUrl=await new Promise((resolve,reject)=>{
+    const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=reject;r.readAsDataURL(f.file);
+   });
+   out.push({id:uid(),name:f.name,type:f.type,size:f.size,dataUrl});continue;
+  }
+  const path=`${user.id}/${taskId}/${uid()}-${f.name.replace(/[^a-zA-Z0-9._-]/g,"_")}`;
+  const {error}=await sb.storage.from("attachments").upload(path,f.file,{contentType:f.type||"application/octet-stream"});
+  if(error)throw error;
+  out.push({id:uid(),name:f.name,type:f.type,size:f.size,path});
+ }
+ return out;
+}
+function openCourse(id=null){
+ const c=courses.find(x=>x.id===id)||{};
+ openModal(`<div class="modalhead"><h2>${id?"แก้ไขรายวิชา":"เพิ่มรายวิชา"}</h2><button class="btn" onclick="closeModal()">ปิด</button></div>
+ <form id="courseForm"><div class="field"><label>ชื่อวิชา *</label><input name="name" required maxlength="100" value="${esc(c.name||"")}" placeholder="เช่น ชีววิทยา"></div>
+ <div class="field"><label>ครูผู้สอน</label><input name="teacher" maxlength="100" value="${esc(c.teacher||"")}" placeholder="ชื่อครูผู้สอน"></div>
+ <div class="field"><label>สีประจำวิชา</label><input name="color" type="color" value="${esc(c.color||"#3468c8")}"></div>
+ <div class="actions"><button class="btn primary">บันทึกวิชา</button>
+ ${id?'<button class="btn danger" type="button" id="delCourse">ลบวิชา</button>':""}</div></form>`);
+ $("courseForm").onsubmit=async e=>{
+  e.preventDefault();const f=new FormData(e.target);
+  const item={id:id||uid(),name:f.get("name").trim(),teacher:f.get("teacher").trim(),color:f.get("color")};
+  const ok=await putRow("courses",item);if(!ok)return;
+  const i=courses.findIndex(x=>x.id===item.id);if(i<0)courses.push(item);else courses[i]=item;
+  if(mode!=="cloud")saveLocal();closeModal();render();toast("บันทึกรายวิชาแล้ว");
+ };
+ if(id)$("delCourse").onclick=async()=>{
+  if(!confirm("ลบรายวิชานี้หรือไม่? งานเดิมจะยังคงอยู่"))return;
+  if(!await removeRow("courses",id))return;
+  courses=courses.filter(x=>x.id!==id);if(mode!=="cloud")saveLocal();closeModal();render();
+ };
+}
+function details(id){
+ const t=tasks.find(x=>x.id===id);if(!t)return;
+ const p=priority(t);
+ openModal(`<div class="modalhead"><h2>รายละเอียดงาน</h2><button class="btn" onclick="closeModal()">ปิด</button></div>
+ <h2>${esc(t.title)}</h2><p><span class="pill">${esc(t.subject)}</span><span class="pill ${p.cls}">${esc(p.name)}</span></p>
+ <p><b>ครูผู้สอน:</b> ${esc(t.teacher||"ไม่ระบุ")}</p><p><b>วันกำหนดส่ง:</b> ${esc(t.dueDate||"ไม่ระบุ")}</p>
+ <p><b>รายละเอียด:</b><br>${esc(t.details||"ไม่มีรายละเอียด").replace(/\n/g,"<br>")}</p>
+ ${t.link?`<p><b>ลิงก์:</b> <a href="${esc(safeUrl(t.link))}" target="_blank" rel="noopener noreferrer">เปิดลิงก์ที่เกี่ยวข้อง</a></p>`:""}
+ <h3>ไฟล์แนบ</h3><div id="detailFiles">${(t.attachments||[]).map((a,i)=>`<button class="btn filelink" onclick="openAttachment('${id}',${i})">${esc(a.name)}</button>`).join("")||"<p class='muted'>ไม่มีไฟล์แนบ</p>"}</div>
+ ${t.completedAt?`<p><b>เสร็จเมื่อ:</b> ${esc(new Date(t.completedAt).toLocaleString("th-TH"))}</p><p>${esc(t.completionNote||"")}</p>`:""}
+ <div class="actions"><button class="btn primary" onclick="closeModal();openTask('${id}')">แก้ไขงาน</button>
+ ${!t.completedAt?`<button class="btn" onclick="closeModal();completeTask('${id}')">ทำเสร็จแล้ว</button>`:""}</div>`);
+}
+function safeUrl(s){try{const u=new URL(s);return ["http:","https:"].includes(u.protocol)?u.href:"#"}catch{return "#"}}
+async function openAttachment(taskId,index){
+ const t=tasks.find(x=>x.id===taskId),a=t?.attachments?.[index];if(!a)return;
+ if(a.dataUrl){window.open(a.dataUrl,"_blank","noopener");return}
+ if(mode!=="cloud"||!a.path){toast("ไม่พบไฟล์ในอุปกรณ์นี้");return}
+ const {data,error}=await sb.storage.from("attachments").createSignedUrl(a.path,60);
+ if(error){toast("เปิดไฟล์ไม่ได้: "+error.message);return}
+ window.open(data.signedUrl,"_blank","noopener");
+}
+function completeTask(id){
+ const t=tasks.find(x=>x.id===id);if(!t)return;
+ completionFiles=[];
+ openModal(`<div class="modalhead"><h2>บันทึกงานที่เสร็จแล้ว</h2><button class="btn" onclick="closeModal()">ปิด</button></div>
+ <p>${esc(t.title)}</p><form id="completeForm">
+ <div class="field"><label>บันทึกเพิ่มเติม</label><textarea name="note" placeholder="เช่น ส่งงานใน Classroom แล้ว"></textarea></div>
+ <div class="field"><label>ลิงก์หลักฐานการส่ง</label><input name="link" type="url" placeholder="https://..."></div>
+ <div class="field"><label>แนบหลักฐาน (ถ้ามี)</label><input id="proofFiles" type="file" multiple accept="image/*,.pdf,.doc,.docx"></div>
+ <button class="btn primary">ยืนยันว่าเสร็จแล้ว</button></form>`);
+ $("completeForm").onsubmit=async e=>{
+  e.preventDefault();const f=new FormData(e.target),files=[...$("proofFiles").files];
+  if(files.some(x=>x.size>10*1024*1024)){toast("ไฟล์ต้องไม่เกิน 10 MB");return}
+  try{
+   t.completionFiles=[...(t.completionFiles||[]),...await uploadFiles(t.id,files.map(file=>({file,name:file.name,type:file.type,size:file.size})))];
+  }catch(err){toast("อัปโหลดหลักฐานไม่สำเร็จ: "+err.message);return}
+  t.completionNote=f.get("note");t.completionLink=f.get("link");
+  t.completedAt=new Date().toISOString();t.updatedAt=t.completedAt;
+  if(!await putRow("tasks",t))return;
+  if(mode!=="cloud")saveLocal();closeModal();render();toast("ย้ายไปงานที่เสร็จแล้ว");
+ };
+}
+async function undoComplete(id){
+ const t=tasks.find(x=>x.id===id);if(!t)return;
+ t.completedAt=null;t.updatedAt=new Date().toISOString();
+ if(!await putRow("tasks",t))return;
+ if(mode!=="cloud")saveLocal();render();toast("ย้ายกลับไปงานที่ยังไม่เสร็จ");
+}
+async function trashTask(id){
+ if(!confirm("ย้ายงานนี้ไปถังขยะหรือไม่?"))return;
+ const t=tasks.find(x=>x.id===id);if(!t)return;
+ t.trashedAt=new Date().toISOString();t.updatedAt=t.trashedAt;
+ if(!await putRow("tasks",t))return;
+ if(mode!=="cloud")saveLocal();render();toast("ย้ายไปถังขยะแล้ว");
+}
+async function restoreTask(id){
+ if(!confirm("กู้คืนงานนี้หรือไม่?"))return;
+ const t=tasks.find(x=>x.id===id);if(!t)return;
+ t.trashedAt=null;t.updatedAt=new Date().toISOString();
+ if(!await putRow("tasks",t))return;
+ if(mode!=="cloud")saveLocal();render();toast("กู้คืนงานแล้ว");
+}
+async function deleteTask(id){
+ if(!confirm("ลบถาวรหรือไม่? ไม่สามารถกู้คืนได้"))return;
+ const t=tasks.find(x=>x.id===id);if(!t)return;
+ if(mode==="cloud"){
+  for(const a of [...(t.attachments||[]),...(t.completionFiles||[])])
+   if(a.path)await sb.storage.from("attachments").remove([a.path]);
+ }
+ if(!await removeRow("tasks",id))return;
+ tasks=tasks.filter(x=>x.id!==id);if(mode!=="cloud")saveLocal();render();toast("ลบถาวรแล้ว");
+}
+async function init(){
+ if(SUPABASE_URL&&SUPABASE_ANON_KEY&&window.supabase){
+  sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+  const {data}=await sb.auth.getSession();
+  if(data.session){user=data.session.user;mode="cloud";await loadCloud();enterWorkspace();subscribeRealtime();return}
+ }
+}
+init();
+</script>
+</body>
+</html>
+
