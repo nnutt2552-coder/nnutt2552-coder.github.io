@@ -20,15 +20,15 @@
       body { font-family: 'Plus Jakarta Sans', sans-serif; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-t-screen">
+<body class="bg-slate-50 text-slate-800 min-h-screen">
     <div id="root"></div>
 
     <script type="text/babel">
         // ==========================================
-        // ⚙️ ตั้งค่า SUPABASE (แทนที่ด้วยค่าของคุณจาก Step 1)
+        // ⚙️ เชื่อมต่อกับ Supabase ของคุณเรียบร้อยแล้ว
         // ==========================================
-        const SUPABASE_URL = 'YOUR_SUPABASE_URL';
-        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+        const SUPABASE_URL = 'https://tapsfxknoiesanwiamuu.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRhcHNmeGtub2llc2Fud2lhbXV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI5MDYzNzcsImV4cCI6MjEwODQ4MjM3N30.3PC9BkOrd4vUz3tjw4Mou-KEkd0X_jg7Ylx4E_kqjEw';
         
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -53,7 +53,6 @@
             const [dueDate, setDueDate] = React.useState('');
             const [links, setLinks] = React.useState(['']);
             const [files, setFiles] = React.useState(['']);
-            const [isDraft, setIsDraft] = React.useState(false);
 
             // Completion Fields
             const [compNotes, setCompNotes] = React.useState('');
@@ -63,13 +62,12 @@
             // Search & Filters
             const [searchQuery, setSearchQuery] = React.useState('');
             const [filterStarred, setFilterStarred] = React.useState(false);
-            const [completedSort, setCompletedSort] = React.useState('latest'); // latest, subject, teacher
+            const [completedSort, setCompletedSort] = React.useState('latest');
 
             // โหลดข้อมูลจาก Supabase และตั้งค่า Real-time
-            useEffect(() => {
+            React.useEffect(() => {
                 fetchData();
 
-                // ตั้งค่า Real-time Subscription ให้ซิงค์ข้ามอุปกรณ์ทันที
                 const channel = supabase.channel('realtime-todos')
                     .on('postgres_changes', { event: '*', schema: 'public', table: 'todos' }, () => {
                         fetchTodos();
@@ -132,7 +130,6 @@
                     return;
                 }
 
-                // ตรวจสอบและบันทึกวิชา/ครูใหม่ลง Master Table อัตโนมัติถ้ายังไม่มี
                 if (!subjects.some(s => s.name === subject)) {
                     await supabase.from('subjects').insert([{ name: subject }]);
                 }
@@ -172,7 +169,6 @@
                 setDueDate('');
                 setLinks(['']);
                 setFiles(['']);
-                setIsDraft(false);
             };
 
             const openEditModal = (task) => {
@@ -184,11 +180,9 @@
                 setDueDate(task.due_date);
                 setLinks(task.links?.length ? task.links : ['']);
                 setFiles(task.files?.length ? task.files : ['']);
-                setIsDraft(task.is_draft);
                 setIsModalOpen(true);
             };
 
-            // ย้ายไปถังขยะ
             const moveToTrash = async (id) => {
                 if (confirm('คุณต้องการย้ายงานนี้ไปที่ถังขยะใช่หรือไม่?')) {
                     await supabase.from('todos').update({ is_deleted: true, deleted_at: new Date() }).eq('id', id);
@@ -196,13 +190,11 @@
                 }
             };
 
-            // สลับสถานะติดดาว
             const toggleStar = async (id, currentStatus) => {
                 await supabase.from('todos').update({ is_starred: !currentStatus }).eq('id', id);
                 fetchData();
             };
 
-            // ยืนยันงานเสร็จสมบูรณ์
             const handleCompleteConfirm = async () => {
                 if (!completingTask) return;
                 await supabase.from('todos').update({
@@ -220,13 +212,11 @@
                 fetchData();
             };
 
-            // กู้คืนจากถังขยะ
             const restoreFromTrash = async (id) => {
                 await supabase.from('todos').update({ is_deleted: false, deleted_at: null }).eq('id', id);
                 fetchData();
             };
 
-            // ลบถาวร
             const deletePermanent = async (id) => {
                 if (confirm('ต้องการลบงานนี้อย่างถาวร?')) {
                     await supabase.from('todos').delete().eq('id', id);
@@ -240,7 +230,7 @@
                     <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
                         <div>
                             <h1 className="text-2xl md:text-3xl font-bold text-slate-900 flex items-center gap-2">
-                                📋 งานคงค้าง <span className="text-xs bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full font-semibold">Real-time Sync</span>
+                                📋 งานคงค้าง <span className="text-xs bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full font-semibold">Real-time Connected</span>
                             </h1>
                             <p className="text-slate-500 text-sm mt-1">ระบบจดบันทึกการบ้านและงานวิชาการ ม.ปลาย</p>
                         </div>
@@ -322,7 +312,7 @@
                                                 <div key={task.id} className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 flex flex-col justify-between hover:shadow-md transition-all relative">
                                                     {task.is_draft && (
                                                         <span className="absolute top-4 right-14 bg-slate-200 text-slate-700 text-xs px-2.5 py-1 rounded-md font-semibold">
-                                                            โครงร่าง (Draft)
+                                                            โครงร่าง
                                                         </span>
                                                     )}
                                                     <button 
@@ -489,7 +479,7 @@
                                 </div>
                                 <div className="grid grid-cols-7 gap-2">
                                     {Array.from({ length: 35 }).map((_, index) => {
-                                        const dayNum = index - 3; // จำลองปฏิทินรายเดือนแบบกระชับ
+                                        const dayNum = index - 3;
                                         const dateStr = `2026-10-${dayNum > 0 && dayNum <= 31 ? (dayNum < 10 ? '0' + dayNum : dayNum) : '01'}`;
                                         const dayTasks = todos.filter(t => t.due_date === dateStr && !t.is_completed && !t.is_deleted);
 
