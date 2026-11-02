@@ -8,7 +8,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Chart.js สำหรับกราฟสถิติรายวิชา -->
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase JS SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -19,7 +19,7 @@
 </head>
 <body class="bg-slate-50 text-slate-800 h-full flex flex-col">
 
-    <!-- SUPABASE CONFIGURATION (ฝังคีย์ของคุณเรียบร้อยแล้ว) -->
+    <!-- SUPABASE CONFIGURATION -->
     <script>
         const SUPABASE_URL = 'https://ewbqsjoniqxantjevkvq.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV3YnFzam9uaXF4YW50amV2a3ZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM1OTA0ODAsImV4cCI6MjEwOTE2NjQ4MH0.Qc7VKzku43uqV1m8Wv8nh3vUBmPojIdIHUnT9nCkg_M';
@@ -32,13 +32,13 @@
                 supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
                 useCloud = true;
             } catch (e) {
-                console.warn('Supabase init failed, falling back to LocalStorage');
+                console.warn('Supabase init failed');
             }
         }
     </script>
 
-    <!-- App Container -->
-    <div id="app" class="flex-1 flex flex-col h-full overflow-hidden">
+    <!-- App Shell -->
+    <div class="flex-1 flex flex-col h-full overflow-hidden">
         <!-- Header -->
         <header class="bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between shadow-xs z-10">
             <div class="flex items-center space-x-3">
@@ -49,21 +49,20 @@
                     <h1 class="text-lg font-bold text-slate-900 leading-tight">งานคงค้าง</h1>
                     <p class="text-xs text-slate-500 flex items-center gap-1">
                         <span id="sync-status-dot" class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
-                        <span id="sync-status-text">กำลังเชื่อมต่อ Supabase Cloud...</span>
+                        <span id="sync-status-text">เชื่อมต่อ Supabase Cloud เรียลไทม์</span>
                     </p>
                 </div>
             </div>
-            <!-- Backup / Restore Actions -->
             <div class="flex items-center space-x-2">
-                <button onclick="exportBackup()" title="สำรองข้อมูลเป็นไฟล์ JSON" class="p-2 text-slate-600 hover:bg-slate-100 rounded-lg text-xs font-medium flex items-center gap-1 transition">
+                <button onclick="exportBackup()" title="สำรองข้อมูล" class="p-2 text-slate-600 hover:bg-slate-100 rounded-lg text-xs font-medium flex items-center gap-1 transition">
                     <i data-lucide="download" class="w-4 h-4"></i> <span class="hidden sm:inline">สำรองข้อมูล</span>
                 </button>
             </div>
         </header>
 
-        <!-- Main Workspace -->
+        <!-- Main Body -->
         <div class="flex-1 flex overflow-hidden">
-            <!-- Sidebar Navigation -->
+            <!-- Sidebar -->
             <nav class="w-20 md:w-64 bg-white border-r border-slate-200 flex flex-col justify-between py-4 z-10">
                 <div class="space-y-1 px-3">
                     <button onclick="switchTab('pending')" id="nav-pending" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition bg-indigo-50 text-indigo-600">
@@ -93,23 +92,22 @@
 
             <!-- Content Area -->
             <main class="flex-1 bg-slate-50 overflow-y-auto p-4 md:p-6" id="main-content-area">
-                <!-- เนื้อหาแต่ละ Tab จะแสดงที่นี่ -->
             </main>
         </div>
     </div>
 
-    <!-- JavaScript Application Logic -->
+    <!-- Application Script Logic -->
     <script>
         let currentTab = 'pending';
         let tasks = [];
         let subjects = [];
+        let filterStarredOnly = false;
 
         async function initApp() {
             await loadData();
             renderCurrentTab();
             lucide.createIcons();
-            
-            // Realtime Sync Subscription
+
             if (useCloud && supabaseClient) {
                 supabaseClient.channel('public:tasks')
                     .on('postgres_changes', { event: '*', schema: 'public', table: 'tasks' }, async () => {
@@ -126,17 +124,13 @@
                     const { data: sData } = await supabaseClient.from('subjects').select('*');
                     if (tData) tasks = tData;
                     if (sData) subjects = sData;
-                    document.getElementById('sync-status-text').innerText = 'ซิงค์ข้อมูลผ่าน Supabase เรียลไทม์';
-                    document.getElementById('sync-status-dot').className = 'w-2 h-2 rounded-full bg-emerald-500 inline-block';
                     return;
-                } catch (err) {
-                    console.warn('Cloud error, fallback to local');
+                } catch (e) {
+                    console.warn(e);
                 }
             }
             tasks = JSON.parse(localStorage.getItem('hw_tasks') || '[]');
             subjects = JSON.parse(localStorage.getItem('hw_subjects') || '[]');
-            document.getElementById('sync-status-text').innerText = 'โหมดบันทึกในเครื่อง (Offline)';
-            document.getElementById('sync-status-dot').className = 'w-2 h-2 rounded-full bg-amber-500 inline-block';
         }
 
         async function saveData(taskObj, isNew = false) {
@@ -152,6 +146,17 @@
                 localStorage.setItem('hw_subjects', JSON.stringify(subjects));
             }
             renderCurrentTab();
+        }
+
+        async function saveSubjectData(newSub) {
+            if (useCloud && supabaseClient) {
+                await supabaseClient.from('subjects').upsert([newSub]);
+                const { data: sData } = await supabaseClient.from('subjects').select('*');
+                if (sData) subjects = sData;
+            } else {
+                subjects.push(newSub);
+                localStorage.setItem('hw_subjects', JSON.stringify(subjects));
+            }
         }
 
         function switchTab(tab) {
@@ -173,53 +178,74 @@
         }
 
         function updateBadges() {
-            const pendingCount = tasks.filter(t => t.status === 'pending').length;
+            const pendingCount = tasks.filter(t => t.status === 'pending' && !t.is_draft).length;
             const completedCount = tasks.filter(t => t.status === 'completed').length;
             if(document.getElementById('badge-pending')) document.getElementById('badge-pending').innerText = pendingCount;
             if(document.getElementById('badge-completed')) document.getElementById('badge-completed').innerText = completedCount;
         }
 
-        // --- 1. Pending Tab ---
+        // --- 1. Pending Tab (ยังไม่เสร็จ) ---
         function renderPendingTab(container) {
-            const pending = tasks.filter(t => t.status === 'pending');
+            let pending = tasks.filter(t => t.status === 'pending');
+            if (filterStarredOnly) pending = pending.filter(t => t.is_starred);
+
             container.innerHTML = `
                 <div class="max-w-5xl mx-auto space-y-6">
-                    <div class="flex justify-between items-center">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                         <div>
                             <h2 class="text-xl font-bold text-slate-900">งานคงค้างทั้งหมด</h2>
-                            <p class="text-xs text-slate-500">จัดการและติดตามกำหนดส่งงานของคุณ</p>
+                            <p class="text-xs text-slate-500">จัดการงานและติดตามกำหนดส่งอย่างเป็นระบบ</p>
                         </div>
-                        <button onclick="openAddTaskModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 shadow-sm transition">
-                            <i data-lucide="plus" class="w-4 h-4"></i> เพิ่มงานใหม่
-                        </button>
+                        <div class="flex items-center gap-2">
+                            <button onclick="toggleFilterStarred()" class="px-3 py-2.5 rounded-xl font-semibold text-xs flex items-center gap-1.5 border transition ${filterStarredOnly ? 'bg-amber-500 text-white border-amber-500' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'}">
+                                <i data-lucide="star" class="w-4 h-4 ${filterStarredOnly ? 'fill-white' : ''}"></i> งานติดดาว
+                            </button>
+                            <button onclick="openAddTaskModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 shadow-sm transition">
+                                <i data-lucide="plus" class="w-4 h-4"></i> เพิ่มงานใหม่
+                            </button>
+                        </div>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        ${pending.length === 0 ? '<div class="col-span-full text-center py-12 text-slate-400 bg-white rounded-2xl border border-slate-200">ไม่มีงานคงค้าง ยอดเยี่ยมมาก!</div>' : ''}
-                        ${pending.map(t => {
-                            const days = calculateDaysLeft(t.due_date);
-                            const p = getPriority(days);
-                            return `
-                                <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs relative overflow-hidden flex flex-col justify-between">
-                                    <div class="absolute top-0 left-0 bottom-0 w-2 ${p.bar}"></div>
-                                    <div>
-                                        <div class="flex justify-between items-start mb-2">
-                                            <span class="text-xs font-bold px-2.5 py-1 rounded-lg ${p.badge}">${p.text} (${days >= 0 ? 'เหลือ ' + days + ' วัน' : 'เลยกำหนด'})</span>
-                                            <div class="flex items-center gap-1">
-                                                <button onclick="toggleStar('${t.id}')" class="p-1.5 text-slate-400 hover:text-amber-500"><i data-lucide="star" class="w-4 h-4 ${t.is_starred ? 'fill-amber-400 text-amber-500' : ''}"></i></button>
-                                                <button onclick="openCompleteModal('${t.id}')" class="bg-emerald-50 text-emerald-600 hover:bg-emerald-100 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1"><i data-lucide="check" class="w-3.5 h-3.5"></i> เสร็จแล้ว</button>
-                                            </div>
-                                        </div>
-                                        <h3 class="font-bold text-slate-900 text-base mb-1">${t.title}</h3>
-                                        <p class="text-xs text-slate-500 mb-2">${t.subject} • ครู${t.teacher} • ส่ง: ${t.due_date}</p>
-                                        ${t.description ? `<p class="text-xs text-slate-600 bg-slate-50 p-2.5 rounded-xl mb-3">${t.description}</p>` : ''}
-                                    </div>
-                                    <div class="flex justify-between pt-3 border-t border-slate-100 text-xs">
-                                        <button onclick="openDetailModal('${t.id}')" class="text-indigo-600 font-semibold hover:underline">ดูรายละเอียด</button>
-                                        <button onclick="moveToTrash('${t.id}')" class="text-rose-500 hover:text-rose-700">ลบ</button>
-                                    </div>
-                                </div>
-                            `;
-                        }).join('')}
+
+                    <!-- Search Box -->
+                    <div class="relative">
+                        <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-3 text-slate-400"></i>
+                        <input type="text" id="search-box" oninput="filterTasksLive(this.value)" placeholder="ค้นหาชื่องาน, รายวิชา หรือครูผู้สอนอย่างรวดเร็ว..." class="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+
+                    <div id="task-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        ${pending.length === 0 ? '<div class="col-span-full text-center py-12 text-slate-400 bg-white rounded-2xl border border-slate-200">ไม่มีงานคงค้างในขณะนี้ ยอดเยี่ยมมาก!</div>' : ''}
+                        ${pending.map(t => generateTaskCard(t)).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function generateTaskCard(t) {
+            const days = calculateDaysLeft(t.due_date);
+            const p = getPriorityConfig(days);
+            return `
+                <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs relative overflow-hidden flex flex-col justify-between">
+                    <div class="absolute top-0 left-0 bottom-0 w-2 ${p.bar}"></div>
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-xs font-bold px-2.5 py-1 rounded-lg ${p.badge}">${p.text} (${days >= 0 ? 'เหลือ ' + days + ' วัน' : 'เลยกำหนด'})</span>
+                            <div class="flex items-center gap-1">
+                                <button onclick="toggleStar('${t.id}')" class="p-1.5 text-slate-400 hover:text-amber-500"><i data-lucide="star" class="w-4 h-4 ${t.is_starred ? 'fill-amber-400 text-amber-500' : ''}"></i></button>
+                                <button onclick="openCompleteModal('${t.id}')" class="bg-emerald-50 text-emerald-600 hover:bg-emerald-100 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1"><i data-lucide="check" class="w-3.5 h-3.5"></i> เสร็จแล้ว</button>
+                            </div>
+                        </div>
+                        <h3 class="font-bold text-slate-900 text-base mb-1">${t.title} ${t.is_draft ? '<span class="text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded-md ml-1 font-normal">โครงร่าง</span>' : ''}</h3>
+                        <p class="text-xs text-slate-500 mb-2">${t.subject} • ครู${t.teacher} • กำหนดส่ง: ${t.due_date}</p>
+                        ${t.description ? `<p class="text-xs text-slate-600 bg-slate-50 p-2.5 rounded-xl mb-3">${t.description}</p>` : ''}
+                        ${t.files && t.files.length > 0 ? `<p class="text-xs text-indigo-600 mb-2">📎 แนบไฟล์ ${t.files.length} รายการ</p>` : ''}
+                        ${t.links && t.links.length > 0 ? `<p class="text-xs text-indigo-600 mb-2">🔗 แนบลิงก์ ${t.links.length} รายการ</p>` : ''}
+                    </div>
+                    <div class="flex justify-between pt-3 border-t border-slate-100 text-xs">
+                        <button onclick="openDetailModal('${t.id}')" class="text-indigo-600 font-semibold hover:underline">ดูรายละเอียดเต็ม</button>
+                        <div class="flex items-center gap-3">
+                            <button onclick="openEditTaskModal('${t.id}')" class="text-slate-500 hover:text-indigo-600 font-medium">แก้ไข</button>
+                            <button onclick="moveToTrash('${t.id}')" class="text-rose-500 hover:text-rose-700 font-medium">ลบ</button>
+                        </div>
                     </div>
                 </div>
             `;
@@ -231,23 +257,38 @@
             return Math.ceil((due - today) / (1000 * 60 * 60 * 24));
         }
 
-        function getPriority(days) {
-            if (days <= 3) return { text: 'วิกฤต', bar: 'bg-zinc-900', badge: 'bg-zinc-900 text-white' };
-            if (days <= 7) return { text: 'เร่งด่วนมาก', bar: 'bg-red-600', badge: 'bg-red-100 text-red-700' };
-            if (days <= 14) return { text: 'เร่งด่วน', bar: 'bg-orange-500', badge: 'bg-orange-100 text-orange-700' };
-            if (days <= 21) return { text: 'ปานกลาง', bar: 'bg-amber-400', badge: 'bg-amber-100 text-amber-800' };
-            if (days <= 30) return { text: 'ปลอดภัย', bar: 'bg-emerald-500', badge: 'bg-emerald-100 text-emerald-800' };
-            return { text: 'ระยะยาว', bar: 'bg-slate-300', badge: 'bg-slate-100 text-slate-700' };
+        function getPriorityConfig(days) {
+            if (days <= 3) return { text: 'เหลืองเวลาทำ ≤ 3 วัน', bar: 'bg-zinc-950', badge: 'bg-zinc-950 text-white' };
+            if (days <= 7) return { text: 'เหลือเวลาทำ ≤ 7 วัน', bar: 'bg-red-600', badge: 'bg-red-100 text-red-700' };
+            if (days <= 14) return { text: 'เหลือเวลาทำ ≤ 14 วัน', bar: 'bg-orange-500', badge: 'bg-orange-100 text-orange-700' };
+            if (days <= 21) return { text: 'เหลือเวลาทำ ≤ 21 วัน', bar: 'bg-amber-400', badge: 'bg-amber-100 text-amber-800' };
+            if (days <= 30) return { text: 'เหลือเวลาทำ ≤ 30 วัน', bar: 'bg-emerald-500', badge: 'bg-emerald-100 text-emerald-800' };
+            return { text: 'เหลือเวลาทำ ≥ 31 วัน', bar: 'bg-slate-300', badge: 'bg-slate-100 text-slate-700' };
         }
 
-        // --- 2. Completed Tab ---
+        function toggleFilterStarred() {
+            filterStarredOnly = !filterStarredOnly;
+            renderCurrentTab();
+        }
+
+        function filterTasksLive(query) {
+            const q = query.toLowerCase();
+            const grid = document.getElementById('task-grid');
+            const filtered = tasks.filter(t => t.status === 'pending' && (t.title.toLowerCase().includes(q) || t.subject.toLowerCase().includes(q) || t.teacher.toLowerCase().includes(q)));
+            grid.innerHTML = filtered.length === 0 ? '<div class="col-span-full text-center py-12 text-slate-400 bg-white rounded-2xl border border-slate-200">ไม่พบงานที่ค้นหา</div>' : filtered.map(t => generateTaskCard(t)).join('');
+            lucide.createIcons();
+        }
+
+        // --- 2. Completed Tab (เสร็จแล้ว) ---
         function renderCompletedTab(container) {
             const completed = tasks.filter(t => t.status === 'completed');
             container.innerHTML = `
                 <div class="max-w-5xl mx-auto space-y-6">
-                    <div>
-                        <h2 class="text-xl font-bold text-slate-900">งานที่เสร็จแล้ว</h2>
-                        <p class="text-xs text-slate-500">ประวัติงานที่คุณส่งสำเร็จ</p>
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h2 class="text-xl font-bold text-slate-900">งานที่เสร็จแล้ว</h2>
+                            <p class="text-xs text-slate-500">แสดงผลงานที่เสร็จแล้วล่าสุดไว้ด้านบนสุด</p>
+                        </div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         ${completed.length === 0 ? '<div class="col-span-full text-center py-12 text-slate-400 bg-white rounded-2xl border border-slate-200">ยังไม่มีงานที่เสร็จสมบูรณ์</div>' : ''}
@@ -273,35 +314,39 @@
             `;
         }
 
-        // --- 3. Subjects & Analytics Tab ---
+        // --- 3. Subjects & Analytics Tab (รายวิชา) ---
         function renderSubjectsTab(container) {
-            const allSubjs = Array.from(new Set(tasks.map(t => t.subject)));
+            const allSubjs = Array.from(new Set([...subjects.map(s => s.name), ...tasks.map(t => t.subject)]));
             container.innerHTML = `
                 <div class="max-w-5xl mx-auto space-y-6">
                     <div>
-                        <h2 class="text-xl font-bold text-slate-900">รายวิชา และสถิติการส่งงาน</h2>
-                        <p class="text-xs text-slate-500">แสดงผลแยกรายวิชาและวิเคราะห์สถานะงาน</p>
+                        <h2 class="text-xl font-bold text-slate-900">รายวิชาทั้งหมด & สถิติการทำงาน</h2>
+                        <p class="text-xs text-slate-500">แสดงผลงานแยกรายวิชาและรายงานสถิติความสำเร็จทันกำหนด</p>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         ${allSubjs.length === 0 ? '<div class="col-span-full text-center py-8 text-slate-400 bg-white rounded-2xl border border-slate-200">ยังไม่มีรายวิชา</div>' : ''}
-                        ${allSubjs.map(s => {
-                            const subTasks = tasks.filter(t => t.subject === s && t.status !== 'trashed');
+                        ${allSubjs.map(sName => {
+                            const subjInfo = subjects.find(s => s.name === sName) || { teacher: 'ไม่ระบุ' };
+                            const subTasks = tasks.filter(t => t.subject === sName && t.status !== 'trashed');
                             const pending = subTasks.filter(t => t.status === 'pending').length;
                             const completed = subTasks.filter(t => t.status === 'completed').length;
                             return `
-                                <div onclick="openSubjectModal('${s}')" class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs hover:shadow-md cursor-pointer transition flex flex-col justify-between">
-                                    <h3 class="font-bold text-slate-900 text-lg mb-3">${s}</h3>
+                                <div onclick="openSubjectDetailModal('${sName}')" class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs hover:shadow-md cursor-pointer transition flex flex-col justify-between">
+                                    <div>
+                                        <h3 class="font-bold text-slate-900 text-lg mb-1">${sName}</h3>
+                                        <p class="text-xs text-slate-500 mb-4">ครูผู้สอน: ${subjInfo.teacher}</p>
+                                    </div>
                                     <div class="grid grid-cols-3 gap-2 bg-slate-50 p-3 rounded-xl text-center text-xs">
                                         <div><p class="text-slate-400">ยังไม่เสร็จ</p><p class="font-bold text-rose-600 text-sm">${pending}</p></div>
                                         <div><p class="text-slate-400">เสร็จแล้ว</p><p class="font-bold text-emerald-600 text-sm">${completed}</p></div>
-                                        <div><p class="text-slate-400">รวม</p><p class="font-bold text-slate-800 text-sm">${subTasks.length}</p></div>
+                                        <div><p class="text-slate-400">รวมทั้งหมด</p><p class="font-bold text-slate-800 text-sm">${subTasks.length}</p></div>
                                     </div>
                                 </div>
                             `;
                         }).join('')}
                     </div>
                     <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs">
-                        <h3 class="font-bold text-slate-900 mb-4">สถิติภาพรวม</h3>
+                        <h3 class="font-bold text-slate-900 mb-4">สถิติและวิเคราะห์ข้อมูลการส่งงาน</h3>
                         <div class="w-full h-64 flex items-center justify-center"><canvas id="analyticsChart"></canvas></div>
                     </div>
                 </div>
@@ -310,28 +355,46 @@
             if (ctx) {
                 const comp = tasks.filter(t => t.status === 'completed').length;
                 const pend = tasks.filter(t => t.status === 'pending').length;
-                new Chart(ctx, { type: 'doughnut', data: { labels: ['เสร็จแล้ว', 'ยังไม่เสร็จ'], datasets: [{ data: [comp, pend], backgroundColor: ['#10b981', '#6366f1'] }] }, options: { responsive: true, maintainAspectRatio: false } });
+                new Chart(ctx, { type: 'bar', data: { labels: ['งานเสร็จแล้ว', 'งานคงค้าง'], datasets: [{ label: 'จำนวนงาน', data: [comp, pend], backgroundColor: ['#10b981', '#6366f1'] }] }, options: { responsive: true, maintainAspectRatio: false } });
             }
         }
 
-        // --- 4. Calendar Tab ---
+        // --- 4. Calendar Tab (ปฏิทิน) ---
         function renderCalendarTab(container) {
             container.innerHTML = `
                 <div class="max-w-4xl mx-auto space-y-6">
                     <div>
-                        <h2 class="text-xl font-bold text-slate-900">ปฏิทินงาน</h2>
-                        <p class="text-xs text-slate-500">กำหนดส่งงานตามปฏิทิน</p>
+                        <h2 class="text-xl font-bold text-slate-900">ปฏิทินงานกำหนดส่ง</h2>
+                        <p class="text-xs text-slate-500">แสดงงานด้วยจุดสีตามลำดับความสำคัญและไอคอนดาว</p>
                     </div>
-                    <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs text-center py-16">
-                        <i data-lucide="calendar-days" class="w-12 h-12 text-indigo-500 mx-auto mb-3"></i>
-                        <h3 class="font-bold text-slate-800 text-base mb-1">ภาพรวมปฏิทินกำหนดส่ง</h3>
-                        <p class="text-xs text-slate-500">ระบบติดตามกำหนดส่งงานทั้งหมดของคุณ</p>
+                    <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs space-y-4">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-bold text-slate-800 text-base">รายการงานทั้งหมดเรียงตามวันกำหนดส่ง</h3>
+                        </div>
+                        <div class="space-y-3">
+                            ${tasks.filter(t => t.status !== 'trashed').map(t => {
+                                const days = calculateDaysLeft(t.due_date);
+                                const p = getPriorityConfig(days);
+                                return `
+                                    <div class="p-3 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-between text-xs">
+                                        <div class="flex items-center gap-3">
+                                            <span class="w-3 h-3 rounded-full ${p.bar}"></span>
+                                            <div>
+                                                <p class="font-bold text-slate-900 text-sm">${t.title} ${t.is_starred ? '⭐' : ''}</p>
+                                                <p class="text-slate-500">${t.subject} • กำหนดส่ง: ${t.due_date}</p>
+                                            </div>
+                                        </div>
+                                        <button onclick="openDetailModal('${t.id}')" class="text-indigo-600 font-semibold hover:underline">ดูรายละเอียด</button>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
                     </div>
                 </div>
             `;
         }
 
-        // --- 5. Trash Tab ---
+        // --- 5. Trash Tab (ถังขยะ) ---
         function renderTrashTab(container) {
             const trash = tasks.filter(t => t.status === 'trashed');
             container.innerHTML = `
@@ -339,7 +402,7 @@
                     <div class="flex justify-between items-center">
                         <div>
                             <h2 class="text-xl font-bold text-slate-900">ถังขยะ</h2>
-                            <p class="text-xs text-slate-500">งานที่ถูกลบ</p>
+                            <p class="text-xs text-slate-500">งานที่ถูกลบจะถูกเก็บไว้ 30 วันก่อนลบถาวร</p>
                         </div>
                         ${trash.length > 0 ? `<button onclick="emptyTrash()" class="bg-rose-50 text-rose-600 hover:bg-rose-100 px-3 py-2 rounded-xl text-xs font-semibold">ลบถาวรทั้งหมด</button>` : ''}
                     </div>
@@ -360,22 +423,34 @@
         }
 
         // --- Modals & Actions ---
-        function openAddTaskModal() {
+        function openAddTaskModal(isDraft = false, existing = null) {
+            const subList = Array.from(new Set([...subjects.map(s => s.name), ...tasks.map(t => t.subject)]));
+            const teacherList = Array.from(new Set([...subjects.map(s => s.teacher), ...tasks.map(t => t.teacher)]));
+
             const html = `
                 <div id="custom-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-                    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl space-y-4">
-                        <h3 class="text-lg font-bold text-slate-900">เพิ่มงานใหม่</h3>
-                        <form onsubmit="handleAddTask(event)" class="space-y-3">
-                            <div><label class="block text-xs font-semibold text-slate-700 mb-1">ชื่องาน*</label><input type="text" id="m-title" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm"></div>
+                    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl space-y-4 max-h-[90vh] overflow-y-auto">
+                        <h3 class="text-lg font-bold text-slate-900">${existing ? 'แก้ไขงานคงค้าง' : 'เพิ่มงานใหม่'}</h3>
+                        <form onsubmit="handleSaveTask(event, ${existing ? `'${existing.id}'` : 'null'}, false)" class="space-y-3">
+                            <div><label class="block text-xs font-semibold text-slate-700 mb-1">ชื่องาน*</label><input type="text" id="m-title" value="${existing ? existing.title : ''}" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm"></div>
                             <div class="grid grid-cols-2 gap-3">
-                                <div><label class="block text-xs font-semibold text-slate-700 mb-1">รายวิชา*</label><input type="text" id="m-subject" required placeholder="เช่น คณิตศาสตร์" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm"></div>
-                                <div><label class="block text-xs font-semibold text-slate-700 mb-1">ครูผู้สอน*</label><input type="text" id="m-teacher" required placeholder="เช่น สมชาย" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm"></div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">รายวิชา*</label>
+                                    <input type="text" id="m-subject" list="subj-options" value="${existing ? existing.subject : ''}" required placeholder="เลือกหรือพิมพ์วิชา" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm">
+                                    <datalist id="subj-options">${subList.map(s => `<option value="${s}">`).join('')}</datalist>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">ครูผู้สอน*</label>
+                                    <input type="text" id="m-teacher" list="teacher-options" value="${existing ? existing.teacher : ''}" required placeholder="เลือกหรือพิมพ์ครู" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm">
+                                    <datalist id="teacher-options">${teacherList.map(t => `<option value="${t}">`).join('')}</datalist>
+                                </div>
                             </div>
-                            <div><label class="block text-xs font-semibold text-slate-700 mb-1">วันกำหนดส่ง*</label><input type="date" id="m-date" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm"></div>
-                            <div><label class="block text-xs font-semibold text-slate-700 mb-1">รายละเอียด</label><textarea id="m-desc" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm"></textarea></div>
+                            <div><label class="block text-xs font-semibold text-slate-700 mb-1">วันกำหนดส่ง*</label><input type="date" id="m-date" value="${existing ? existing.due_date : ''}" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm"></div>
+                            <div><label class="block text-xs font-semibold text-slate-700 mb-1">รายละเอียดเพิ่มเติม</label><textarea id="m-desc" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm">${existing && existing.description ? existing.description : ''}</textarea></div>
                             <div class="flex justify-end gap-2 pt-2">
                                 <button type="button" onclick="closeModal()" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl">ยกเลิก</button>
-                                <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-xs font-semibold">บันทึก</button>
+                                <button type="button" onclick="handleSaveTask(event, ${existing ? `'${existing.id}'` : 'null'}, true)" class="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-xl text-xs font-semibold">บันทึกเป็นโครงร่าง</button>
+                                <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-xs font-semibold">บันทึกงาน</button>
                             </div>
                         </form>
                     </div>
@@ -384,22 +459,59 @@
             document.body.insertAdjacentHTML('beforeend', html);
         }
 
-        async function handleAddTask(e) {
-            e.preventDefault();
-            const newTask = {
-                id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
-                title: document.getElementById('m-title').value,
-                subject: document.getElementById('m-subject').value,
-                teacher: document.getElementById('m-teacher').value,
-                due_date: document.getElementById('m-date').value,
-                description: document.getElementById('m-desc').value,
-                status: 'pending',
-                is_starred: false,
-                created_at: new Date().toISOString()
-            };
-            tasks.push(newTask);
-            await saveData(newTask, true);
+        async function handleSaveTask(e, existingId, isDraft) {
+            if (!isDraft) e.preventDefault();
+            const title = document.getElementById('m-title').value;
+            const subject = document.getElementById('m-subject').value;
+            const teacher = document.getElementById('m-teacher').value;
+            const dueDate = document.getElementById('m-date').value;
+            const desc = document.getElementById('m-desc').value;
+
+            if (!isDraft && (!title || !subject || !teacher || !dueDate)) {
+                alert('กรุณากรอกข้อมูลที่มีเครื่องหมาย * ให้ครบถ้วน');
+                return;
+            }
+
+            // บันทึกรายวิชาลงตาราง subjects เผื่อยังไม่มี
+            if (subject && teacher) {
+                await saveSubjectData({ name: subject, teacher: teacher });
+            }
+
+            if (existingId) {
+                const t = tasks.find(x => x.id === existingId);
+                if (t) {
+                    t.title = title || 'ไม่มีชื่องาน';
+                    t.subject = subject || 'ทั่วไป';
+                    t.teacher = teacher || 'ไม่ระบุ';
+                    t.due_date = dueDate || new Date().toISOString().slice(0,10);
+                    t.description = desc;
+                    t.is_draft = isDraft;
+                    await saveData(t, false);
+                }
+            } else {
+                const newTask = {
+                    id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
+                    title: title || 'ไม่มีชื่องาน',
+                    subject: subject || 'ทั่วไป',
+                    teacher: teacher || 'ไม่ระบุ',
+                    due_date: dueDate || new Date().toISOString().slice(0,10),
+                    description: desc,
+                    status: 'pending',
+                    is_starred: false,
+                    is_draft: isDraft,
+                    files: [],
+                    links: [],
+                    created_at: new Date().toISOString()
+                };
+                tasks.push(newTask);
+                await saveData(newTask, true);
+            }
             closeModal();
+        }
+
+        function openEditTaskModal(id) {
+            const t = tasks.find(x => x.id === id);
+            if (t) openAddTaskModal(false, t);
         }
 
         async function toggleStar(id) {
@@ -414,6 +526,7 @@
             const t = tasks.find(x => x.id === id);
             if (t) {
                 t.status = 'trashed';
+                t.trashed_at = new Date().toISOString();
                 await saveData(t, false);
             }
         }
@@ -432,7 +545,6 @@
                 await loadData();
             } else {
                 tasks = tasks.filter(x => x.id !== id);
-                saveData();
             }
             renderCurrentTab();
         }
@@ -443,7 +555,6 @@
                 await loadData();
             } else {
                 tasks = tasks.filter(x => x.status !== 'trashed');
-                saveData();
             }
             renderCurrentTab();
         }
@@ -455,7 +566,7 @@
                 <div id="custom-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50">
                     <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl space-y-4">
                         <h3 class="text-lg font-bold text-slate-900">ยืนยันส่งงาน: ${t.title}</h3>
-                        <div><label class="block text-xs font-semibold text-slate-700 mb-1">บันทึกการส่งงาน</label><textarea id="comp-notes" rows="3" placeholder="ระบุลิงก์หรือข้อความส่งครู..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm"></textarea></div>
+                        <div><label class="block text-xs font-semibold text-slate-700 mb-1">บันทึกเพิ่มเติม / แนบลิ้งค์ส่งงาน</label><textarea id="comp-notes" rows="3" placeholder="ระบุลิงก์หรือข้อความส่งครู..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm"></textarea></div>
                         <div class="flex justify-end gap-2 pt-2">
                             <button onclick="closeModal()" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl">ยกเลิก</button>
                             <button onclick="confirmComplete('${t.id}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-xs font-semibold">ยืนยันว่าเสร็จแล้ว</button>
@@ -488,6 +599,7 @@
                             <p><strong>รายวิชา:</strong> ${t.subject}</p>
                             <p><strong>ครูผู้สอน:</strong> ${t.teacher}</p>
                             <p><strong>กำหนดส่ง:</strong> ${t.due_date}</p>
+                            <p><strong>สถานะ:</strong> ${t.status === 'completed' ? 'เสร็จแล้ว' : 'ยังไม่เสร็จ'}</p>
                             <p><strong>รายละเอียด:</strong> ${t.description || '-'}</p>
                             ${t.completion_notes ? `<p class="bg-emerald-50 p-3 rounded-xl text-emerald-700"><strong>บันทึกการส่ง:</strong> ${t.completion_notes}</p>` : ''}
                         </div>
@@ -499,7 +611,7 @@
             lucide.createIcons();
         }
 
-        function openSubjectModal(subjectName) {
+        function openSubjectDetailModal(subjectName) {
             const subTasks = tasks.filter(t => t.subject === subjectName && t.status !== 'trashed');
             const html = `
                 <div id="custom-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50">
