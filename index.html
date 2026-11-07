@@ -1,642 +1,313 @@
 <!DOCTYPE html>
-<html lang="th" class="h-full">
+<html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>งานคงค้าง - ระบบบันทึกและติดตามงานระหว่างเรียน</title>
+    <title>ระบบจัดการคำใบ้ (Clue Management System)</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase JS SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { font-family: 'Sarabun', sans-serif; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 h-full flex flex-col">
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between">
 
-    <!-- SUPABASE CONFIGURATION -->
-    <script>
-        const SUPABASE_URL = 'https://ewbqsjoniqxantjevkvq.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV3YnFzam9uaXF4YW50amV2a3ZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM1OTA0ODAsImV4cCI6MjEwOTE2NjQ4MH0.Qc7VKzku43uqV1m8Wv8nh3vUBmPojIdIHUnT9nCkg_M';
-        
-        let supabaseClient = null;
-        let useCloud = false;
-
-        if (SUPABASE_URL && SUPABASE_ANON_KEY) {
-            try {
-                supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-                useCloud = true;
-            } catch (e) {
-                console.warn('Supabase init failed');
-            }
-        }
-    </script>
-
-    <!-- App Shell -->
-    <div class="flex-1 flex flex-col h-full overflow-hidden">
-        <!-- Header -->
-        <header class="bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between shadow-xs z-10">
-            <div class="flex items-center space-x-3">
-                <div class="bg-indigo-600 text-white p-2 rounded-xl shadow-md">
-                    <i data-lucide="book-open-check" class="w-6 h-6"></i>
-                </div>
+    <!-- Header -->
+    <header class="bg-blue-600 text-white shadow-md">
+        <div class="max-w-5xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-white text-blue-600 p-2 rounded-lg font-bold text-xl shadow">SM</div>
                 <div>
-                    <h1 class="text-lg font-bold text-slate-900 leading-tight">งานคงค้าง</h1>
-                    <p class="text-xs text-slate-500 flex items-center gap-1">
-                        <span id="sync-status-dot" class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
-                        <span id="sync-status-text">เชื่อมต่อ Supabase Cloud เรียลไทม์</span>
-                    </p>
+                    <h1 class="text-xl font-bold">ระบบบันทึกและจัดการคำใบ้</h1>
+                    <p class="text-xs text-blue-100">Clue Management System</p>
                 </div>
             </div>
-            <div class="flex items-center space-x-2">
-                <button onclick="exportBackup()" title="สำรองข้อมูล" class="p-2 text-slate-600 hover:bg-slate-100 rounded-lg text-xs font-medium flex items-center gap-1 transition">
-                    <i data-lucide="download" class="w-4 h-4"></i> <span class="hidden sm:inline">สำรองข้อมูล</span>
+            <div class="flex items-center gap-2">
+                <button onclick="app.openAdminModal()" class="bg-blue-700 hover:bg-blue-800 text-white text-sm px-4 py-2 rounded-lg border border-blue-500 transition flex items-center gap-2">
+                    🔒 ดูคำใบ้ทั้งหมด (Admin)
+                </button>
+                <button onclick="app.openConfigModal()" class="bg-blue-500 hover:bg-blue-400 text-white text-xs px-3 py-2 rounded-lg transition" title="ตั้งค่า Supabase">
+                    ⚙️ ตั้งค่า DB
                 </button>
             </div>
-        </header>
+        </div>
+    </header>
 
-        <!-- Main Body -->
-        <div class="flex-1 flex overflow-hidden">
-            <!-- Sidebar -->
-            <nav class="w-20 md:w-64 bg-white border-r border-slate-200 flex flex-col justify-between py-4 z-10">
-                <div class="space-y-1 px-3">
-                    <button onclick="switchTab('pending')" id="nav-pending" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition bg-indigo-50 text-indigo-600">
-                        <i data-lucide="clock" class="w-5 h-5 shrink-0"></i>
-                        <span class="hidden md:inline">ยังไม่เสร็จ</span>
-                        <span id="badge-pending" class="ml-auto bg-indigo-200 text-indigo-800 text-xs px-2 py-0.5 rounded-full hidden md:inline">0</span>
+    <!-- Main Container -->
+    <main class="max-w-3xl w-full mx-auto p-4 sm:p-6 my-6 bg-white rounded-2xl shadow-sm border border-slate-100 flex-grow">
+        
+        <!-- VIEW 1: HOME / ENTER CODE -->
+        <div id="view-home" class="space-y-6">
+            <div class="text-center space-y-2 py-4">
+                <h2 class="text-2xl font-bold text-slate-900">กรอกรหัสประจำตัวของคุณ</h2>
+                <p class="text-sm text-slate-500">กรุณากรอกรหัสรูปแบบ SM ตามด้วยตัวเลข เช่น SM01, SM22 (ติดกันห้ามเว้นวรรค)</p>
+            </div>
+
+            <div class="max-w-md mx-auto space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">รหัสประจำตัว (Code)</label>
+                    <input type="text" id="input-code" placeholder="เช่น SM01" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none uppercase tracking-wider font-semibold text-center text-lg">
+                    <p id="code-error" class="text-red-500 text-xs mt-1 hidden"></p>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+                    <button onclick="app.handleAction('create')" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-xl transition shadow-sm">
+                        ✍️ กรอก/เพิ่มคำใบ้
                     </button>
-                    <button onclick="switchTab('completed')" id="nav-completed" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition text-slate-600 hover:bg-slate-100">
-                        <i data-lucide="check-circle-2" class="w-5 h-5 shrink-0"></i>
-                        <span class="hidden md:inline">เสร็จแล้ว</span>
-                        <span id="badge-completed" class="ml-auto bg-slate-200 text-slate-700 text-xs px-2 py-0.5 rounded-full hidden md:inline">0</span>
+                    <button onclick="app.handleAction('edit')" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-medium py-3 rounded-xl transition shadow-sm">
+                        ✏️ แก้ไขคำใบ้
                     </button>
-                    <button onclick="switchTab('subjects')" id="nav-subjects" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition text-slate-600 hover:bg-slate-100">
-                        <i data-lucide="library" class="w-5 h-5 shrink-0"></i>
-                        <span class="hidden md:inline">รายวิชา & สถิติ</span>
-                    </button>
-                    <button onclick="switchTab('calendar')" id="nav-calendar" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition text-slate-600 hover:bg-slate-100">
-                        <i data-lucide="calendar" class="w-5 h-5 shrink-0"></i>
-                        <span class="hidden md:inline">ปฏิทินงาน</span>
-                    </button>
-                    <button onclick="switchTab('trash')" id="nav-trash" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition text-slate-600 hover:bg-slate-100">
-                        <i data-lucide="trash-2" class="w-5 h-5 shrink-0"></i>
-                        <span class="hidden md:inline">ถังขยะ</span>
+                    <button onclick="app.handleAction('view')" class="w-full bg-slate-700 hover:bg-slate-800 text-white font-medium py-3 rounded-xl transition shadow-sm">
+                        📋 ดูคำใบ้ของฉัน
                     </button>
                 </div>
-            </nav>
+            </div>
+        </div>
 
-            <!-- Content Area -->
-            <main class="flex-1 bg-slate-50 overflow-y-auto p-4 md:p-6" id="main-content-area">
-            </main>
+        <!-- VIEW 2: EDIT / CREATE CLUE FORM -->
+        <div id="view-form" class="space-y-6 hidden">
+            <div class="flex items-center justify-between border-b pb-4">
+                <div>
+                    <h2 id="form-title" class="text-xl font-bold text-slate-900">กรอกคำใบ้สำหรับรหัส: <span id="current-code-display" class="text-blue-600"></span></h2>
+                    <p class="text-xs text-slate-500">พิมพ์คำใบ้และแนบรูปภาพประกอบ (สูงสุด 2 รูป)</p>
+                </div>
+                <button onclick="app.goHome()" class="text-sm text-slate-500 hover:text-slate-800 bg-slate-100 px-3 py-1.5 rounded-lg">
+                    ← ย้อนกลับ
+                </button>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">ข้อความคำใบ้</label>
+                    <textarea id="clue-text" rows="5" placeholder="พิมพ์รายละเอียดคำใบ้ของคุณที่นี่..." class="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">แนบรูปภาพ (สูงสุด 2 รูป)</label>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- Image Slot 1 -->
+                        <div class="border-2 border-dashed border-slate-300 rounded-xl p-4 text-center relative flex flex-col items-center justify-center min-h-[160px] bg-slate-50 hover:bg-slate-100 transition">
+                            <input type="file" id="img-file-1" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer" onchange="app.handleImageUpload(event, 1)">
+                            <div id="img-preview-container-1" class="hidden w-full h-full flex flex-col items-center">
+                                <img id="img-preview-1" src="" class="max-h-32 rounded-lg object-contain shadow-sm cursor-pointer" onclick="app.openLightbox(this.src)" title="คลิกดูภาพเต็มจอ">
+                                <button type="button" onclick="app.removeImage(1)" class="mt-2 text-xs text-red-600 hover:underline bg-white px-2 py-1 rounded shadow-sm border">ลบรูปนี้</button>
+                            </div>
+                            <div id="img-placeholder-1" class="space-y-1">
+                                <span class="text-2xl">📷</span>
+                                <p class="text-xs text-slate-600 font-medium">คลิกเพื่อเพิ่มรูปภาพที่ 1</p>
+                                <p class="text-[10px] text-slate-400">PNG, JPG, WEBP</p>
+                            </div>
+                        </div>
+
+                        <!-- Image Slot 2 -->
+                        <div class="border-2 border-dashed border-slate-300 rounded-xl p-4 text-center relative flex flex-col items-center justify-center min-h-[160px] bg-slate-50 hover:bg-slate-100 transition">
+                            <input type="file" id="img-file-2" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer" onchange="app.handleImageUpload(event, 2)">
+                            <div id="img-preview-container-2" class="hidden w-full h-full flex flex-col items-center">
+                                <img id="img-preview-2" src="" class="max-h-32 rounded-lg object-contain shadow-sm cursor-pointer" onclick="app.openLightbox(this.src)" title="คลิกดูภาพเต็มจอ">
+                                <button type="button" onclick="app.removeImage(2)" class="mt-2 text-xs text-red-600 hover:underline bg-white px-2 py-1 rounded shadow-sm border">ลบรูปนี้</button>
+                            </div>
+                            <div id="img-placeholder-2" class="space-y-1">
+                                <span class="text-2xl">📷</span>
+                                <p class="text-xs text-slate-600 font-medium">คลิกเพื่อเพิ่มรูปภาพที่ 2</p>
+                                <p class="text-[10px] text-slate-400">PNG, JPG, WEBP</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-4 flex justify-end gap-3">
+                    <button onclick="app.goHome()" class="px-5 py-2.5 rounded-xl border border-slate-300 text-slate-600 hover:bg-slate-50">ยกเลิก</button>
+                    <button onclick="app.saveClue()" class="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-sm transition">💾 บันทึกคำใบ้</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW 3: SUCCESS / CONFIRMATION -->
+        <div id="view-success" class="space-y-6 text-center py-6 hidden">
+            <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-3xl mx-auto shadow-sm">
+                ✓
+            </div>
+            <div class="space-y-1">
+                <h2 id="success-title" class="text-2xl font-bold text-slate-900">บันทึกข้อมูลเรียบร้อยแล้ว</h2>
+                <p class="text-sm text-slate-500" id="success-subtitle">ข้อมูลคำใบ้ของรหัสถูกจัดเก็บเข้าสู่ระบบเรียบร้อย</p>
+            </div>
+
+            <div class="bg-slate-50 border border-slate-200 rounded-2xl p-5 text-left max-w-md mx-auto space-y-3">
+                <div class="flex justify-between items-center border-b pb-2">
+                    <span class="text-xs text-slate-400 uppercase tracking-wider font-semibold">รหัสประจำตัว</span>
+                    <span id="res-code" class="font-bold text-blue-600 text-lg"></span>
+                </div>
+                <div>
+                    <span class="text-xs text-slate-400 uppercase tracking-wider font-semibold block mb-1">คำใบ้</span>
+                    <p id="res-text" class="text-slate-700 text-sm whitespace-pre-wrap bg-white p-3 rounded-xl border border-slate-100 min-h-[60px]"></p>
+                </div>
+                <div id="res-images-box" class="hidden">
+                    <span class="text-xs text-slate-400 uppercase tracking-wider font-semibold block mb-1">รูปภาพแนบ</span>
+                    <div id="res-images" class="flex gap-2 flex-wrap"></div>
+                </div>
+            </div>
+
+            <div class="pt-4 flex justify-center gap-3">
+                <button onclick="app.goHome()" class="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-sm transition">
+                    กลับหน้าหลัก
+                </button>
+                <button onclick="app.startEditFromView()" class="px-6 py-2.5 rounded-xl border border-blue-300 text-blue-600 hover:bg-blue-50 transition">
+                    ✏️ แก้ไขเพิ่มเติม
+                </button>
+            </div>
+        </div>
+
+        <!-- VIEW 4: MY CLUE (VIEW ONLY / QUICK EDIT) -->
+        <div id="view-my-clue" class="space-y-6 hidden">
+            <div class="flex items-center justify-between border-b pb-4">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-900">คำใบ้ของคุณ: <span id="my-code-display" class="text-blue-600"></span></h2>
+                    <p class="text-xs text-slate-500">ตรวจสอบหรือจัดการคำใบ้ประจำรหัสของคุณ</p>
+                </div>
+                <button onclick="app.goHome()" class="text-sm text-slate-500 hover:text-slate-800 bg-slate-100 px-3 py-1.5 rounded-lg">
+                    ← กลับหน้าหลัก
+                </button>
+            </div>
+
+            <div id="my-clue-content" class="space-y-4">
+                <!-- Dynamic loaded content -->
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center py-6 text-xs text-slate-400">
+        Clue Management System &bull; Secured with Supabase Cloud Database
+    </footer>
+
+    <!-- ADMIN MODAL: ALL CLUES -->
+    <div id="admin-modal" class="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] flex flex-col shadow-xl overflow-hidden">
+            <div class="p-4 sm:p-5 bg-slate-900 text-white flex justify-between items-center">
+                <div class="flex items-center gap-2">
+                    <span class="text-xl">🔒</span>
+                    <h3 class="font-bold text-lg">จัดการคำใบ้ทั้งหมด (Admin Dashboard)</h3>
+                </div>
+                <button onclick="app.closeAdminModal()" class="text-slate-400 hover:text-white text-xl font-bold px-2">✕</button>
+            </div>
+
+            <!-- Password screen if not logged in -->
+            <div id="admin-auth-box" class="p-8 text-center space-y-4 my-auto">
+                <p class="text-sm text-slate-600">กรุณากรอกรหัสผ่านผู้ดูแลระบบเพื่อเข้าดูคำใบ้ทั้งหมด</p>
+                <div class="max-w-xs mx-auto flex gap-2">
+                    <input type="password" id="admin-pass" placeholder="รหัสผ่านผู้ดูแลระบบ" class="w-full px-4 py-2 border rounded-xl text-center focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <button onclick="app.verifyAdmin()" class="bg-blue-600 text-white px-5 py-2 rounded-xl font-medium hover:bg-blue-700">เข้าสู่ระบบ</button>
+                </div>
+                <p id="admin-pass-error" class="text-red-500 text-xs hidden"></p>
+            </div>
+
+            <!-- Admin Content (Hidden until auth) -->
+            <div id="admin-panel-content" class="p-4 sm:p-6 overflow-y-auto space-y-4 hidden flex-grow">
+                <div class="flex flex-col sm:flex-row justify-between gap-3 items-center">
+                    <div class="relative w-full sm:w-72">
+                        <input type="text" id="admin-search" oninput="app.filterAdminList()" placeholder="🔍 ค้นหารหัส (เช่น SM01)..." class="w-full px-3 py-2 pl-9 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    </div>
+                    <div class="text-xs text-slate-500">
+                        แสดงข้อมูลทั้งหมด (SM01 - SM38)
+                    </div>
+                </div>
+
+                <div class="border rounded-xl overflow-hidden">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-slate-100 text-xs uppercase text-slate-600 font-semibold">
+                            <tr>
+                                <th class="p-3">รหัส</th>
+                                <th class="p-3">คำใบ้</th>
+                                <th class="p-3">รูปภาพ</th>
+                                <th class="p-3">สถานะ</th>
+                                <th class="p-3 text-right">จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-table-body" class="divide-y divide-slate-100 text-sm">
+                            <!-- Rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Application Script Logic -->
+    <!-- DETAIL MODAL -->
+    <div id="detail-modal" class="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-xl relative">
+            <button onclick="app.closeDetailModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-800 font-bold">✕</button>
+            <div class="flex items-center justify-between border-b pb-3">
+                <h3 id="detail-code" class="text-xl font-bold text-blue-600"></h3>
+                <span id="detail-time" class="text-xs text-slate-400"></span>
+            </div>
+            <div>
+                <h4 class="text-xs font-semibold text-slate-400 uppercase mb-1">เนื้อหาคำใบ้ฉบับเต็ม</h4>
+                <div id="detail-text" class="bg-slate-50 p-3 rounded-xl border text-sm whitespace-pre-wrap max-h-48 overflow-y-auto"></div>
+                <button onclick="app.copyDetailText()" class="mt-2 text-xs text-blue-600 hover:underline font-medium">📋 คัดลอกข้อความคำใบ้</button>
+            </div>
+            <div id="detail-images-section">
+                <h4 class="text-xs font-semibold text-slate-400 uppercase mb-1">รูปภาพประกอบ</h4>
+                <div id="detail-images" class="flex gap-2 flex-wrap"></div>
+            </div>
+            <div class="border-t pt-3 flex justify-between items-center">
+                <button onclick="app.openHistoryModalFromDetail()" class="text-xs text-slate-600 hover:text-blue-600 underline">🕒 ดูประวัติการแก้ไขย้อนหลัง</button>
+                <button onclick="app.closeDetailModal()" class="bg-slate-200 hover:bg-slate-300 px-4 py-2 rounded-xl text-xs font-medium">ปิดหน้าต่าง</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- HISTORY MODAL -->
+    <div id="history-modal" class="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-60 hidden">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-xl relative max-h-[80vh] flex flex-col">
+            <button onclick="app.closeHistoryModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-800 font-bold">✕</button>
+            <h3 class="text-lg font-bold text-slate-900 border-b pb-3">🕒 ประวัติการแก้ไข: <span id="history-code-title" class="text-blue-600"></span></h3>
+            <div id="history-list" class="overflow-y-auto space-y-3 flex-grow pr-1">
+                <!-- History items -->
+            </div>
+            <div class="border-t pt-3 text-right">
+                <button onclick="app.closeHistoryModal()" class="bg-slate-200 hover:bg-slate-300 px-4 py-2 rounded-xl text-xs font-medium">ปิด</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- LIGHTBOX MODAL -->
+    <div id="lightbox-modal" class="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-70 hidden" onclick="app.closeLightbox()">
+        <div class="relative max-w-4xl max-h-[90vh]" onclick="event.stopPropagation()">
+            <button onclick="app.closeLightbox()" class="absolute -top-10 right-0 text-white text-2xl font-bold px-3 py-1">✕</button>
+            <img id="lightbox-img" src="" class="max-w-full max-h-[85vh] rounded-lg shadow-2xl object-contain mx-auto">
+        </div>
+    </div>
+
+    <!-- CONFIG MODAL FOR SUPABASE -->
+    <div id="config-modal" class="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-xl relative">
+            <button onclick="app.closeConfigModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-800 font-bold">✕</button>
+            <h3 class="text-lg font-bold text-slate-900 border-b pb-3">⚙️ ตั้งค่าการเชื่อมต่อ Supabase</h3>
+            <div class="space-y-3 text-sm">
+                <div>
+                    <label class="block font-medium text-slate-700 mb-1">Supabase URL</label>
+                    <input type="text" id="cfg-url" value="https://couxeeulzawrtkvsipyj.supabase.co" class="w-full p-2.5 border rounded-xl text-xs font-mono">
+                </div>
+                <div>
+                    <label class="block font-medium text-slate-700 mb-1">Supabase Anon Key</label>
+                    <input type="password" id="cfg-key" value="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNvdXhlZXVsemF3cnRrdnNpcHlqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM5ODcxNDIsImV4cCI6MjEwOTU2MzE0Mn0.0U1KyWHsHZC5yHE2kr9rMrx-SRaEtcMzcP7IH_W1QYw" class="w-full p-2.5 border rounded-xl text-xs font-mono">
+                </div>
+            </div>
+            <div class="border-t pt-3 flex justify-end gap-2">
+                <button onclick="app.closeConfigModal()" class="px-4 py-2 rounded-xl border text-slate-600 text-xs">ยกเลิก</button>
+                <button onclick="app.saveConfig()" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium">บันทึกและเชื่อมต่อ</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPT LOGIC -->
     <script>
-        let currentTab = 'pending';
-        let tasks = [];
-        let subjects = [];
-        let filterStarredOnly = false;
-
-        async function initApp() {
-            await loadData();
-            renderCurrentTab();
-            lucide.createIcons();
-
-            if (useCloud && supabaseClient) {
-                supabaseClient.channel('public:tasks')
-                    .on('postgres_changes', { event: '*', schema: 'public', table: 'tasks' }, async () => {
-                        await loadData();
-                        renderCurrentTab();
-                    }).subscribe();
-            }
-        }
-
-        async function loadData() {
-            if (useCloud && supabaseClient) {
-                try {
-                    const { data: tData } = await supabaseClient.from('tasks').select('*');
-                    const { data: sData } = await supabaseClient.from('subjects').select('*');
-                    if (tData) tasks = tData;
-                    if (sData) subjects = sData;
-                    return;
-                } catch (e) {
-                    console.warn(e);
-                }
-            }
-            tasks = JSON.parse(localStorage.getItem('hw_tasks') || '[]');
-            subjects = JSON.parse(localStorage.getItem('hw_subjects') || '[]');
-        }
-
-        async function saveData(taskObj, isNew = false) {
-            if (useCloud && supabaseClient) {
-                if (isNew) {
-                    await supabaseClient.from('tasks').insert([taskObj]);
-                } else {
-                    await supabaseClient.from('tasks').upsert([taskObj]);
-                }
-                await loadData();
-            } else {
-                localStorage.setItem('hw_tasks', JSON.stringify(tasks));
-                localStorage.setItem('hw_subjects', JSON.stringify(subjects));
-            }
-            renderCurrentTab();
-        }
-
-        async function saveSubjectData(newSub) {
-            if (useCloud && supabaseClient) {
-                await supabaseClient.from('subjects').upsert([newSub]);
-                const { data: sData } = await supabaseClient.from('subjects').select('*');
-                if (sData) subjects = sData;
-            } else {
-                subjects.push(newSub);
-                localStorage.setItem('hw_subjects', JSON.stringify(subjects));
-            }
-        }
-
-        function switchTab(tab) {
-            currentTab = tab;
-            document.querySelectorAll('.nav-btn').forEach(b => b.className = "nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition text-slate-600 hover:bg-slate-100");
-            document.getElementById(`nav-${tab}`).className = "nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition bg-indigo-50 text-indigo-600";
-            renderCurrentTab();
-        }
-
-        function renderCurrentTab() {
-            const area = document.getElementById('main-content-area');
-            updateBadges();
-            if (currentTab === 'pending') renderPendingTab(area);
-            else if (currentTab === 'completed') renderCompletedTab(area);
-            else if (currentTab === 'subjects') renderSubjectsTab(area);
-            else if (currentTab === 'calendar') renderCalendarTab(area);
-            else if (currentTab === 'trash') renderTrashTab(area);
-            lucide.createIcons();
-        }
-
-        function updateBadges() {
-            const pendingCount = tasks.filter(t => t.status === 'pending' && !t.is_draft).length;
-            const completedCount = tasks.filter(t => t.status === 'completed').length;
-            if(document.getElementById('badge-pending')) document.getElementById('badge-pending').innerText = pendingCount;
-            if(document.getElementById('badge-completed')) document.getElementById('badge-completed').innerText = completedCount;
-        }
-
-        // --- 1. Pending Tab (ยังไม่เสร็จ) ---
-        function renderPendingTab(container) {
-            let pending = tasks.filter(t => t.status === 'pending');
-            if (filterStarredOnly) pending = pending.filter(t => t.is_starred);
-
-            container.innerHTML = `
-                <div class="max-w-5xl mx-auto space-y-6">
-                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                        <div>
-                            <h2 class="text-xl font-bold text-slate-900">งานคงค้างทั้งหมด</h2>
-                            <p class="text-xs text-slate-500">จัดการงานและติดตามกำหนดส่งอย่างเป็นระบบ</p>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <button onclick="toggleFilterStarred()" class="px-3 py-2.5 rounded-xl font-semibold text-xs flex items-center gap-1.5 border transition ${filterStarredOnly ? 'bg-amber-500 text-white border-amber-500' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'}">
-                                <i data-lucide="star" class="w-4 h-4 ${filterStarredOnly ? 'fill-white' : ''}"></i> งานติดดาว
-                            </button>
-                            <button onclick="openAddTaskModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 shadow-sm transition">
-                                <i data-lucide="plus" class="w-4 h-4"></i> เพิ่มงานใหม่
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Search Box -->
-                    <div class="relative">
-                        <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-3 text-slate-400"></i>
-                        <input type="text" id="search-box" oninput="filterTasksLive(this.value)" placeholder="ค้นหาชื่องาน, รายวิชา หรือครูผู้สอนอย่างรวดเร็ว..." class="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    </div>
-
-                    <div id="task-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        ${pending.length === 0 ? '<div class="col-span-full text-center py-12 text-slate-400 bg-white rounded-2xl border border-slate-200">ไม่มีงานคงค้างในขณะนี้ ยอดเยี่ยมมาก!</div>' : ''}
-                        ${pending.map(t => generateTaskCard(t)).join('')}
-                    </div>
-                </div>
-            `;
-        }
-
-        function generateTaskCard(t) {
-            const days = calculateDaysLeft(t.due_date);
-            const p = getPriorityConfig(days);
-            return `
-                <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs relative overflow-hidden flex flex-col justify-between">
-                    <div class="absolute top-0 left-0 bottom-0 w-2 ${p.bar}"></div>
-                    <div>
-                        <div class="flex justify-between items-start mb-2">
-                            <span class="text-xs font-bold px-2.5 py-1 rounded-lg ${p.badge}">${p.text} (${days >= 0 ? 'เหลือ ' + days + ' วัน' : 'เลยกำหนด'})</span>
-                            <div class="flex items-center gap-1">
-                                <button onclick="toggleStar('${t.id}')" class="p-1.5 text-slate-400 hover:text-amber-500"><i data-lucide="star" class="w-4 h-4 ${t.is_starred ? 'fill-amber-400 text-amber-500' : ''}"></i></button>
-                                <button onclick="openCompleteModal('${t.id}')" class="bg-emerald-50 text-emerald-600 hover:bg-emerald-100 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1"><i data-lucide="check" class="w-3.5 h-3.5"></i> เสร็จแล้ว</button>
-                            </div>
-                        </div>
-                        <h3 class="font-bold text-slate-900 text-base mb-1">${t.title} ${t.is_draft ? '<span class="text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded-md ml-1 font-normal">โครงร่าง</span>' : ''}</h3>
-                        <p class="text-xs text-slate-500 mb-2">${t.subject} • ครู${t.teacher} • กำหนดส่ง: ${t.due_date}</p>
-                        ${t.description ? `<p class="text-xs text-slate-600 bg-slate-50 p-2.5 rounded-xl mb-3">${t.description}</p>` : ''}
-                        ${t.files && t.files.length > 0 ? `<p class="text-xs text-indigo-600 mb-2">📎 แนบไฟล์ ${t.files.length} รายการ</p>` : ''}
-                        ${t.links && t.links.length > 0 ? `<p class="text-xs text-indigo-600 mb-2">🔗 แนบลิงก์ ${t.links.length} รายการ</p>` : ''}
-                    </div>
-                    <div class="flex justify-between pt-3 border-t border-slate-100 text-xs">
-                        <button onclick="openDetailModal('${t.id}')" class="text-indigo-600 font-semibold hover:underline">ดูรายละเอียดเต็ม</button>
-                        <div class="flex items-center gap-3">
-                            <button onclick="openEditTaskModal('${t.id}')" class="text-slate-500 hover:text-indigo-600 font-medium">แก้ไข</button>
-                            <button onclick="moveToTrash('${t.id}')" class="text-rose-500 hover:text-rose-700 font-medium">ลบ</button>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function calculateDaysLeft(d) {
-            const today = new Date(); today.setHours(0,0,0,0);
-            const due = new Date(d); due.setHours(0,0,0,0);
-            return Math.ceil((due - today) / (1000 * 60 * 60 * 24));
-        }
-
-        function getPriorityConfig(days) {
-            if (days <= 3) return { text: 'เหลืองเวลาทำ ≤ 3 วัน', bar: 'bg-zinc-950', badge: 'bg-zinc-950 text-white' };
-            if (days <= 7) return { text: 'เหลือเวลาทำ ≤ 7 วัน', bar: 'bg-red-600', badge: 'bg-red-100 text-red-700' };
-            if (days <= 14) return { text: 'เหลือเวลาทำ ≤ 14 วัน', bar: 'bg-orange-500', badge: 'bg-orange-100 text-orange-700' };
-            if (days <= 21) return { text: 'เหลือเวลาทำ ≤ 21 วัน', bar: 'bg-amber-400', badge: 'bg-amber-100 text-amber-800' };
-            if (days <= 30) return { text: 'เหลือเวลาทำ ≤ 30 วัน', bar: 'bg-emerald-500', badge: 'bg-emerald-100 text-emerald-800' };
-            return { text: 'เหลือเวลาทำ ≥ 31 วัน', bar: 'bg-slate-300', badge: 'bg-slate-100 text-slate-700' };
-        }
-
-        function toggleFilterStarred() {
-            filterStarredOnly = !filterStarredOnly;
-            renderCurrentTab();
-        }
-
-        function filterTasksLive(query) {
-            const q = query.toLowerCase();
-            const grid = document.getElementById('task-grid');
-            const filtered = tasks.filter(t => t.status === 'pending' && (t.title.toLowerCase().includes(q) || t.subject.toLowerCase().includes(q) || t.teacher.toLowerCase().includes(q)));
-            grid.innerHTML = filtered.length === 0 ? '<div class="col-span-full text-center py-12 text-slate-400 bg-white rounded-2xl border border-slate-200">ไม่พบงานที่ค้นหา</div>' : filtered.map(t => generateTaskCard(t)).join('');
-            lucide.createIcons();
-        }
-
-        // --- 2. Completed Tab (เสร็จแล้ว) ---
-        function renderCompletedTab(container) {
-            const completed = tasks.filter(t => t.status === 'completed');
-            container.innerHTML = `
-                <div class="max-w-5xl mx-auto space-y-6">
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <h2 class="text-xl font-bold text-slate-900">งานที่เสร็จแล้ว</h2>
-                            <p class="text-xs text-slate-500">แสดงผลงานที่เสร็จแล้วล่าสุดไว้ด้านบนสุด</p>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        ${completed.length === 0 ? '<div class="col-span-full text-center py-12 text-slate-400 bg-white rounded-2xl border border-slate-200">ยังไม่มีงานที่เสร็จสมบูรณ์</div>' : ''}
-                        ${completed.map(t => `
-                            <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs flex flex-col justify-between">
-                                <div>
-                                    <div class="flex justify-between items-center mb-2">
-                                        <span class="text-xs font-semibold bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-lg">เสร็จสมบูรณ์</span>
-                                        <span class="text-xs text-slate-400">${t.completed_at ? new Date(t.completed_at).toLocaleDateString('th-TH') : ''}</span>
-                                    </div>
-                                    <h3 class="font-bold text-slate-900 text-base mb-1">${t.title}</h3>
-                                    <p class="text-xs text-slate-500 mb-3">${t.subject} • ครู${t.teacher}</p>
-                                    ${t.completion_notes ? `<p class="text-xs text-slate-600 bg-slate-50 p-2.5 rounded-xl mb-3">บันทึกส่ง: ${t.completion_notes}</p>` : ''}
-                                </div>
-                                <div class="pt-3 border-t border-slate-100 flex justify-between items-center text-xs">
-                                    <button onclick="openDetailModal('${t.id}')" class="text-indigo-600 font-semibold hover:underline">ดูรายละเอียด</button>
-                                    <button onclick="moveToTrash('${t.id}')" class="text-rose-500 hover:text-rose-700">ลบ</button>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
-        }
-
-        // --- 3. Subjects & Analytics Tab (รายวิชา) ---
-        function renderSubjectsTab(container) {
-            const allSubjs = Array.from(new Set([...subjects.map(s => s.name), ...tasks.map(t => t.subject)]));
-            container.innerHTML = `
-                <div class="max-w-5xl mx-auto space-y-6">
-                    <div>
-                        <h2 class="text-xl font-bold text-slate-900">รายวิชาทั้งหมด & สถิติการทำงาน</h2>
-                        <p class="text-xs text-slate-500">แสดงผลงานแยกรายวิชาและรายงานสถิติความสำเร็จทันกำหนด</p>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        ${allSubjs.length === 0 ? '<div class="col-span-full text-center py-8 text-slate-400 bg-white rounded-2xl border border-slate-200">ยังไม่มีรายวิชา</div>' : ''}
-                        ${allSubjs.map(sName => {
-                            const subjInfo = subjects.find(s => s.name === sName) || { teacher: 'ไม่ระบุ' };
-                            const subTasks = tasks.filter(t => t.subject === sName && t.status !== 'trashed');
-                            const pending = subTasks.filter(t => t.status === 'pending').length;
-                            const completed = subTasks.filter(t => t.status === 'completed').length;
-                            return `
-                                <div onclick="openSubjectDetailModal('${sName}')" class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs hover:shadow-md cursor-pointer transition flex flex-col justify-between">
-                                    <div>
-                                        <h3 class="font-bold text-slate-900 text-lg mb-1">${sName}</h3>
-                                        <p class="text-xs text-slate-500 mb-4">ครูผู้สอน: ${subjInfo.teacher}</p>
-                                    </div>
-                                    <div class="grid grid-cols-3 gap-2 bg-slate-50 p-3 rounded-xl text-center text-xs">
-                                        <div><p class="text-slate-400">ยังไม่เสร็จ</p><p class="font-bold text-rose-600 text-sm">${pending}</p></div>
-                                        <div><p class="text-slate-400">เสร็จแล้ว</p><p class="font-bold text-emerald-600 text-sm">${completed}</p></div>
-                                        <div><p class="text-slate-400">รวมทั้งหมด</p><p class="font-bold text-slate-800 text-sm">${subTasks.length}</p></div>
-                                    </div>
-                                </div>
-                            `;
-                        }).join('')}
-                    </div>
-                    <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs">
-                        <h3 class="font-bold text-slate-900 mb-4">สถิติและวิเคราะห์ข้อมูลการส่งงาน</h3>
-                        <div class="w-full h-64 flex items-center justify-center"><canvas id="analyticsChart"></canvas></div>
-                    </div>
-                </div>
-            `;
-            const ctx = document.getElementById('analyticsChart');
-            if (ctx) {
-                const comp = tasks.filter(t => t.status === 'completed').length;
-                const pend = tasks.filter(t => t.status === 'pending').length;
-                new Chart(ctx, { type: 'bar', data: { labels: ['งานเสร็จแล้ว', 'งานคงค้าง'], datasets: [{ label: 'จำนวนงาน', data: [comp, pend], backgroundColor: ['#10b981', '#6366f1'] }] }, options: { responsive: true, maintainAspectRatio: false } });
-            }
-        }
-
-        // --- 4. Calendar Tab (ปฏิทิน) ---
-        function renderCalendarTab(container) {
-            container.innerHTML = `
-                <div class="max-w-4xl mx-auto space-y-6">
-                    <div>
-                        <h2 class="text-xl font-bold text-slate-900">ปฏิทินงานกำหนดส่ง</h2>
-                        <p class="text-xs text-slate-500">แสดงงานด้วยจุดสีตามลำดับความสำคัญและไอคอนดาว</p>
-                    </div>
-                    <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs space-y-4">
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="font-bold text-slate-800 text-base">รายการงานทั้งหมดเรียงตามวันกำหนดส่ง</h3>
-                        </div>
-                        <div class="space-y-3">
-                            ${tasks.filter(t => t.status !== 'trashed').map(t => {
-                                const days = calculateDaysLeft(t.due_date);
-                                const p = getPriorityConfig(days);
-                                return `
-                                    <div class="p-3 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-between text-xs">
-                                        <div class="flex items-center gap-3">
-                                            <span class="w-3 h-3 rounded-full ${p.bar}"></span>
-                                            <div>
-                                                <p class="font-bold text-slate-900 text-sm">${t.title} ${t.is_starred ? '⭐' : ''}</p>
-                                                <p class="text-slate-500">${t.subject} • กำหนดส่ง: ${t.due_date}</p>
-                                            </div>
-                                        </div>
-                                        <button onclick="openDetailModal('${t.id}')" class="text-indigo-600 font-semibold hover:underline">ดูรายละเอียด</button>
-                                    </div>
-                                `;
-                            }).join('')}
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        // --- 5. Trash Tab (ถังขยะ) ---
-        function renderTrashTab(container) {
-            const trash = tasks.filter(t => t.status === 'trashed');
-            container.innerHTML = `
-                <div class="max-w-5xl mx-auto space-y-6">
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <h2 class="text-xl font-bold text-slate-900">ถังขยะ</h2>
-                            <p class="text-xs text-slate-500">งานที่ถูกลบจะถูกเก็บไว้ 30 วันก่อนลบถาวร</p>
-                        </div>
-                        ${trash.length > 0 ? `<button onclick="emptyTrash()" class="bg-rose-50 text-rose-600 hover:bg-rose-100 px-3 py-2 rounded-xl text-xs font-semibold">ลบถาวรทั้งหมด</button>` : ''}
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        ${trash.length === 0 ? '<div class="col-span-full text-center py-12 text-slate-400 bg-white rounded-2xl border border-slate-200">ถังขยะว่างเปล่า</div>' : ''}
-                        ${trash.map(t => `
-                            <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs flex items-center justify-between">
-                                <div><h3 class="font-bold text-slate-900 text-sm mb-1">${t.title}</h3><p class="text-xs text-slate-400">${t.subject}</p></div>
-                                <div class="flex gap-2">
-                                    <button onclick="restoreTask('${t.id}')" class="bg-indigo-50 text-indigo-600 px-3 py-1.5 rounded-lg text-xs font-semibold">กู้คืน</button>
-                                    <button onclick="permanentDelete('${t.id}')" class="bg-rose-50 text-rose-600 px-3 py-1.5 rounded-lg text-xs font-semibold">ลบถาวร</button>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
-        }
-
-        // --- Modals & Actions ---
-        function openAddTaskModal(isDraft = false, existing = null) {
-            const subList = Array.from(new Set([...subjects.map(s => s.name), ...tasks.map(t => t.subject)]));
-            const teacherList = Array.from(new Set([...subjects.map(s => s.teacher), ...tasks.map(t => t.teacher)]));
-
-            const html = `
-                <div id="custom-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-                    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl space-y-4 max-h-[90vh] overflow-y-auto">
-                        <h3 class="text-lg font-bold text-slate-900">${existing ? 'แก้ไขงานคงค้าง' : 'เพิ่มงานใหม่'}</h3>
-                        <form onsubmit="handleSaveTask(event, ${existing ? `'${existing.id}'` : 'null'}, false)" class="space-y-3">
-                            <div><label class="block text-xs font-semibold text-slate-700 mb-1">ชื่องาน*</label><input type="text" id="m-title" value="${existing ? existing.title : ''}" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm"></div>
-                            <div class="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label class="block text-xs font-semibold text-slate-700 mb-1">รายวิชา*</label>
-                                    <input type="text" id="m-subject" list="subj-options" value="${existing ? existing.subject : ''}" required placeholder="เลือกหรือพิมพ์วิชา" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm">
-                                    <datalist id="subj-options">${subList.map(s => `<option value="${s}">`).join('')}</datalist>
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-semibold text-slate-700 mb-1">ครูผู้สอน*</label>
-                                    <input type="text" id="m-teacher" list="teacher-options" value="${existing ? existing.teacher : ''}" required placeholder="เลือกหรือพิมพ์ครู" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm">
-                                    <datalist id="teacher-options">${teacherList.map(t => `<option value="${t}">`).join('')}</datalist>
-                                </div>
-                            </div>
-                            <div><label class="block text-xs font-semibold text-slate-700 mb-1">วันกำหนดส่ง*</label><input type="date" id="m-date" value="${existing ? existing.due_date : ''}" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm"></div>
-                            <div><label class="block text-xs font-semibold text-slate-700 mb-1">รายละเอียดเพิ่มเติม</label><textarea id="m-desc" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm">${existing && existing.description ? existing.description : ''}</textarea></div>
-                            <div class="flex justify-end gap-2 pt-2">
-                                <button type="button" onclick="closeModal()" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl">ยกเลิก</button>
-                                <button type="button" onclick="handleSaveTask(event, ${existing ? `'${existing.id}'` : 'null'}, true)" class="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-xl text-xs font-semibold">บันทึกเป็นโครงร่าง</button>
-                                <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-xs font-semibold">บันทึกงาน</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            `;
-            document.body.insertAdjacentHTML('beforeend', html);
-        }
-
-        async function handleSaveTask(e, existingId, isDraft) {
-            if (!isDraft) e.preventDefault();
-            const title = document.getElementById('m-title').value;
-            const subject = document.getElementById('m-subject').value;
-            const teacher = document.getElementById('m-teacher').value;
-            const dueDate = document.getElementById('m-date').value;
-            const desc = document.getElementById('m-desc').value;
-
-            if (!isDraft && (!title || !subject || !teacher || !dueDate)) {
-                alert('กรุณากรอกข้อมูลที่มีเครื่องหมาย * ให้ครบถ้วน');
-                return;
-            }
-
-            // บันทึกรายวิชาลงตาราง subjects เผื่อยังไม่มี
-            if (subject && teacher) {
-                await saveSubjectData({ name: subject, teacher: teacher });
-            }
-
-            if (existingId) {
-                const t = tasks.find(x => x.id === existingId);
-                if (t) {
-                    t.title = title || 'ไม่มีชื่องาน';
-                    t.subject = subject || 'ทั่วไป';
-                    t.teacher = teacher || 'ไม่ระบุ';
-                    t.due_date = dueDate || new Date().toISOString().slice(0,10);
-                    t.description = desc;
-                    t.is_draft = isDraft;
-                    await saveData(t, false);
-                }
-            } else {
-                const newTask = {
-                    id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
-                    title: title || 'ไม่มีชื่องาน',
-                    subject: subject || 'ทั่วไป',
-                    teacher: teacher || 'ไม่ระบุ',
-                    due_date: dueDate || new Date().toISOString().slice(0,10),
-                    description: desc,
-                    status: 'pending',
-                    is_starred: false,
-                    is_draft: isDraft,
-                    files: [],
-                    links: [],
-                    created_at: new Date().toISOString()
-                };
-                tasks.push(newTask);
-                await saveData(newTask, true);
-            }
-            closeModal();
-        }
-
-        function openEditTaskModal(id) {
-            const t = tasks.find(x => x.id === id);
-            if (t) openAddTaskModal(false, t);
-        }
-
-        async function toggleStar(id) {
-            const t = tasks.find(x => x.id === id);
-            if (t) {
-                t.is_starred = !t.is_starred;
-                await saveData(t, false);
-            }
-        }
-
-        async function moveToTrash(id) {
-            const t = tasks.find(x => x.id === id);
-            if (t) {
-                t.status = 'trashed';
-                t.trashed_at = new Date().toISOString();
-                await saveData(t, false);
-            }
-        }
-
-        async function restoreTask(id) {
-            const t = tasks.find(x => x.id === id);
-            if (t) {
-                t.status = 'pending';
-                await saveData(t, false);
-            }
-        }
-
-        async function permanentDelete(id) {
-            if (useCloud && supabaseClient) {
-                await supabaseClient.from('tasks').delete().eq('id', id);
-                await loadData();
-            } else {
-                tasks = tasks.filter(x => x.id !== id);
-            }
-            renderCurrentTab();
-        }
-
-        async function emptyTrash() {
-            if (useCloud && supabaseClient) {
-                await supabaseClient.from('tasks').delete().eq('status', 'trashed');
-                await loadData();
-            } else {
-                tasks = tasks.filter(x => x.status !== 'trashed');
-            }
-            renderCurrentTab();
-        }
-
-        function openCompleteModal(id) {
-            const t = tasks.find(x => x.id === id);
-            if (!t) return;
-            const html = `
-                <div id="custom-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-                    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl space-y-4">
-                        <h3 class="text-lg font-bold text-slate-900">ยืนยันส่งงาน: ${t.title}</h3>
-                        <div><label class="block text-xs font-semibold text-slate-700 mb-1">บันทึกเพิ่มเติม / แนบลิ้งค์ส่งงาน</label><textarea id="comp-notes" rows="3" placeholder="ระบุลิงก์หรือข้อความส่งครู..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm"></textarea></div>
-                        <div class="flex justify-end gap-2 pt-2">
-                            <button onclick="closeModal()" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl">ยกเลิก</button>
-                            <button onclick="confirmComplete('${t.id}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-xs font-semibold">ยืนยันว่าเสร็จแล้ว</button>
-                        </div>
-                    </div>
-                </div>
-            `;
-            document.body.insertAdjacentHTML('beforeend', html);
-        }
-
-        async function confirmComplete(id) {
-            const t = tasks.find(x => x.id === id);
-            if (t) {
-                t.status = 'completed';
-                t.completion_notes = document.getElementById('comp-notes').value;
-                t.completed_at = new Date().toISOString();
-                await saveData(t, false);
-                closeModal();
-            }
-        }
-
-        function openDetailModal(id) {
-            const t = tasks.find(x => x.id === id);
-            if (!t) return;
-            const html = `
-                <div id="custom-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-                    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl space-y-4">
-                        <div class="flex justify-between"><h3 class="text-lg font-bold text-slate-900">${t.title}</h3><button onclick="closeModal()"><i data-lucide="x" class="w-5 h-5 text-slate-400"></i></button></div>
-                        <div class="space-y-2 text-sm text-slate-600">
-                            <p><strong>รายวิชา:</strong> ${t.subject}</p>
-                            <p><strong>ครูผู้สอน:</strong> ${t.teacher}</p>
-                            <p><strong>กำหนดส่ง:</strong> ${t.due_date}</p>
-                            <p><strong>สถานะ:</strong> ${t.status === 'completed' ? 'เสร็จแล้ว' : 'ยังไม่เสร็จ'}</p>
-                            <p><strong>รายละเอียด:</strong> ${t.description || '-'}</p>
-                            ${t.completion_notes ? `<p class="bg-emerald-50 p-3 rounded-xl text-emerald-700"><strong>บันทึกการส่ง:</strong> ${t.completion_notes}</p>` : ''}
-                        </div>
-                        <div class="flex justify-end pt-2"><button onclick="closeModal()" class="bg-slate-100 px-4 py-2 rounded-xl text-xs font-semibold">ปิด</button></div>
-                    </div>
-                </div>
-            `;
-            document.body.insertAdjacentHTML('beforeend', html);
-            lucide.createIcons();
-        }
-
-        function openSubjectDetailModal(subjectName) {
-            const subTasks = tasks.filter(t => t.subject === subjectName && t.status !== 'trashed');
-            const html = `
-                <div id="custom-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-                    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl space-y-4 max-h-[80vh] overflow-y-auto">
-                        <div class="flex justify-between"><h3 class="text-lg font-bold text-slate-900">วิชา: ${subjectName}</h3><button onclick="closeModal()"><i data-lucide="x" class="w-5 h-5 text-slate-400"></i></button></div>
-                        <div class="space-y-2">
-                            ${subTasks.map(t => `<div class="bg-slate-50 p-3 rounded-xl text-xs flex justify-between items-center"><div><p class="font-bold text-sm text-slate-800">${t.title}</p><p class="text-slate-500">กำหนดส่ง: ${t.due_date}</p></div><span class="px-2 py-1 rounded-md ${t.status === 'completed' ? 'bg-emerald-100 text-emerald-700' : 'bg-indigo-100 text-indigo-700'}">${t.status === 'completed' ? 'เสร็จแล้ว' : 'ค้างอยู่'}</span></div>`).join('')}
-                        </div>
-                    </div>
-                </div>
-            `;
-            document.body.insertAdjacentHTML('beforeend', html);
-        }
-
-        function closeModal() {
-            const m = document.getElementById('custom-modal');
-            if (m) m.remove();
-        }
-
-        function exportBackup() {
-            const blob = new Blob([JSON.stringify({ tasks, subjects }, null, 2)], { type: 'application/json' });
-            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'homework_backup.json'; a.click();
-        }
-
-        window.onload = initApp;
-    </script>
-</body>
-</html>
+        class ClueApp {
+            constructor() {
+                // Fixed Real Supabase credentials provided by user
+                this.supabaseUrl = localStorage.getItem('sb_url') || 'https
