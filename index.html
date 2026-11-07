@@ -1,762 +1,408 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { 
-  User, Key, Upload, ImageIcon, Trash2, History, ChevronLeft, 
-  Search, Eye, Save, X, CheckCircle, Copy, RotateCcw, 
-  ShieldAlert, LogOut, Info, AlertTriangle
-} from 'lucide-react';
-import { createClient } from '@supabase/supabase-js';
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบจัดการคำใบ้</title>
+    <!-- โหลด Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- โหลด FontAwesome สำหรับไอคอน -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- โหลด Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- โหลด React แบบไม่ต้อง Build -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body class="bg-slate-50 text-slate-900 font-sans antialiased">
+    <div id="root"></div>
 
-// ============================================================================
-// เชื่อมต่อ Supabase ด้วยรหัสของคุณ
-// ============================================================================
-const SUPABASE_URL = 'https://ewbqsjoniqxantjevkvq.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV3YnFzam9uaXF4YW50amV2a3ZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM1OTA0ODAsImV4cCI6MjEwOTE2NjQ4MH0.Qc7VKzku43uqV1m8Wv8nh3vUBmPojIdIHUnT9nCkg_M';
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
 
-// --- Database Management (เชื่อมต่อกับ Supabase จริง) ---
-const useDatabase = () => {
-  const [hints, setHints] = useState({});
-  const [history, setHistory] = useState([]);
+        // 1. เชื่อมต่อ Supabase
+        const SUPABASE_URL = 'https://ewbqsjoniqxantjevkvq.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV3YnFzam9uaXF4YW50amV2a3ZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM1OTA0ODAsImV4cCI6MjEwOTE2NjQ4MH0.Qc7VKzku43uqV1m8Wv8nh3vUBmPojIdIHUnT9nCkg_M';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  // ดึงข้อมูลทั้งหมดจากฐานข้อมูล
-  const fetchAllData = async () => {
-    const { data: hintsData } = await supabase.from('hints').select('*');
-    const { data: historyData } = await supabase.from('hint_history').select('*');
+        // 2. ระบบจัดการ Database
+        const useDatabase = () => {
+            const [hints, setHints] = useState({});
+            const [history, setHistory] = useState([]);
 
-    if (hintsData) {
-      const hintsObj = {};
-      hintsData.forEach(item => {
-        hintsObj[item.sm_code] = {
-          id: item.sm_code,
-          text: item.message || '',
-          images: [item.image_1_url, item.image_2_url].filter(Boolean),
-          deleted: item.is_deleted,
-          updatedAt: item.updated_at
-        };
-      });
-      setHints(hintsObj);
-    }
+            const fetchAllData = async () => {
+                const { data: hintsData } = await supabase.from('hints').select('*');
+                const { data: historyData } = await supabase.from('hint_history').select('*');
 
-    if (historyData) {
-      const mappedHistory = historyData.map(item => ({
-        logId: item.id,
-        id: item.sm_code,
-        action: item.action,
-        timestamp: item.created_at,
-        details: item.action.includes('DELETED') ? 'ลบข้อมูล' : 
-                 item.action === 'RESTORED' ? 'กู้คืนข้อมูล' : 'อัปเดตคำใบ้/รูปภาพ'
-      }));
-      setHistory(mappedHistory);
-    }
-  };
+                if (hintsData) {
+                    const hintsObj = {};
+                    hintsData.forEach(item => {
+                        hintsObj[item.sm_code] = {
+                            id: item.sm_code,
+                            text: item.message || '',
+                            images: [item.image_1_url, item.image_2_url].filter(Boolean),
+                            deleted: item.is_deleted,
+                            updatedAt: item.updated_at
+                        };
+                    });
+                    setHints(hintsObj);
+                }
 
-  useEffect(() => {
-    fetchAllData();
-  }, []);
+                if (historyData) {
+                    const mappedHistory = historyData.map(item => ({
+                        logId: item.id,
+                        id: item.sm_code,
+                        action: item.action,
+                        timestamp: item.created_at,
+                        details: item.action.includes('DELETED') ? 'ลบข้อมูล' : 
+                                 item.action === 'RESTORED' ? 'กู้คืนข้อมูล' : 'อัปเดตคำใบ้/รูปภาพ'
+                    }));
+                    setHistory(mappedHistory);
+                }
+            };
 
-  const saveHint = async (id, text, images) => {
-    const img1 = images[0] || null;
-    const img2 = images[1] || null;
-    
-    // บันทึกลงตาราง hints
-    await supabase.from('hints').upsert({
-      sm_code: id,
-      message: text,
-      image_1_url: img1,
-      image_2_url: img2,
-      is_deleted: false,
-      updated_at: new Date().toISOString()
-    }, { onConflict: 'sm_code' });
+            useEffect(() => { fetchAllData(); }, []);
 
-    // บันทึกประวัติ
-    await supabase.from('hint_history').insert({
-      sm_code: id,
-      action: 'UPDATED',
-      message_snapshot: text,
-      image_1_snapshot: img1,
-      image_2_snapshot: img2
-    });
-    
-    fetchAllData();
-  };
-
-  const softDeleteHint = async (id) => {
-    await supabase.from('hints').update({ is_deleted: true, updated_at: new Date().toISOString() }).eq('sm_code', id);
-    await supabase.from('hint_history').insert({ sm_code: id, action: 'DELETED' });
-    fetchAllData();
-  };
-
-  const restoreHint = async (id) => {
-    await supabase.from('hints').update({ is_deleted: false, updated_at: new Date().toISOString() }).eq('sm_code', id);
-    await supabase.from('hint_history').insert({ sm_code: id, action: 'RESTORED' });
-    fetchAllData();
-  };
-
-  const hardDeleteHint = async (id) => {
-    await supabase.from('hints').delete().eq('sm_code', id);
-    await supabase.from('hint_history').insert({ sm_code: id, action: 'HARD_DELETED' });
-    fetchAllData();
-  };
-
-  return { hints, history, saveHint, softDeleteHint, restoreHint, hardDeleteHint };
-};
-
-// --- Components ---
-const Button = ({ children, onClick, variant = 'primary', className = '', icon: Icon, disabled = false }) => {
-  const baseStyle = "flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md";
-  const variants = {
-    primary: "bg-blue-600 hover:bg-blue-700 text-white",
-    secondary: "bg-white hover:bg-slate-100 text-blue-900 border border-slate-200",
-    danger: "bg-red-600 hover:bg-red-700 text-white",
-    outlineDanger: "bg-white hover:bg-red-50 text-red-600 border border-red-200"
-  };
-
-  return (
-    <button onClick={onClick} disabled={disabled} className={`${baseStyle} ${variants[variant]} ${className}`}>
-      {Icon && <Icon size={18} />}
-      {children}
-    </button>
-  );
-};
-
-const FullScreenImageModal = ({ src, onClose }) => {
-  if (!src) return null;
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4" onClick={onClose}>
-      <button className="absolute top-4 right-4 text-white hover:text-slate-300" onClick={onClose}>
-        <X size={32} />
-      </button>
-      <img src={src} alt="Full Screen Preview" className="max-w-full max-h-full rounded-lg object-contain shadow-2xl" onClick={e => e.stopPropagation()} />
-    </div>
-  );
-};
-
-// --- Main App Component ---
-export default function HintManagementSystem() {
-  const [currentView, setCurrentView] = useState('home'); 
-  const [currentId, setCurrentId] = useState('');
-  const [adminAuthenticated, setAdminAuthenticated] = useState(false);
-  const [fullScreenImage, setFullScreenImage] = useState(null);
-  const [toast, setToast] = useState({ visible: false, message: '', type: 'success' });
-  
-  // เปลี่ยนมาใช้ฟังก์ชันฐานข้อมูลจริง
-  const { hints, history, saveHint, softDeleteHint, restoreHint, hardDeleteHint } = useDatabase();
-
-  const showToast = (message, type = 'success') => {
-    setToast({ visible: true, message, type });
-    setTimeout(() => setToast({ visible: false, message: '', type: 'success' }), 3000);
-  };
-
-  const renderView = () => {
-    switch (currentView) {
-      case 'home': return <HomeView />;
-      case 'submit': return <SubmitHintView />;
-      case 'view': return <UserHintView />;
-      case 'admin-login': return <AdminLoginView />;
-      case 'admin-panel': return adminAuthenticated ? <AdminPanelView /> : <AdminLoginView />;
-      case 'admin-history': return adminAuthenticated ? <AdminHistoryView /> : <AdminLoginView />;
-      default: return <HomeView />;
-    }
-  };
-
-  const HomeView = () => {
-    const [inputId, setInputId] = useState('');
-    const [error, setError] = useState('');
-
-    const validateAndProceed = (nextView) => {
-      const trimmedId = inputId.trim().toUpperCase();
-      if (inputId.includes(' ') || !/^SM\d{2}$/.test(trimmedId)) {
-        setError('รูปแบบรหัสไม่ถูกต้อง (ต้องเป็น SM ตามด้วยตัวเลข 2 หลัก เช่น SM01 และห้ามเว้นวรรค)');
-        return;
-      }
-      setError('');
-      setCurrentId(trimmedId);
-      setCurrentView(nextView);
-    };
-
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50 p-4">
-        <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 border border-slate-100">
-          <div className="flex justify-center mb-6 text-blue-600">
-            <User size={48} className="p-3 bg-blue-50 rounded-full" />
-          </div>
-          <h1 className="text-2xl font-bold text-center text-blue-900 mb-2">ระบบจัดการคำใบ้</h1>
-          <p className="text-center text-slate-500 mb-8 text-sm">กรุณากรอกรหัสประจำตัวของคุณเพื่อดำเนินการต่อ</p>
-          
-          <div className="space-y-4">
-            <div>
-              <input
-                type="text"
-                placeholder="เช่น SM01, SM22"
-                value={inputId}
-                onChange={(e) => {
-                  setInputId(e.target.value.toUpperCase());
-                  setError('');
-                }}
-                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors uppercase"
-                maxLength={4}
-              />
-              {error && (
-                <p className="text-red-500 text-xs mt-2 flex items-start gap-1">
-                  <AlertTriangle size={14} className="mt-0.5 shrink-0" />
-                  {error}
-                </p>
-              )}
-            </div>
-
-            <div className="grid grid-cols-2 gap-3 pt-2">
-              <Button onClick={() => validateAndProceed('submit')} variant="primary">
-                กรอก/แก้ไข
-              </Button>
-              <Button onClick={() => validateAndProceed('view')} variant="secondary">
-                ดูคำใบ้
-              </Button>
-            </div>
-          </div>
-
-          <div className="mt-12 text-center border-t pt-6">
-            <button 
-              onClick={() => setCurrentView('admin-login')}
-              className="text-sm text-slate-400 hover:text-blue-600 flex items-center justify-center gap-2 mx-auto transition-colors"
-            >
-              <ShieldAlert size={16} /> ผู้ดูแลระบบ (Admin)
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  const SubmitHintView = () => {
-    const existingHint = hints[currentId];
-    const [text, setText] = useState(existingHint?.text || '');
-    const [images, setImages] = useState(existingHint?.images || []);
-    const [isSaving, setIsSaving] = useState(false);
-    const fileInputRef = useRef(null);
-
-    const handleImageUpload = (e) => {
-      const files = Array.from(e.target.files);
-      if (images.length + files.length > 2) {
-        showToast('อัปโหลดรูปภาพได้สูงสุด 2 ภาพเท่านั้น', 'error');
-        return;
-      }
-
-      files.forEach(file => {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          setImages(prev => [...prev, reader.result].slice(0, 2));
-        };
-        if (file) reader.readAsDataURL(file);
-      });
-    };
-
-    const removeImage = (index) => {
-      setImages(prev => prev.filter((_, i) => i !== index));
-    };
-
-    const handleSave = async () => {
-      if (!text.trim() && images.length === 0) {
-        showToast('กรุณากรอกข้อความหรือแนบรูปภาพอย่างน้อย 1 อย่าง', 'error');
-        return;
-      }
-      setIsSaving(true);
-      await saveHint(currentId, text, images);
-      setIsSaving(false);
-      showToast('บันทึกข้อมูลเรียบร้อยแล้ว');
-      setTimeout(() => setCurrentView('home'), 1500);
-    };
-
-    return (
-      <div className="min-h-screen bg-slate-50 p-4 md:p-8">
-        <div className="max-w-2xl mx-auto">
-          <button onClick={() => setCurrentView('home')} className="flex items-center text-slate-500 hover:text-blue-600 mb-6 transition-colors">
-            <ChevronLeft size={20} /> กลับหน้าหลัก
-          </button>
-          
-          <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8 border border-slate-100">
-            <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
-              <h2 className="text-xl font-bold text-blue-900 flex items-center gap-2">
-                <EditIcon /> จัดการคำใบ้
-              </h2>
-              <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full font-semibold">{currentId}</span>
-            </div>
-
-            <div className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">ข้อความคำใบ้</label>
-                <textarea
-                  rows={4}
-                  value={text}
-                  onChange={(e) => setText(e.target.value)}
-                  placeholder="พิมพ์คำใบ้ของคุณที่นี่..."
-                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  รูปภาพประกอบ (สูงสุด 2 ภาพ)
-                </label>
-                <input 
-                  type="file" 
-                  accept="image/*" 
-                  multiple 
-                  ref={fileInputRef}
-                  className="hidden" 
-                  onChange={handleImageUpload} 
-                />
+            const saveHint = async (id, text, images) => {
+                const img1 = images[0] || null;
+                const img2 = images[1] || null;
                 
-                {images.length < 2 && (
-                  <button 
-                    onClick={() => fileInputRef.current?.click()}
-                    className="w-full py-8 border-2 border-dashed border-slate-300 rounded-lg text-slate-500 hover:bg-slate-50 hover:border-blue-400 hover:text-blue-600 transition-all flex flex-col items-center gap-2"
-                  >
-                    <Upload size={24} />
-                    <span>คลิกเพื่อเพิ่มรูปภาพ ({images.length}/2)</span>
-                  </button>
-                )}
+                await supabase.from('hints').upsert({
+                    sm_code: id, message: text, image_1_url: img1, image_2_url: img2,
+                    is_deleted: false, updated_at: new Date().toISOString()
+                }, { onConflict: 'sm_code' });
 
-                {images.length > 0 && (
-                  <div className="grid grid-cols-2 gap-4 mt-4">
-                    {images.map((img, idx) => (
-                      <div key={idx} className="relative group rounded-lg overflow-hidden border border-slate-200 shadow-sm aspect-video bg-slate-100 flex items-center justify-center">
-                        <img 
-                          src={img} 
-                          alt={`Preview ${idx + 1}`} 
-                          className="object-cover w-full h-full cursor-pointer opacity-90 group-hover:opacity-100 transition-opacity"
-                          onClick={() => setFullScreenImage(img)}
-                        />
-                        <button 
-                          onClick={() => removeImage(idx)}
-                          className="absolute top-2 right-2 p-1.5 bg-red-600/90 hover:bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+                await supabase.from('hint_history').insert({
+                    sm_code: id, action: 'UPDATED', message_snapshot: text,
+                    image_1_snapshot: img1, image_2_snapshot: img2
+                });
+                fetchAllData();
+            };
 
-              <div className="pt-4 flex justify-end">
-                <Button onClick={handleSave} icon={Save} disabled={isSaving}>
-                  {isSaving ? 'กำลังบันทึก...' : 'บันทึกข้อมูล'}
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
+            const softDeleteHint = async (id) => {
+                await supabase.from('hints').update({ is_deleted: true, updated_at: new Date().toISOString() }).eq('sm_code', id);
+                await supabase.from('hint_history').insert({ sm_code: id, action: 'DELETED' });
+                fetchAllData();
+            };
 
-  const UserHintView = () => {
-    const existingHint = hints[currentId];
-    const isDeleted = existingHint?.deleted;
+            const restoreHint = async (id) => {
+                await supabase.from('hints').update({ is_deleted: false, updated_at: new Date().toISOString() }).eq('sm_code', id);
+                await supabase.from('hint_history').insert({ sm_code: id, action: 'RESTORED' });
+                fetchAllData();
+            };
 
-    return (
-      <div className="min-h-screen bg-slate-50 p-4 md:p-8">
-        <div className="max-w-2xl mx-auto">
-          <button onClick={() => setCurrentView('home')} className="flex items-center text-slate-500 hover:text-blue-600 mb-6 transition-colors">
-            <ChevronLeft size={20} /> กลับหน้าหลัก
-          </button>
-          
-          <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8 border border-slate-100">
-            <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
-              <h2 className="text-xl font-bold text-blue-900 flex items-center gap-2">
-                <Eye size={24} /> ข้อมูลคำใบ้
-              </h2>
-              <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full font-semibold">{currentId}</span>
-            </div>
+            const hardDeleteHint = async (id) => {
+                await supabase.from('hints').delete().eq('sm_code', id);
+                await supabase.from('hint_history').insert({ sm_code: id, action: 'HARD_DELETED' });
+                fetchAllData();
+            };
 
-            {(!existingHint || isDeleted) ? (
-              <div className="text-center py-12 text-slate-400">
-                <Info size={48} className="mx-auto mb-4 opacity-50" />
-                <p>ยังไม่มีข้อมูลคำใบ้สำหรับรหัสนี้</p>
-                <div className="mt-6">
-                  <Button onClick={() => setCurrentView('submit')} variant="primary" className="mx-auto">
-                    ไปหน้าสร้างคำใบ้
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-6">
-                {existingHint.text && (
-                  <div className="bg-slate-50 p-6 rounded-xl border border-slate-100 shadow-sm">
-                    <p className="text-slate-800 whitespace-pre-wrap leading-relaxed">{existingHint.text}</p>
-                  </div>
-                )}
+            return { hints, history, saveHint, softDeleteHint, restoreHint, hardDeleteHint };
+        };
 
-                {existingHint.images?.length > 0 && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {existingHint.images.map((img, idx) => (
-                      <div key={idx} className="rounded-xl overflow-hidden shadow-md cursor-pointer border border-slate-200" onClick={() => setFullScreenImage(img)}>
-                        <img src={img} alt={`Hint ${idx + 1}`} className="w-full h-48 object-cover hover:scale-105 transition-transform duration-300" />
-                      </div>
-                    ))}
-                  </div>
-                )}
+        // 3. Components
+        const Button = ({ children, onClick, variant = 'primary', className = '', icon, disabled = false }) => {
+            const baseStyle = "flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md";
+            const variants = {
+                primary: "bg-blue-600 hover:bg-blue-700 text-white",
+                secondary: "bg-white hover:bg-slate-100 text-blue-900 border border-slate-200",
+                danger: "bg-red-600 hover:bg-red-700 text-white",
+                outlineDanger: "bg-white hover:bg-red-50 text-red-600 border border-red-200"
+            };
+            return (
+                <button onClick={onClick} disabled={disabled} className={`${baseStyle} ${variants[variant]} ${className}`}>
+                    {icon && <i className={icon}></i>}
+                    {children}
+                </button>
+            );
+        };
 
-                <div className="text-sm text-slate-400 text-right mt-8 pt-4 border-t border-slate-50">
-                  อัปเดตล่าสุด: {new Date(existingHint.updatedAt).toLocaleString('th-TH')}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  };
+        // 4. Main App
+        const App = () => {
+            const [currentView, setCurrentView] = useState('home'); 
+            const [currentId, setCurrentId] = useState('');
+            const [adminAuthenticated, setAdminAuthenticated] = useState(false);
+            const [fullScreenImage, setFullScreenImage] = useState(null);
+            const [toast, setToast] = useState({ visible: false, message: '', type: 'success' });
+            
+            const { hints, history, saveHint, softDeleteHint, restoreHint, hardDeleteHint } = useDatabase();
 
-  const AdminLoginView = () => {
-    const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
+            const showToast = (message, type = 'success') => {
+                setToast({ visible: true, message, type });
+                setTimeout(() => setToast({ visible: false, message: '', type: 'success' }), 3000);
+            };
 
-    const handleLogin = (e) => {
-      e.preventDefault();
-      if (password === '@SM_12345') {
-        setAdminAuthenticated(true);
-        setCurrentView('admin-panel');
-      } else {
-        setError('รหัสผ่านไม่ถูกต้อง');
-      }
-    };
+            // --- Home View ---
+            const HomeView = () => {
+                const [inputId, setInputId] = useState('');
+                const [error, setError] = useState('');
 
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-slate-900 p-4">
-        <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8">
-          <button onClick={() => setCurrentView('home')} className="flex items-center text-slate-500 hover:text-slate-800 mb-6 text-sm">
-            <ChevronLeft size={16} /> กลับหน้าหลัก
-          </button>
+                const validateAndProceed = (nextView) => {
+                    const trimmedId = inputId.trim().toUpperCase();
+                    if (inputId.includes(' ') || !/^SM\d{2}$/.test(trimmedId)) {
+                        setError('รูปแบบรหัสไม่ถูกต้อง (เช่น SM01 ห้ามเว้นวรรค)');
+                        return;
+                    }
+                    setError('');
+                    setCurrentId(trimmedId);
+                    setCurrentView(nextView);
+                };
 
-          <div className="flex justify-center mb-6 text-slate-900">
-            <ShieldAlert size={48} className="p-3 bg-slate-100 rounded-full" />
-          </div>
-          <h1 className="text-2xl font-bold text-center text-slate-900 mb-6">สำหรับผู้ดูแลระบบ</h1>
-          
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div>
-              <div className="relative">
-                <Key className="absolute left-3 top-3 text-slate-400" size={20} />
-                <input
-                  type="password"
-                  placeholder="รหัสผ่านผู้ดูแลระบบ"
-                  value={password}
-                  onChange={(e) => { setPassword(e.target.value); setError(''); }}
-                  className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition-colors"
-                />
-              </div>
-              {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
-            </div>
-            <Button type="submit" className="w-full !bg-slate-900 hover:!bg-slate-800 text-white">
-              เข้าสู่ระบบ
-            </Button>
-          </form>
-        </div>
-      </div>
-    );
-  };
-
-  const AdminPasswordModal = ({ isOpen, onClose, onConfirm, actionType }) => {
-    const [pwd, setPwd] = useState('');
-    const [err, setErr] = useState('');
-
-    if (!isOpen) return null;
-
-    const handleSubmit = () => {
-      if (pwd === '@SM_12345') {
-        onConfirm();
-        setPwd('');
-        setErr('');
-      } else {
-        setErr('รหัสผ่านไม่ถูกต้อง');
-      }
-    };
-
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-        <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm p-6">
-          <h3 className="text-lg font-bold text-slate-900 mb-2 flex items-center gap-2">
-            <ShieldAlert size={20} className={actionType.includes('ลบถาวร') ? 'text-red-600' : 'text-orange-500'} /> 
-            ยืนยันสิทธิ์แอดมิน
-          </h3>
-          <p className="text-sm text-slate-600 mb-4">กรุณากรอกรหัสผ่านเพื่อยืนยันการ{actionType}</p>
-          
-          <input
-            type="password"
-            value={pwd}
-            onChange={(e) => { setPwd(e.target.value); setErr(''); }}
-            className="w-full px-4 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-slate-900 mb-2"
-            placeholder="รหัสผ่านแอดมิน"
-          />
-          {err && <p className="text-red-500 text-xs mb-4">{err}</p>}
-          
-          <div className="flex justify-end gap-2 mt-6">
-            <Button variant="secondary" onClick={onClose} className="!py-2 !px-4">ยกเลิก</Button>
-            <Button variant="danger" onClick={handleSubmit} className="!py-2 !px-4">ยืนยัน</Button>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  const AdminPanelView = () => {
-    const [search, setSearch] = useState('');
-    const [showTrash, setShowTrash] = useState(false);
-    const [expandedId, setExpandedId] = useState(null);
-    const [pwdModal, setPwdModal] = useState({ isOpen: false, action: null, hintId: '', typeStr: '' });
-
-    const allSmIds = Array.from({ length: 38 }, (_, i) => `SM${String(i + 1).padStart(2, '0')}`);
-    const filteredIds = allSmIds.filter(id => id.toLowerCase().includes(search.toLowerCase()));
-
-    const handleCopy = (text) => {
-      navigator.clipboard.writeText(text);
-      showToast('คัดลอกข้อความแล้ว');
-    };
-
-    const confirmAction = (hintId, action, typeStr) => {
-      setPwdModal({ isOpen: true, action, hintId, typeStr });
-    };
-
-    const executeAction = async () => {
-      await pwdModal.action(pwdModal.hintId);
-      showToast(`ดำเนินการ${pwdModal.typeStr}เรียบร้อย`);
-      setPwdModal({ isOpen: false, action: null, hintId: '', typeStr: '' });
-    };
-
-    return (
-      <div className="min-h-screen bg-slate-100 pb-12">
-        <header className="bg-slate-900 text-white shadow-md sticky top-0 z-40">
-          <div className="max-w-6xl mx-auto px-4 py-4 flex flex-wrap items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <ShieldAlert className="text-blue-400" />
-              <h1 className="text-xl font-bold">ระบบจัดการหลังบ้าน (Admin)</h1>
-            </div>
-            <div className="flex items-center gap-3">
-              <button 
-                onClick={() => setShowTrash(!showTrash)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${showTrash ? 'bg-red-500/20 text-red-300' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}`}
-              >
-                <Trash2 size={16} /> {showTrash ? 'ซ่อนถังขยะ' : 'ดูถังขยะ'}
-              </button>
-              <button 
-                onClick={() => { setAdminAuthenticated(false); setCurrentView('home'); }}
-                className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-red-600/80 rounded-lg text-sm font-medium transition-colors"
-              >
-                <LogOut size={16} /> ออกจากระบบ
-              </button>
-            </div>
-          </div>
-        </header>
-
-        <div className="max-w-6xl mx-auto px-4 mt-8">
-          <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-            <h2 className="text-2xl font-bold text-slate-800">
-              {showTrash ? 'คำใบ้ที่ถูกลบ (ถังขยะ)' : 'ภาพรวมคำใบ้ทั้งหมด'}
-            </h2>
-            <div className="relative w-full md:w-72">
-              <Search className="absolute left-3 top-2.5 text-slate-400" size={20} />
-              <input
-                type="text"
-                placeholder="ค้นหารหัส (เช่น SM01)"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-full focus:ring-2 focus:ring-blue-500 outline-none uppercase"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredIds.map(id => {
-              const hint = hints[id];
-              const hasData = !!hint;
-              const isDeleted = hint?.deleted;
-
-              if (showTrash && !isDeleted) return null;
-              if (!showTrash && isDeleted) return null;
-              if (showTrash && !hasData) return null;
-
-              const isExpanded = expandedId === id;
-
-              return (
-                <div key={id} className={`bg-white rounded-xl shadow-sm border ${hasData ? 'border-blue-100 hover:shadow-md' : 'border-slate-100 opacity-60'} overflow-hidden transition-all duration-200 flex flex-col`}>
-                  
-                  <div 
-                    className={`p-4 flex items-center justify-between cursor-pointer ${hasData ? 'bg-blue-50/50' : 'bg-slate-50'}`}
-                    onClick={() => hasData && setExpandedId(isExpanded ? null : id)}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${hasData ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-500'}`}>
-                        {id.replace('SM', '')}
-                      </div>
-                      <span className="font-semibold text-slate-800">{id}</span>
-                    </div>
-                    <div>
-                      {hasData ? (
-                        <span className="flex items-center gap-1 text-xs font-medium text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
-                          <CheckCircle size={12} /> มีข้อมูล
-                        </span>
-                      ) : (
-                        <span className="text-xs font-medium text-slate-400">ยังไม่มีข้อมูล</span>
-                      )}
-                    </div>
-                  </div>
-
-                  {hasData && isExpanded && (
-                    <div className="p-4 border-t border-slate-100 flex-grow flex flex-col">
-                      {hint.text && (
-                        <div className="mb-4">
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="text-xs font-semibold text-slate-500">ข้อความ:</span>
-                            <button onClick={(e) => { e.stopPropagation(); handleCopy(hint.text); }} className="text-slate-400 hover:text-blue-600 transition-colors" title="คัดลอก">
-                              <Copy size={14} />
-                            </button>
-                          </div>
-                          <p className="text-sm text-slate-700 bg-slate-50 p-3 rounded-lg border border-slate-100 whitespace-pre-wrap">{hint.text}</p>
+                return (
+                    <div className="flex flex-col items-center justify-center min-h-screen p-4">
+                        <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 border border-slate-100">
+                            <div className="flex justify-center mb-6 text-blue-600">
+                                <i className="fas fa-user text-4xl p-4 bg-blue-50 rounded-full"></i>
+                            </div>
+                            <h1 className="text-2xl font-bold text-center text-blue-900 mb-2">ระบบจัดการคำใบ้</h1>
+                            <p className="text-center text-slate-500 mb-8 text-sm">กรุณากรอกรหัสประจำตัวของคุณเพื่อดำเนินการต่อ</p>
+                            
+                            <div className="space-y-4">
+                                <div>
+                                    <input type="text" placeholder="เช่น SM01, SM22" value={inputId}
+                                        onChange={(e) => { setInputId(e.target.value.toUpperCase()); setError(''); }}
+                                        className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 uppercase" maxLength={4} />
+                                    {error && <p className="text-red-500 text-xs mt-2"><i className="fas fa-exclamation-triangle"></i> {error}</p>}
+                                </div>
+                                <div className="grid grid-cols-2 gap-3 pt-2">
+                                    <Button onClick={() => validateAndProceed('submit')} variant="primary">กรอก/แก้ไข</Button>
+                                    <Button onClick={() => validateAndProceed('view')} variant="secondary">ดูคำใบ้</Button>
+                                </div>
+                            </div>
+                            <div className="mt-12 text-center border-t pt-6">
+                                <button onClick={() => setCurrentView('admin-login')} className="text-sm text-slate-400 hover:text-blue-600 transition-colors">
+                                    <i className="fas fa-shield-alt"></i> ผู้ดูแลระบบ (Admin)
+                                </button>
+                            </div>
                         </div>
-                      )}
+                    </div>
+                );
+            };
 
-                      {hint.images?.length > 0 && (
-                        <div className="mb-4">
-                          <span className="text-xs font-semibold text-slate-500 mb-1 block">รูปภาพ ({hint.images.length}):</span>
-                          <div className="flex gap-2">
-                            {hint.images.map((img, idx) => (
-                              <img 
-                                key={idx} 
-                                src={img} 
-                                alt={`img-${idx}`} 
-                                className="w-16 h-16 object-cover rounded-md cursor-pointer border border-slate-200 hover:border-blue-400"
-                                onClick={() => setFullScreenImage(img)}
-                              />
-                            ))}
-                          </div>
+            // --- Submit View ---
+            const SubmitHintView = () => {
+                const existingHint = hints[currentId];
+                const [text, setText] = useState(existingHint?.text || '');
+                const [images, setImages] = useState(existingHint?.images || []);
+                const [isSaving, setIsSaving] = useState(false);
+                const fileInputRef = useRef(null);
+
+                const handleImageUpload = (e) => {
+                    const files = Array.from(e.target.files);
+                    if (images.length + files.length > 2) return showToast('สูงสุด 2 ภาพ', 'error');
+                    files.forEach(file => {
+                        const reader = new FileReader();
+                        reader.onloadend = () => setImages(prev => [...prev, reader.result].slice(0, 2));
+                        if (file) reader.readAsDataURL(file);
+                    });
+                };
+
+                const handleSave = async () => {
+                    if (!text.trim() && images.length === 0) return showToast('กรุณากรอกข้อความหรือแนบรูป', 'error');
+                    setIsSaving(true);
+                    await saveHint(currentId, text, images);
+                    setIsSaving(false);
+                    showToast('บันทึกเรียบร้อย');
+                    setTimeout(() => setCurrentView('home'), 1500);
+                };
+
+                return (
+                    <div className="min-h-screen p-4 md:p-8 max-w-2xl mx-auto">
+                        <button onClick={() => setCurrentView('home')} className="mb-6 text-slate-500 hover:text-blue-600"><i className="fas fa-chevron-left"></i> กลับหน้าหลัก</button>
+                        <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+                            <h2 className="text-xl font-bold text-blue-900 mb-6 flex justify-between border-b pb-4">
+                                <span><i className="fas fa-edit"></i> จัดการคำใบ้</span>
+                                <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">{currentId}</span>
+                            </h2>
+                            <textarea rows="4" value={text} onChange={(e) => setText(e.target.value)} placeholder="พิมพ์คำใบ้ที่นี่..." className="w-full px-4 py-3 border rounded-lg mb-4"></textarea>
+                            
+                            <input type="file" accept="image/*" multiple ref={fileInputRef} className="hidden" onChange={handleImageUpload} />
+                            {images.length < 2 && (
+                                <button onClick={() => fileInputRef.current?.click()} className="w-full py-8 border-2 border-dashed rounded-lg text-slate-500 hover:text-blue-600 mb-4">
+                                    <i className="fas fa-upload text-2xl mb-2 block"></i> เพิ่มรูปภาพ ({images.length}/2)
+                                </button>
+                            )}
+                            
+                            <div className="grid grid-cols-2 gap-4 mb-6">
+                                {images.map((img, idx) => (
+                                    <div key={idx} className="relative rounded-lg overflow-hidden border">
+                                        <img src={img} className="w-full h-32 object-cover" />
+                                        <button onClick={() => setImages(images.filter((_, i) => i !== idx))} className="absolute top-2 right-2 bg-red-600 text-white p-2 rounded-full text-xs"><i className="fas fa-trash"></i></button>
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="flex justify-end">
+                                <Button onClick={handleSave} icon="fas fa-save" disabled={isSaving}>{isSaving ? 'กำลังบันทึก...' : 'บันทึกข้อมูล'}</Button>
+                            </div>
                         </div>
-                      )}
-                      
-                      <div className="mt-auto pt-4 flex flex-wrap gap-2 justify-end border-t border-slate-100">
-                        <Button 
-                          variant="secondary" 
-                          className="!text-xs !py-1.5 !px-3"
-                          onClick={() => { setCurrentId(id); setCurrentView('admin-history'); }}
-                          icon={History}
-                        >
-                          ประวัติ
-                        </Button>
-                        
-                        {!isDeleted ? (
-                          <Button 
-                            variant="outlineDanger" 
-                            className="!text-xs !py-1.5 !px-3"
-                            onClick={() => confirmAction(id, softDeleteHint, 'ลบ')}
-                            icon={Trash2}
-                          >
-                            ลบ
-                          </Button>
-                        ) : (
-                          <>
-                            <Button 
-                              className="!text-xs !py-1.5 !px-3 !bg-green-600 hover:!bg-green-700 text-white"
-                              onClick={() => confirmAction(id, restoreHint, 'กู้คืน')}
-                              icon={RotateCcw}
-                            >
-                              กู้คืน
-                            </Button>
-                            <Button 
-                              variant="danger" 
-                              className="!text-xs !py-1.5 !px-3"
-                              onClick={() => confirmAction(id, hardDeleteHint, 'ลบถาวร')}
-                              icon={Trash2}
-                            >
-                              ลบถาวร
-                            </Button>
-                          </>
-                        )}
-                      </div>
                     </div>
-                  )}
+                );
+            };
+
+            // --- User View ---
+            const UserHintView = () => {
+                const hint = hints[currentId];
+                return (
+                    <div className="min-h-screen p-4 md:p-8 max-w-2xl mx-auto">
+                        <button onClick={() => setCurrentView('home')} className="mb-6 text-slate-500 hover:text-blue-600"><i className="fas fa-chevron-left"></i> กลับหน้าหลัก</button>
+                        <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+                            <h2 className="text-xl font-bold text-blue-900 mb-6 flex justify-between border-b pb-4">
+                                <span><i className="fas fa-eye"></i> ข้อมูลคำใบ้</span>
+                                <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">{currentId}</span>
+                            </h2>
+                            {(!hint || hint.deleted) ? (
+                                <div className="text-center py-12 text-slate-400">ไม่พบข้อมูลคำใบ้</div>
+                            ) : (
+                                <div>
+                                    {hint.text && <div className="bg-slate-50 p-4 rounded-lg mb-4 whitespace-pre-wrap">{hint.text}</div>}
+                                    <div className="grid grid-cols-2 gap-4">
+                                        {hint.images?.map((img, idx) => (
+                                            <img key={idx} src={img} onClick={() => setFullScreenImage(img)} className="w-full h-48 object-cover rounded-lg cursor-pointer border" />
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                );
+            };
+
+            // --- Admin Login ---
+            const AdminLoginView = () => {
+                const [pwd, setPwd] = useState('');
+                const [err, setErr] = useState('');
+                const login = (e) => {
+                    e.preventDefault();
+                    if (pwd === '@SM_12345') { setAdminAuthenticated(true); setCurrentView('admin-panel'); }
+                    else setErr('รหัสไม่ถูกต้อง');
+                };
+                return (
+                    <div className="flex items-center justify-center min-h-screen bg-slate-900 p-4">
+                        <div className="w-full max-w-md bg-white rounded-2xl p-8">
+                            <button onClick={() => setCurrentView('home')} className="mb-6 text-sm text-slate-500"><i className="fas fa-chevron-left"></i> กลับหน้าหลัก</button>
+                            <h1 className="text-2xl font-bold text-center mb-6"><i className="fas fa-shield-alt text-blue-600"></i> ผู้ดูแลระบบ</h1>
+                            <form onSubmit={login}>
+                                <input type="password" value={pwd} onChange={e => {setPwd(e.target.value); setErr('');}} placeholder="รหัสผ่าน" className="w-full px-4 py-3 border rounded-lg mb-2" />
+                                {err && <p className="text-red-500 text-sm mb-4">{err}</p>}
+                                <Button type="submit" className="w-full !bg-slate-900">เข้าสู่ระบบ</Button>
+                            </form>
+                        </div>
+                    </div>
+                );
+            };
+
+            // --- Admin Panel ---
+            const AdminPanelView = () => {
+                const [search, setSearch] = useState('');
+                const [showTrash, setShowTrash] = useState(false);
+                const allIds = Array.from({ length: 38 }, (_, i) => `SM${String(i + 1).padStart(2, '0')}`);
+                const filtered = allIds.filter(id => id.includes(search.toUpperCase()));
+
+                return (
+                    <div className="min-h-screen bg-slate-100 pb-12">
+                        <header className="bg-slate-900 text-white p-4 flex justify-between items-center sticky top-0 z-40">
+                            <h1 className="font-bold"><i className="fas fa-shield-alt text-blue-400"></i> Admin Panel</h1>
+                            <div className="flex gap-2">
+                                <button onClick={() => setShowTrash(!showTrash)} className="px-4 py-2 bg-slate-800 rounded-lg text-sm">{showTrash ? 'ซ่อนถังขยะ' : 'ดูถังขยะ'}</button>
+                                <button onClick={() => { setAdminAuthenticated(false); setCurrentView('home'); }} className="px-4 py-2 bg-red-600 rounded-lg text-sm"><i className="fas fa-sign-out-alt"></i> ออก</button>
+                            </div>
+                        </header>
+                        <div className="max-w-6xl mx-auto px-4 mt-6">
+                            <input type="text" placeholder="ค้นหารหัส (SM01)..." value={search} onChange={e => setSearch(e.target.value)} className="w-full md:w-72 px-4 py-2 rounded-full border mb-6 uppercase" />
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {filtered.map(id => {
+                                    const h = hints[id];
+                                    if (showTrash && !h?.deleted) return null;
+                                    if (!showTrash && h?.deleted) return null;
+                                    if (showTrash && !h) return null;
+
+                                    return (
+                                        <div key={id} className={`bg-white rounded-xl border p-4 ${h ? 'border-blue-200' : 'opacity-60'}`}>
+                                            <div className="flex justify-between items-center mb-3">
+                                                <span className="font-bold text-lg bg-slate-100 px-3 py-1 rounded">{id}</span>
+                                                {h && <span className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full"><i className="fas fa-check"></i> มีข้อมูล</span>}
+                                            </div>
+                                            {h && (
+                                                <div>
+                                                    <p className="text-sm bg-slate-50 p-2 rounded mb-2 h-16 overflow-hidden">{h.text}</p>
+                                                    <div className="flex gap-2 mb-3">
+                                                        {h.images?.map((img, i) => <img key={i} src={img} className="w-10 h-10 object-cover rounded cursor-pointer" onClick={()=>setFullScreenImage(img)} />)}
+                                                    </div>
+                                                    <div className="flex justify-end gap-2 border-t pt-3">
+                                                        <button onClick={() => { setCurrentId(id); setCurrentView('admin-history'); }} className="text-xs bg-slate-200 px-2 py-1 rounded"><i className="fas fa-history"></i> ประวัติ</button>
+                                                        {!h.deleted ? (
+                                                            <button onClick={() => { if(prompt('พิมพ์ @SM_12345 เพื่อลบ')==='@SM_12345') softDeleteHint(id); }} className="text-xs bg-red-100 text-red-600 px-2 py-1 rounded"><i className="fas fa-trash"></i> ลบ</button>
+                                                        ) : (
+                                                            <>
+                                                                <button onClick={() => restoreHint(id)} className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded"><i className="fas fa-undo"></i> กู้คืน</button>
+                                                                <button onClick={() => { if(prompt('พิมพ์ @SM_12345 เพื่อลบถาวร')==='@SM_12345') hardDeleteHint(id); }} className="text-xs bg-red-600 text-white px-2 py-1 rounded"><i className="fas fa-trash-alt"></i> ลบถาวร</button>
+                                                            </>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    </div>
+                );
+            };
+
+            // --- Admin History ---
+            const AdminHistoryView = () => {
+                const logs = history.filter(h => h.id === currentId).sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+                return (
+                    <div className="min-h-screen p-4 max-w-3xl mx-auto">
+                        <button onClick={() => setCurrentView('admin-panel')} className="mb-6 text-sm text-slate-500"><i className="fas fa-chevron-left"></i> กลับ</button>
+                        <h2 className="text-xl font-bold mb-4">ประวัติของ {currentId}</h2>
+                        <div className="bg-white rounded-xl shadow p-6">
+                            {logs.length === 0 ? <p className="text-slate-400">ไม่มีประวัติ</p> : (
+                                <div className="space-y-4">
+                                    {logs.map((log, i) => (
+                                        <div key={i} className="border-l-4 border-blue-500 pl-4 py-2 bg-slate-50 rounded-r-lg">
+                                            <div className="flex justify-between">
+                                                <span className="font-bold text-sm">{log.action}</span>
+                                                <span className="text-xs text-slate-400">{new Date(log.timestamp).toLocaleString('th-TH')}</span>
+                                            </div>
+                                            <p className="text-sm mt-1">{log.details}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                );
+            };
+
+            return (
+                <div>
+                    {currentView === 'home' && <HomeView />}
+                    {currentView === 'submit' && <SubmitHintView />}
+                    {currentView === 'view' && <UserHintView />}
+                    {currentView === 'admin-login' && <AdminLoginView />}
+                    {currentView === 'admin-panel' && <AdminPanelView />}
+                    {currentView === 'admin-history' && <AdminHistoryView />}
+                    
+                    {fullScreenImage && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4" onClick={() => setFullScreenImage(null)}>
+                            <img src={fullScreenImage} className="max-w-full max-h-full rounded-lg" />
+                        </div>
+                    )}
+
+                    <div className={`fixed bottom-6 right-6 transition-all duration-300 ${toast.visible ? 'opacity-100' : 'opacity-0 pointer-events-none'} z-50`}>
+                        <div className={`px-6 py-4 rounded-xl shadow-xl text-white ${toast.type === 'error' ? 'bg-red-600' : 'bg-slate-900'}`}>
+                            {toast.message}
+                        </div>
+                    </div>
                 </div>
-              );
-            })}
-          </div>
-        </div>
+            );
+        };
 
-        <AdminPasswordModal 
-          isOpen={pwdModal.isOpen} 
-          onClose={() => setPwdModal({ isOpen: false, action: null, hintId: '', typeStr: '' })} 
-          onConfirm={executeAction} 
-          actionType={pwdModal.typeStr}
-        />
-      </div>
-    );
-  };
-
-  const AdminHistoryView = () => {
-    const userHistory = history.filter(h => h.id === currentId).sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
-
-    const getActionColor = (action) => {
-      if (action.includes('DELETED')) return 'bg-red-100 text-red-700 border-red-200';
-      if (action === 'RESTORED') return 'bg-purple-100 text-purple-700 border-purple-200';
-      return 'bg-blue-100 text-blue-700 border-blue-200';
-    };
-
-    return (
-      <div className="min-h-screen bg-slate-100 p-4 md:p-8">
-        <div className="max-w-3xl mx-auto">
-          <div className="flex items-center justify-between mb-6">
-            <button onClick={() => setCurrentView('admin-panel')} className="flex items-center text-slate-500 hover:text-slate-900 transition-colors bg-white px-4 py-2 rounded-lg shadow-sm">
-              <ChevronLeft size={20} /> กลับหน้าจัดการ
-            </button>
-            <div className="bg-slate-900 text-white px-4 py-2 rounded-lg shadow-sm flex items-center gap-2">
-              <History size={18} /> ประวัติของ {currentId}
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-md p-6">
-            {userHistory.length === 0 ? (
-              <div className="text-center py-8 text-slate-400">
-                <Info size={32} className="mx-auto mb-2 opacity-50" />
-                <p>ยังไม่มีประวัติการทำรายการสำหรับรหัสนี้</p>
-              </div>
-            ) : (
-              <div className="relative border-l-2 border-slate-200 ml-4 space-y-8 py-4">
-                {userHistory.map((log, idx) => (
-                  <div key={log.logId || idx} className="relative pl-6">
-                    <div className={`absolute -left-2.5 top-1.5 w-5 h-5 rounded-full border-2 border-white ${getActionColor(log.action).split(' ')[0]}`}></div>
-                    <div className="bg-slate-50 border border-slate-100 p-4 rounded-lg shadow-sm">
-                      <div className="flex justify-between items-start mb-2">
-                        <span className={`text-xs font-bold px-2 py-1 rounded border ${getActionColor(log.action)}`}>
-                          {log.action}
-                        </span>
-                        <span className="text-xs text-slate-400">
-                          {new Date(log.timestamp).toLocaleString('th-TH')}
-                        </span>
-                      </div>
-                      <p className="text-sm text-slate-700">{log.details}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  const EditIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>;
-
-  return (
-    <div className="font-sans antialiased text-slate-900 selection:bg-blue-200">
-      {renderView()}
-
-      <FullScreenImageModal src={fullScreenImage} onClose={() => setFullScreenImage(null)} />
-
-      <div className={`fixed bottom-6 right-6 transition-all duration-300 transform ${toast.visible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0 pointer-events-none'} z-50`}>
-        <div className={`flex items-center gap-3 px-6 py-4 rounded-xl shadow-2xl text-white font-medium ${toast.type === 'error' ? 'bg-red-600' : 'bg-slate-900'}`}>
-          {toast.type === 'error' ? <AlertTriangle size={20} /> : <CheckCircle size={20} className="text-green-400" />}
-          {toast.message}
-        </div>
-      </div>
-    </div>
-  );
-}
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
